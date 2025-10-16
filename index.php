@@ -144,6 +144,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </head>
 
 <body id="home">
+  <!-- Skip Links for Accessibility -->
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <a href="#header" class="skip-link">Skip to navigation</a>
+  <a href="#footer" class="skip-link">Skip to footer</a>
+
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -158,14 +163,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <!-- ======= Hero Section ======= -->
   <section id="hero">
 
-    <div id="heroCarousel" data-bs-interval="5000" class="carousel slide carousel-fade" data-bs-ride="carousel">
+    <div id="heroCarousel" data-bs-interval="5000" class="carousel slide carousel-fade" data-bs-ride="carousel" aria-label="Hero carousel" aria-live="polite">
 
       <ol class="carousel-indicators" id="hero-carousel-indicators"></ol>
 
       <div class="carousel-inner" role="listbox">
 
         <!-- Slide 1 -->
-        <div class="carousel-item active" style="background-image: url(assets/img/slide/3ZYUW.jpg)">
+        <div class="carousel-item active">
+          <picture>
+            <source srcset="assets/img/slide/3ZYUW.webp" type="image/webp">
+            <img src="assets/img/slide/3ZYUW.jpg" alt="St. Louis Web Design and Hosting Services" class="hero-slide-img" loading="eager" width="1920" height="1080">
+          </picture>
           <div class="carousel-container">
             <div class="container">
               <h2 class="animate__animated animate__fadeInDown">St. Louis Web Design &amp; Hosting</h2>
@@ -179,7 +188,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
 
         <!-- Slide 2 -->
-        <div class="carousel-item" style="background-image: url(assets/img/slide/55768.jpg)">
+        <div class="carousel-item">
+          <picture>
+            <source srcset="assets/img/slide/55768.webp" type="image/webp">
+            <img src="assets/img/slide/55768.jpg" alt="Custom Web Development Services" class="hero-slide-img" loading="eager" width="1920" height="1080">
+          </picture>
           <div class="carousel-container">
             <div class="container">
               <h2 class="animate__animated animate__fadeInDown">Custom Web Development</h2>
@@ -190,7 +203,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
 
         <!-- Slide 3 -->
-        <div class="carousel-item" style="background-image: url(assets/img/slide/545FZX.jpg)">
+        <div class="carousel-item">
+          <picture>
+            <source srcset="assets/img/slide/545FZX.webp" type="image/webp">
+            <img src="assets/img/slide/545FZX.jpg" alt="Domain Registration Services" class="hero-slide-img" loading="eager" width="1920" height="1080">
+          </picture>
           <div class="carousel-container">
             <div class="container">
               <h2 class="animate__animated animate__fadeInDown">Discover A Huge Variety of Domains</h2>
@@ -202,18 +219,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
       </div>
 
-      <a class="carousel-control-prev" href="#heroCarousel" role="button" data-bs-slide="prev">
+      <a class="carousel-control-prev" href="#heroCarousel" role="button" data-bs-slide="prev" aria-label="Previous slide">
         <span class="carousel-control-prev-icon bi bi-chevron-left" aria-hidden="true"></span>
       </a>
 
-      <a class="carousel-control-next" href="#heroCarousel" role="button" data-bs-slide="next">
+      <a class="carousel-control-next" href="#heroCarousel" role="button" data-bs-slide="next" aria-label="Next slide">
         <span class="carousel-control-next-icon bi bi-chevron-right" aria-hidden="true"></span>
       </a>
 
     </div>
   </section><!-- End Hero -->
 
-  <main id="main">
+  <main id="main" role="main">
 
     <!-- ======= Featured Services Section ======= -->
 
@@ -506,36 +523,143 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         <div class="section-title">
           <h2>Portfolio</h2>
-          <p>Below are some of the latest web design and development projects we have done for our clients in St. Louis and surrounding areas.</p>
+          <p>Explore our recent web design, hosting, and video editing projects. Each case study showcases real results for St. Louis businesses - from performance improvements to increased conversions.</p>
         </div>
 
         <div class="row">
-          <div class="col-lg-12 d-flex justify-content-center">
-            <ul id="portfolio-flters">
-              <!-- <li data-filter="*" class="filter-active">All</li>
-              <li data-filter=".filter-app">App</li>
-              <li data-filter=".filter-card">Card</li>
-              <li data-filter=".filter-web">Web</li> -->
+          <div class="col-lg-12 d-flex justify-content-center" data-aos="fade-up">
+            <ul id="portfolio-flters" role="group" aria-label="Portfolio filters">
+              <li data-filter="*" class="filter-active" role="button" aria-pressed="true" tabindex="0">All</li>
+              <li data-filter=".filter-hosting" role="button" aria-pressed="false" tabindex="0">Web Hosting</li>
+              <li data-filter=".filter-video" role="button" aria-pressed="false" tabindex="0">Video Editing</li>
+              <li data-filter=".filter-web" role="button" aria-pressed="false" tabindex="0">Web Development</li>
+              <li data-filter=".filter-wordpress" role="button" aria-pressed="false" tabindex="0">WordPress</li>
+              <li data-filter=".filter-seo" role="button" aria-pressed="false" tabindex="0">SEO</li>
             </ul>
           </div>
         </div>
 
         <div class="row portfolio-container">
 
-          <div class="col-lg-4 col-md-6 portfolio-item filter-app">
+          <!-- E-Commerce Migration -->
+          <div class="col-lg-4 col-md-6 portfolio-item filter-hosting filter-web" data-aos="fade-up" data-aos-delay="100">
             <div class="portfolio-wrap">
-              <img src="assets/img/portfolio/Irie-Blog.png" class="img-fluid" alt="">
+              <picture>
+                <source srcset="assets/img/portfolio/ecommerce-migration.webp" type="image/webp">
+                <img src="assets/img/portfolio/ecommerce-migration.jpg" class="img-fluid" alt="E-Commerce Site Migration & Optimization" loading="lazy" decoding="async" width="600" height="400">
+              </picture>
+              <span class="portfolio-category-badge">Web Hosting</span>
               <div class="portfolio-info">
-                <h4>App 1</h4>
-                <p>App</p>
+                <h4>E-Commerce Site Migration</h4>
+                <p>Web Hosting & Development</p>
+                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> 80% Faster Load Times</span>
                 <div class="portfolio-links">
-                  <a href="assets/img/portfolio/Irie-Blog.png" data-gallery="portfolioGallery" class="portfolio-lightbox" title="App 1"><i class="bx bx-plus"></i></a>
-                  <a href="irie-blog.php" title="More Details"><i class="bx bx-link"></i></a>
+                  <a href="assets/img/portfolio/ecommerce-migration.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="E-Commerce Site Migration & Optimization"><i class="bx bx-plus"></i></a>
+                  <a href="portfolio-details.php?project=ecommerce-migration" title="View Case Study"><i class="bx bx-link"></i></a>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- Social Media Campaign -->
+          <div class="col-lg-4 col-md-6 portfolio-item filter-video" data-aos="fade-up" data-aos-delay="200">
+            <div class="portfolio-wrap">
+              <picture>
+                <source srcset="assets/img/portfolio/social-campaign.webp" type="image/webp">
+                <img src="assets/img/portfolio/social-campaign.jpg" class="img-fluid" alt="Social Media Video Campaign" loading="lazy" decoding="async" width="600" height="400">
+              </picture>
+              <span class="portfolio-category-badge">Video Editing</span>
+              <div class="portfolio-info">
+                <h4>Social Media Video Campaign</h4>
+                <p>Video Editing</p>
+                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> 300% Engagement Increase</span>
+                <div class="portfolio-links">
+                  <a href="assets/img/portfolio/social-campaign.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="Social Media Video Campaign"><i class="bx bx-plus"></i></a>
+                  <a href="portfolio-details.php?project=social-media-campaign" title="View Case Study"><i class="bx bx-link"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Custom WooCommerce -->
+          <div class="col-lg-4 col-md-6 portfolio-item filter-web filter-wordpress" data-aos="fade-up" data-aos-delay="300">
+            <div class="portfolio-wrap">
+              <picture>
+                <source srcset="assets/img/portfolio/custom-woocommerce.webp" type="image/webp">
+                <img src="assets/img/portfolio/custom-woocommerce.jpg" class="img-fluid" alt="Custom WooCommerce Platform" loading="lazy" decoding="async" width="600" height="400">
+              </picture>
+              <span class="portfolio-category-badge">Web Development</span>
+              <div class="portfolio-info">
+                <h4>Custom WooCommerce Platform</h4>
+                <p>Web Development</p>
+                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> 200% Conversion Increase</span>
+                <div class="portfolio-links">
+                  <a href="assets/img/portfolio/custom-woocommerce.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="Custom WooCommerce Platform"><i class="bx bx-plus"></i></a>
+                  <a href="portfolio-details.php?project=custom-ecommerce" title="View Case Study"><i class="bx bx-link"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Local SEO -->
+          <div class="col-lg-4 col-md-6 portfolio-item filter-seo filter-web" data-aos="fade-up" data-aos-delay="100">
+            <div class="portfolio-wrap">
+              <picture>
+                <source srcset="assets/img/portfolio/local-seo.webp" type="image/webp">
+                <img src="assets/img/portfolio/local-seo.jpg" class="img-fluid" alt="Local SEO Campaign for Law Firm" loading="lazy" decoding="async" width="600" height="400">
+              </picture>
+              <span class="portfolio-category-badge">SEO</span>
+              <div class="portfolio-info">
+                <h4>Local SEO Campaign</h4>
+                <p>SEO & Web Development</p>
+                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> 500% Organic Traffic Increase</span>
+                <div class="portfolio-links">
+                  <a href="assets/img/portfolio/local-seo.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="Local SEO Campaign for Law Firm"><i class="bx bx-plus"></i></a>
+                  <a href="portfolio-details.php?project=local-seo" title="View Case Study"><i class="bx bx-link"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- WordPress Optimization -->
+          <div class="col-lg-4 col-md-6 portfolio-item filter-hosting filter-wordpress" data-aos="fade-up" data-aos-delay="200">
+            <div class="portfolio-wrap">
+              <picture>
+                <source srcset="assets/img/portfolio/wordpress-optimization.webp" type="image/webp">
+                <img src="assets/img/portfolio/wordpress-optimization.jpg" class="img-fluid" alt="WordPress Performance Optimization" loading="lazy" decoding="async" width="600" height="400">
+              </picture>
+              <span class="portfolio-category-badge">WordPress</span>
+              <div class="portfolio-info">
+                <h4>WordPress Performance Optimization</h4>
+                <p>WordPress Optimization</p>
+                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> 70% Faster Page Loads</span>
+                <div class="portfolio-links">
+                  <a href="assets/img/portfolio/wordpress-optimization.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="WordPress Performance Optimization"><i class="bx bx-plus"></i></a>
+                  <a href="portfolio-details.php?project=wordpress-optimization" title="View Case Study"><i class="bx bx-link"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- YouTube Launch -->
+          <div class="col-lg-4 col-md-6 portfolio-item filter-video" data-aos="fade-up" data-aos-delay="300">
+            <div class="portfolio-wrap">
+              <picture>
+                <source srcset="assets/img/portfolio/youtube-launch.webp" type="image/webp">
+                <img src="assets/img/portfolio/youtube-launch.jpg" class="img-fluid" alt="YouTube Channel Launch & Growth" loading="lazy" decoding="async" width="600" height="400">
+              </picture>
+              <span class="portfolio-category-badge">Video Editing</span>
+              <div class="portfolio-info">
+                <h4>YouTube Channel Launch</h4>
+                <p>Video Editing</p>
+                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> 10K Subscribers in 3 Months</span>
+                <div class="portfolio-links">
+                  <a href="assets/img/portfolio/youtube-launch.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="YouTube Channel Launch & Growth"><i class="bx bx-plus"></i></a>
+                  <a href="portfolio-details.php?project=youtube-launch" title="View Case Study"><i class="bx bx-link"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
 
         </div>
 
@@ -655,8 +779,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         <div class="row">
           <div class="col-lg-6 order-1 order-lg-2">
-
-            <img src="assets/img/team/mark_a.jpg" class="img-fluid" alt="">
+            <picture>
+              <source srcset="assets/img/team/mark_a.webp" type="image/webp">
+              <img src="assets/img/team/mark_a.jpg" class="img-fluid" alt="Mark - Founder and Lead Developer at Izende Studio Web" loading="lazy" decoding="async" width="800" height="600">
+            </picture>
           </div>
           <div class="col-lg-6 pt-4 pt-lg-0 order-2 order-lg-1 content">
             <h3>Hey! Thanks for stopping by. We would like to share with you a little bit about our Izende Web Design Company.</h3>

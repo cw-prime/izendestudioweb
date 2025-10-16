@@ -30,6 +30,9 @@
           <li><a class="nav-link scrollto" href="/blog.php">Blog</a></li>
           <li><a class="getstarted scrollto" href="/quote.php" id="quote">Free Quote</a></li>
         </ul>
+        <button id="dark-mode-toggle" class="dark-mode-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <i class="bx bx-moon"></i>
+        </button>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav><!-- .navbar -->
 

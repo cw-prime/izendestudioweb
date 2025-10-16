@@ -226,8 +226,10 @@
         e.preventDefault();
         portfolioFilters.forEach(function(el) {
           el.classList.remove('filter-active');
+          el.setAttribute('aria-pressed', 'false');
         });
         this.classList.add('filter-active');
+        this.setAttribute('aria-pressed', 'true');
 
         portfolioIsotope.arrange({
           filter: this.getAttribute('data-filter')
@@ -705,7 +707,12 @@
     },
 
     animateCounter: function(element) {
-      const target = parseInt(element.getAttribute('data-target'));
+      const targetStr = element.getAttribute('data-target');
+      const suffix = element.getAttribute('data-suffix') || '';
+      const target = parseFloat(targetStr);
+      const isDecimal = targetStr.includes('.');
+      const decimalPlaces = isDecimal ? (targetStr.split('.')[1] || '').length : 0;
+
       const duration = 2000;
       const increment = target / (duration / 16);
       let current = 0;
@@ -713,16 +720,24 @@
       const updateCounter = () => {
         current += increment;
         if (current < target) {
-          element.textContent = Math.floor(current);
+          if (isDecimal) {
+            element.textContent = current.toFixed(decimalPlaces) + suffix;
+          } else {
+            element.textContent = Math.floor(current) + suffix;
+          }
           requestAnimationFrame(updateCounter);
         } else {
-          element.textContent = target;
+          if (isDecimal) {
+            element.textContent = target.toFixed(decimalPlaces) + suffix;
+          } else {
+            element.textContent = target + suffix;
+          }
         }
       };
 
       // Check for reduced motion preference
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        element.textContent = target;
+        element.textContent = (isDecimal ? target.toFixed(decimalPlaces) : target) + suffix;
       } else {
         updateCounter();
       }
@@ -1462,5 +1477,419 @@
       initBlogPage();
     }
   });
+
+  /**
+   * Phase 15: Performance & Polish Enhancements
+   */
+
+  /**
+   * Lazy Loading Enhancement (Native + Fallback)
+   */
+  class LazyLoader {
+    constructor() {
+      this.images = document.querySelectorAll('img[data-src]');
+      this.init();
+    }
+
+    init() {
+      // Use native lazy loading if available
+      if ('loading' in HTMLImageElement.prototype) {
+        this.images.forEach(img => {
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
+        });
+      } else {
+        // Fallback to IntersectionObserver
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              this.loadImage(entry.target);
+            }
+          });
+        }, { rootMargin: '50px' });
+
+        this.images.forEach(img => this.observer.observe(img));
+      }
+    }
+
+    loadImage(img) {
+      img.src = img.dataset.src;
+      img.classList.add('loaded');
+      img.removeAttribute('data-src');
+      if (this.observer) this.observer.unobserve(img);
+    }
+  }
+
+  /**
+   * Ripple Effect on Buttons
+   */
+  function addRippleEffect(button, event) {
+    // Check for reduced motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    button.classList.add('ripple-active');
+    setTimeout(() => {
+      button.classList.remove('ripple-active');
+    }, 600);
+  }
+
+  // Apply ripple to all buttons with .btn-ripple class
+  document.addEventListener('click', function(e) {
+    const button = e.target.closest('.btn-ripple');
+    if (button) {
+      addRippleEffect(button, e);
+    }
+  });
+
+  /**
+   * Dark Mode Toggle (Optional)
+   */
+  class DarkMode {
+    constructor() {
+      this.key = 'izende_theme_preference';
+      this.toggle = document.getElementById('dark-mode-toggle');
+      if (!this.toggle) return;
+
+      this.init();
+    }
+
+    init() {
+      // Check for saved preference or system preference
+      const savedTheme = localStorage.getItem(this.key);
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+
+      this.applyTheme(theme);
+
+      // Toggle button click
+      this.toggle.addEventListener('click', () => this.toggleTheme());
+
+      // Listen for system preference changes
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem(this.key)) {
+          this.applyTheme(e.matches ? 'dark' : 'light');
+        }
+      });
+    }
+
+    toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      this.setTheme(newTheme);
+    }
+
+    setTheme(theme) {
+      // Add transition class
+      document.body.classList.add('theme-transition');
+
+      this.applyTheme(theme);
+      localStorage.setItem(this.key, theme);
+
+      // Remove transition class after animation
+      setTimeout(() => {
+        document.body.classList.remove('theme-transition');
+      }, 300);
+    }
+
+    applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (this.toggle) {
+        this.toggle.innerHTML = theme === 'dark' ? '<i class="bx bx-sun"></i>' : '<i class="bx bx-moon"></i>';
+        this.toggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+      }
+    }
+
+    getTheme() {
+      return document.documentElement.getAttribute('data-theme') || 'light';
+    }
+  }
+
+  /**
+   * Scroll Progress Indicator
+   */
+  class ScrollProgress {
+    constructor() {
+      this.progressBar = document.getElementById('scroll-progress');
+      if (!this.progressBar) {
+        // Create if doesn't exist
+        this.progressBar = document.createElement('div');
+        this.progressBar.id = 'scroll-progress';
+        document.body.appendChild(this.progressBar);
+      }
+      this.init();
+    }
+
+    init() {
+      // Only show on long pages
+      if (document.documentElement.scrollHeight <= window.innerHeight * 2) {
+        return;
+      }
+
+      // Check for reduced motion
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+      }
+
+      window.addEventListener('scroll', () => this.update(), { passive: true });
+      this.update();
+    }
+
+    update() {
+      const scrollTop = window.scrollY;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = (scrollTop / scrollHeight) * 100;
+      this.progressBar.style.width = scrollPercent + '%';
+    }
+  }
+
+  /**
+   * Image Load Error Handling with Loop Prevention
+   */
+  document.addEventListener('error', function(e) {
+    if (e.target.tagName === 'IMG') {
+      const placeholderUrl = '/assets/img/placeholder.jpg';
+      // Guard against infinite loop if placeholder itself fails
+      if (e.target.src === placeholderUrl || e.target.dataset.errorHandled) {
+        e.target.style.display = 'none';
+        return;
+      }
+      // Mark as handled and replace with placeholder
+      e.target.dataset.errorHandled = 'true';
+      e.target.src = placeholderUrl;
+      e.target.alt = 'Image unavailable';
+      console.warn('Image load error:', e.target.src);
+    }
+  }, true);
+
+  /**
+   * Performance Monitoring (Core Web Vitals)
+   */
+  class PerformanceMonitor {
+    constructor() {
+      this.metrics = {};
+      this.init();
+    }
+
+    init() {
+      if (!('PerformanceObserver' in window)) return;
+
+      // Track Largest Contentful Paint (LCP)
+      try {
+        const lcpObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          const lastEntry = entries[entries.length - 1];
+          this.metrics.lcp = lastEntry.renderTime || lastEntry.loadTime;
+          this.log('LCP', this.metrics.lcp);
+        });
+        lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+      } catch (e) { /* ignore */ }
+
+      // Track First Input Delay (FID)
+      try {
+        const fidObserver = new PerformanceObserver((list) => {
+          list.getEntries().forEach(entry => {
+            this.metrics.fid = entry.processingStart - entry.startTime;
+            this.log('FID', this.metrics.fid);
+          });
+        });
+        fidObserver.observe({ entryTypes: ['first-input'] });
+      } catch (e) { /* ignore */ }
+
+      // Track Cumulative Layout Shift (CLS)
+      try {
+        let clsScore = 0;
+        const clsObserver = new PerformanceObserver((list) => {
+          list.getEntries().forEach(entry => {
+            if (!entry.hadRecentInput) {
+              clsScore += entry.value;
+            }
+          });
+          this.metrics.cls = clsScore;
+          this.log('CLS', this.metrics.cls);
+        });
+        clsObserver.observe({ entryTypes: ['layout-shift'] });
+      } catch (e) { /* ignore */ }
+    }
+
+    log(metric, value) {
+      console.log(`[Performance] ${metric}:`, value.toFixed(2));
+
+      // Send to analytics if available
+      if (typeof window.dataLayer !== 'undefined') {
+        window.dataLayer.push({
+          event: 'web_vitals',
+          metric: metric,
+          value: Math.round(value)
+        });
+      }
+    }
+  }
+
+  /**
+   * Accessibility Announcer
+   */
+  function announce(message, priority = 'polite') {
+    let liveRegion = document.getElementById('aria-live-region');
+    if (!liveRegion) {
+      liveRegion = document.createElement('div');
+      liveRegion.id = 'aria-live-region';
+      liveRegion.setAttribute('role', 'status');
+      liveRegion.setAttribute('aria-live', priority);
+      liveRegion.setAttribute('aria-atomic', 'true');
+      document.body.appendChild(liveRegion);
+    }
+
+    liveRegion.textContent = message;
+
+    // Clear after 1 second
+    setTimeout(() => {
+      liveRegion.textContent = '';
+    }, 1000);
+  }
+
+  // Make announce function globally available
+  window.announce = announce;
+
+  /**
+   * Enhanced IntersectionObserver for Multiple Uses
+   */
+  class EnhancedObserver {
+    constructor() {
+      this.observers = {};
+      this.init();
+    }
+
+    init() {
+      // Lazy load images
+      this.observeImages();
+
+      // Animate elements on scroll (if AOS not present)
+      if (typeof AOS === 'undefined') {
+        this.observeAnimations();
+      }
+    }
+
+    observeImages() {
+      const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+      if (lazyImages.length === 0) return;
+
+      const imageObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            img.classList.add('loaded');
+            imageObserver.unobserve(img);
+          }
+        });
+      }, { rootMargin: '50px' });
+
+      lazyImages.forEach(img => imageObserver.observe(img));
+    }
+
+    observeAnimations() {
+      const animatedElements = document.querySelectorAll('[data-animate]');
+      if (animatedElements.length === 0) return;
+
+      // Check for reduced motion
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) return;
+
+      const animationObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const element = entry.target;
+            const animation = element.getAttribute('data-animate');
+            element.classList.add('anim-complete', animation);
+            animationObserver.unobserve(element);
+          }
+        });
+      }, { threshold: 0.1 });
+
+      animatedElements.forEach(el => animationObserver.observe(el));
+    }
+  }
+
+  /**
+   * Keyboard Shortcuts
+   */
+  document.addEventListener('keydown', function(e) {
+    // Don't trigger if user is typing in input
+    if (e.target.matches('input, textarea, select')) return;
+
+    // '/' key: Focus search input
+    if (e.key === '/') {
+      e.preventDefault();
+      const searchInput = document.getElementById('blog-search');
+      if (searchInput) {
+        searchInput.focus();
+        announce('Search field focused', 'polite');
+      }
+    }
+
+    // 'Escape' key: Close modals, dropdowns, etc (already handled by specific components)
+    // Aria be handled in individual modal/dropdown handlers
+  });
+
+  /**
+   * Enhanced will-change Performance Optimization
+   */
+  function optimizeAnimations() {
+    const animatedElements = document.querySelectorAll('[data-aos], .portfolio-wrap, .blog-card, .icon-box');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('will-animate');
+        } else {
+          entry.target.classList.remove('will-animate');
+        }
+      });
+    }, { rootMargin: '200px' });
+
+    animatedElements.forEach(el => observer.observe(el));
+
+    // Remove will-change after animation completes
+    document.addEventListener('animationend', function(e) {
+      if (e.target.classList.contains('will-animate')) {
+        e.target.classList.remove('will-animate');
+        e.target.classList.add('anim-complete');
+      }
+    });
+  }
+
+  /**
+   * Initialize All Phase 15 Enhancements
+   */
+  window.addEventListener('load', () => {
+    // Initialize LazyLoader for images with data-src
+    new LazyLoader();
+
+    // Initialize Dark Mode (if toggle exists)
+    new DarkMode();
+
+    // Initialize Scroll Progress
+    new ScrollProgress();
+
+    // Initialize Performance Monitor
+    new PerformanceMonitor();
+
+    // Initialize Enhanced Observer
+    new EnhancedObserver();
+
+    // Optimize animations with will-change
+    optimizeAnimations();
+
+    // Add ripple class to all primary buttons
+    document.querySelectorAll('.btn-brand, .btn-primary, .cta-btn, .btn-get-started').forEach(btn => {
+      btn.classList.add('btn-ripple');
+    });
+
+    // Announce page load complete to screen readers
+    announce('Page loaded successfully', 'polite');
+  });
+
+  // AOS initialization remains at lines 988-996 (already implemented)
 
 })();

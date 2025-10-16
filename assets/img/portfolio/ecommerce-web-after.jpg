@@ -1,0 +1,16 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#f8fcf9"/>
+  <rect x="100" y="100" width="600" height="400" fill="white" stroke="#47aeff" stroke-width="3" rx="8"/>
+  <rect x="100" y="100" width="600" height="50" fill="#47aeff"/>
+  <text x="400" y="135" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">Custom Design</text>
+  <rect x="150" y="200" width="200" height="250" fill="white" stroke="#47aeff" stroke-width="2" rx="4"/>
+  <rect x="170" y="220" width="160" height="120" fill="#47aeff" opacity="0.2" rx="4"/>
+  <rect x="170" y="355" width="140" height="12" fill="#47aeff" rx="6"/>
+  <rect x="170" y="375" width="100" height="10" fill="#80c9ff" rx="5"/>
+  <rect x="400" y="200" width="200" height="250" fill="white" stroke="#47aeff" stroke-width="2" rx="4"/>
+  <rect x="420" y="220" width="160" height="120" fill="#47aeff" opacity="0.2" rx="4"/>
+  <rect x="420" y="355" width="140" height="12" fill="#47aeff" rx="6"/>
+  <rect x="420" y="375" width="100" height="10" fill="#80c9ff" rx="5"/>
+  <path d="M 360 550 L 380 570 L 440 510" stroke="#47aeff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="400" y="555" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#47aeff" text-anchor="middle">2.7% Conversion Rate</text>
+</svg>

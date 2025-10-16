@@ -1,0 +1,488 @@
+{
+  "projects": [
+    {
+      "slug": "ecommerce-migration",
+      "name": "E-Commerce Site Migration & Optimization",
+      "client": {
+        "name": "ShopLocal STL",
+        "industry": "E-Commerce Retail",
+        "location": "Chesterfield, MO"
+      },
+      "category": ["hosting", "web"],
+      "categoryDisplay": "Web Hosting & Development",
+      "date": "March 2024",
+      "duration": "3 weeks",
+      "url": "",
+      "featured": true,
+      "keyMetric": "80% faster load times",
+      "challenge": {
+        "summary": "ShopLocal STL's e-commerce site was suffering from slow load times and frequent downtime on their previous shared hosting provider. Their cart abandonment rate was 72%, and mobile performance was extremely poor with a score of only 35/100. The site was averaging 8.2 second load times, causing significant loss of revenue.",
+        "points": [
+          "Page load times averaging 8.2 seconds",
+          "Monthly downtime of 4-6 hours affecting sales",
+          "Cart abandonment rate of 72%",
+          "Poor mobile performance (35/100 score)",
+          "Frequent server crashes during traffic spikes"
+        ]
+      },
+      "solution": {
+        "summary": "We migrated ShopLocal STL to our optimized VPS hosting platform with LiteSpeed web server, implemented Redis caching for WooCommerce, and integrated Cloudflare CDN for global content delivery. We also optimized all product images and implemented lazy loading to reduce initial page weight by 60%.",
+        "process": [
+          {"title": "Performance Audit", "description": "Analyzed current site performance, identified bottlenecks in database queries and image loading"},
+          {"title": "VPS Configuration", "description": "Set up optimized VPS with LiteSpeed web server, PHP 8.1, and Redis object caching"},
+          {"title": "Zero-Downtime Migration", "description": "Migrated site during off-peak hours with DNS failover strategy to ensure no sales were lost"},
+          {"title": "Performance Optimization", "description": "Implemented caching layers, CDN, image optimization, and code minification"},
+          {"title": "Monitoring Setup", "description": "Configured 24/7 uptime monitoring and performance tracking with real-time alerts"}
+        ],
+        "technologies": [
+          {"name": "LiteSpeed Web Server", "icon": "bx-rocket", "description": "40x faster than Apache for WordPress/WooCommerce"},
+          {"name": "Redis Caching", "icon": "bx-save", "description": "Object caching for database queries and sessions"},
+          {"name": "Cloudflare CDN", "icon": "bx-cloud", "description": "Global content delivery with DDoS protection"},
+          {"name": "WooCommerce", "icon": "bx-cart", "description": "Optimized for e-commerce performance"},
+          {"name": "PHP 8.1", "icon": "bx-code-alt", "description": "Latest PHP version for improved performance"},
+          {"name": "MySQL 8.0", "icon": "bx-data", "description": "Optimized database with query caching"}
+        ]
+      },
+      "results": {
+        "summary": "The migration and optimization delivered dramatic improvements in site performance and business metrics. Load times decreased by 80%, mobile performance improved to 95/100, and the conversion rate nearly doubled. The site has maintained 99.99% uptime for 6 consecutive months with zero downtime incidents.",
+        "metrics": [
+          {"icon": "bx-time", "value": "80%", "label": "Faster Load Times", "improvement": true},
+          {"icon": "bx-trending-up", "value": "45%", "label": "Conversion Increase", "improvement": true},
+          {"icon": "bx-bar-chart-alt-2", "value": "99.99%", "label": "Uptime Achieved", "improvement": true},
+          {"icon": "bx-mobile", "value": "95/100", "label": "Mobile Score", "improvement": true}
+        ]
+      },
+      "beforeAfter": {
+        "items": [
+          {"label": "Page Load Time", "before": "8.2s", "after": "1.8s"},
+          {"label": "Mobile Score", "before": "35/100", "after": "95/100"},
+          {"label": "Conversion Rate", "before": "1.2%", "after": "2.8%"},
+          {"label": "Monthly Uptime", "before": "95.5%", "after": "99.99%"}
+        ],
+        "images": {
+          "before": "assets/img/portfolio/ecommerce-before.jpg",
+          "after": "assets/img/portfolio/ecommerce-after.jpg"
+        }
+      },
+      "testimonial": {
+        "quote": "The migration was seamless and the results exceeded our expectations. Our site is now lightning fast and we haven't had a single minute of downtime in 6 months. Sales from our website increased 45% in the first quarter alone.",
+        "author": "Robert Thompson",
+        "title": "CEO",
+        "company": "ShopLocal STL",
+        "rating": 5
+      },
+      "gallery": [
+        "assets/img/portfolio/ecommerce-1.jpg",
+        "assets/img/portfolio/ecommerce-2.jpg",
+        "assets/img/portfolio/ecommerce-3.jpg",
+        "assets/img/portfolio/ecommerce-4.jpg",
+        "assets/img/portfolio/ecommerce-5.jpg",
+        "assets/img/portfolio/ecommerce-6.jpg"
+      ],
+      "relatedProjects": ["wordpress-optimization", "high-traffic-blog", "custom-ecommerce"]
+    },
+    {
+      "slug": "social-media-campaign",
+      "name": "Social Media Video Campaign",
+      "client": {
+        "name": "Fitness Studio Plus",
+        "industry": "Health & Fitness",
+        "location": "Clayton, MO"
+      },
+      "category": ["video"],
+      "categoryDisplay": "Video Editing",
+      "date": "February 2024",
+      "duration": "2 months",
+      "url": "",
+      "featured": true,
+      "keyMetric": "300% engagement increase",
+      "challenge": {
+        "summary": "Fitness Studio Plus was struggling to gain traction on social media platforms. Their engagement rate was below 1%, they had inconsistent branding across platforms, and their video content was not optimized for each platform's requirements. They needed a comprehensive video content strategy to attract new members.",
+        "points": [
+          "Social media engagement rate below 1%",
+          "Inconsistent branding and messaging across platforms",
+          "Low-quality video content shot on phones",
+          "No content calendar or posting strategy",
+          "Unable to showcase class offerings effectively"
+        ]
+      },
+      "solution": {
+        "summary": "We created a 60-day social media video campaign with professional video editing, platform-specific content optimization, and a consistent posting schedule. We produced 30+ Reels for Instagram, 15 TikTok videos, 10 YouTube Shorts, and 5 long-form YouTube tutorials. All content featured consistent branding, engaging transitions, and strong calls-to-action.",
+        "process": [
+          {"title": "Content Strategy", "description": "Developed content calendar aligned with fitness trends, seasons, and studio promotions"},
+          {"title": "Video Production", "description": "Shot professional footage of classes, trainers, and member testimonials over 3 days"},
+          {"title": "Professional Editing", "description": "Edited videos with motion graphics, music, captions, and branding elements"},
+          {"title": "Platform Optimization", "description": "Optimized videos for each platform's specs (aspect ratio, length, captions)"},
+          {"title": "Launch & Analytics", "description": "Launched campaign with strategic posting schedule and tracked engagement metrics"}
+        ],
+        "technologies": [
+          {"name": "Adobe Premiere Pro", "icon": "bx-video", "description": "Professional video editing and color grading"},
+          {"name": "After Effects", "icon": "bx-movie", "description": "Motion graphics and animated text overlays"},
+          {"name": "Canva Pro", "icon": "bx-palette", "description": "Thumbnail design and brand templates"},
+          {"name": "Instagram Reels", "icon": "bx-camera", "description": "Short-form vertical video for Instagram"},
+          {"name": "TikTok", "icon": "bx-video-recording", "description": "Trending short-form content"},
+          {"name": "YouTube", "icon": "bxl-youtube", "description": "Long-form tutorials and shorts"}
+        ]
+      },
+      "results": {
+        "summary": "The video campaign transformed Fitness Studio Plus's social media presence. Engagement rates increased 300%, follower growth accelerated to 5,000 new followers in 60 days, and most importantly, they gained 45 new member sign-ups directly attributed to social media. Their content now consistently reaches 150,000+ people monthly.",
+        "metrics": [
+          {"icon": "bx-trending-up", "value": "300%", "label": "Engagement Increase", "improvement": true},
+          {"icon": "bx-group", "value": "5,000", "label": "New Followers", "improvement": true},
+          {"icon": "bx-bar-chart-alt", "value": "150K+", "label": "Monthly Reach", "improvement": true},
+          {"icon": "bx-user-plus", "value": "45", "label": "New Members from Social", "improvement": true}
+        ]
+      },
+      "beforeAfter": {
+        "items": [
+          {"label": "Engagement Rate", "before": "0.8%", "after": "3.2%"},
+          {"label": "Monthly Followers Growth", "before": "50", "after": "2,500"},
+          {"label": "Monthly Reach", "before": "12,000", "after": "150,000"},
+          {"label": "Member Sign-ups from Social", "before": "2", "after": "45"}
+        ],
+        "images": {
+          "before": "assets/img/portfolio/social-before.jpg",
+          "after": "assets/img/portfolio/social-after.jpg"
+        }
+      },
+      "testimonial": {
+        "quote": "The video content transformed our social media presence. We went from barely any engagement to having our videos go viral regularly. We've gained 45 new members directly from social media in just 2 months!",
+        "author": "Jessica Martinez",
+        "title": "Studio Owner",
+        "company": "Fitness Studio Plus",
+        "rating": 5
+      },
+      "gallery": [
+        "assets/img/portfolio/social-1.jpg",
+        "assets/img/portfolio/social-2.jpg",
+        "assets/img/portfolio/social-3.jpg",
+        "assets/img/portfolio/social-4.jpg",
+        "assets/img/portfolio/social-5.jpg",
+        "assets/img/portfolio/social-6.jpg"
+      ],
+      "relatedProjects": ["youtube-launch", "product-video", "brand-video"]
+    },
+    {
+      "slug": "custom-ecommerce",
+      "name": "Custom WooCommerce Platform",
+      "client": {
+        "name": "Artisan Marketplace",
+        "industry": "Handcrafted Goods",
+        "location": "St. Louis, MO"
+      },
+      "category": ["web", "wordpress"],
+      "categoryDisplay": "Web Development",
+      "date": "January 2024",
+      "duration": "6 weeks",
+      "url": "",
+      "featured": true,
+      "keyMetric": "200% conversion increase",
+      "challenge": {
+        "summary": "Artisan Marketplace was using a generic Shopify theme that didn't reflect their brand identity and lacked key features for their multi-vendor marketplace model. They needed custom product filtering, vendor dashboards, and a unique checkout experience. Their conversion rate was stuck at 0.9% and bounce rate was high at 68%.",
+        "points": [
+          "Generic theme didn't match brand aesthetic",
+          "Lacked multi-vendor marketplace features",
+          "Poor mobile checkout experience",
+          "Limited product filtering and search",
+          "High bounce rate of 68%"
+        ]
+      },
+      "solution": {
+        "summary": "We built a custom WooCommerce multi-vendor platform with advanced product filtering, vendor dashboards, and a streamlined checkout process. We implemented custom product taxonomies, AJAX-powered filtering, and a mobile-first checkout design. The site features beautiful product photography showcases and vendor storytelling sections.",
+        "process": [
+          {"title": "Discovery & Planning", "description": "Conducted user research, analyzed competitor sites, defined technical requirements"},
+          {"title": "Custom Theme Development", "description": "Built custom WordPress theme from scratch with brand-aligned design"},
+          {"title": "WooCommerce Configuration", "description": "Set up multi-vendor marketplace with commission structure and vendor tools"},
+          {"title": "UX Optimization", "description": "Implemented A/B tested checkout flow, product filtering, and mobile optimizations"},
+          {"title": "Testing & Launch", "description": "Conducted thorough testing, data migration, and smooth launch with minimal downtime"}
+        ],
+        "technologies": [
+          {"name": "WordPress", "icon": "bxl-wordpress", "description": "Flexible CMS for e-commerce"},
+          {"name": "WooCommerce", "icon": "bx-cart", "description": "Powerful e-commerce platform"},
+          {"name": "WC Vendors", "icon": "bx-store", "description": "Multi-vendor marketplace functionality"},
+          {"name": "React", "icon": "bxl-react", "description": "Dynamic product filtering and cart"},
+          {"name": "Stripe", "icon": "bx-credit-card", "description": "Secure payment processing"},
+          {"name": "AWS S3", "icon": "bx-cloud", "description": "Image hosting and CDN"}
+        ]
+      },
+      "results": {
+        "summary": "The custom WooCommerce platform delivered exceptional results. Conversion rates increased by 200%, average order value grew by 35%, and bounce rates dropped to 42%. The new vendor dashboard reduced support tickets by 60%, and vendors report 3x faster product listing times. Monthly revenue increased 180% in the first quarter.",
+        "metrics": [
+          {"icon": "bx-trending-up", "value": "200%", "label": "Conversion Increase", "improvement": true},
+          {"icon": "bx-dollar", "value": "35%", "label": "Higher AOV", "improvement": true},
+          {"icon": "bx-time-five", "value": "60%", "label": "Faster Checkout", "improvement": true},
+          {"icon": "bx-bar-chart-alt-2", "value": "180%", "label": "Revenue Growth", "improvement": true}
+        ]
+      },
+      "beforeAfter": {
+        "items": [
+          {"label": "Conversion Rate", "before": "0.9%", "after": "2.7%"},
+          {"label": "Average Order Value", "before": "$45", "after": "$61"},
+          {"label": "Bounce Rate", "before": "68%", "after": "42%"},
+          {"label": "Mobile Conversion", "before": "0.4%", "after": "2.1%"}
+        ],
+        "images": {
+          "before": "assets/img/portfolio/ecommerce-web-before.jpg",
+          "after": "assets/img/portfolio/ecommerce-web-after.jpg"
+        }
+      },
+      "testimonial": {
+        "quote": "The custom WooCommerce platform transformed our business. Our vendors love the new dashboard, customers find products easily, and our sales have nearly tripled. The investment paid for itself in the first month!",
+        "author": "Sarah Johnson",
+        "title": "Founder",
+        "company": "Artisan Marketplace",
+        "rating": 5
+      },
+      "gallery": [
+        "assets/img/portfolio/marketplace-1.jpg",
+        "assets/img/portfolio/marketplace-2.jpg",
+        "assets/img/portfolio/marketplace-3.jpg",
+        "assets/img/portfolio/marketplace-4.jpg",
+        "assets/img/portfolio/marketplace-5.jpg",
+        "assets/img/portfolio/marketplace-6.jpg"
+      ],
+      "relatedProjects": ["ecommerce-migration", "wordpress-optimization", "local-seo"]
+    },
+    {
+      "slug": "local-seo",
+      "name": "Local SEO Campaign for Law Firm",
+      "client": {
+        "name": "Thompson & Associates",
+        "industry": "Legal Services",
+        "location": "Clayton, MO"
+      },
+      "category": ["seo", "web"],
+      "categoryDisplay": "SEO & Web Development",
+      "date": "December 2023",
+      "duration": "6 months",
+      "url": "",
+      "featured": true,
+      "keyMetric": "500% organic traffic increase",
+      "challenge": {
+        "summary": "Thompson & Associates was invisible in local search results despite being established for 20 years. They weren't ranking for key practice area keywords, had no Google Business Profile optimization, and received zero organic leads. Their website was outdated and not mobile-friendly, contributing to poor search rankings.",
+        "points": [
+          "Not ranking on first page for any target keywords",
+          "Zero organic leads from search",
+          "Outdated website with poor mobile experience",
+          "No Google Business Profile optimization",
+          "Competitors dominating local search results"
+        ]
+      },
+      "solution": {
+        "summary": "We implemented a comprehensive local SEO strategy including website redesign, on-page optimization, Google Business Profile enhancement, local citation building, and content marketing. We also created location-specific landing pages for each practice area and built high-quality backlinks from legal directories and local publications.",
+        "process": [
+          {"title": "SEO Audit", "description": "Comprehensive audit of website, backlinks, and local search presence"},
+          {"title": "Website Redesign", "description": "Modern, mobile-friendly website with optimized page structure and content"},
+          {"title": "Google Business Optimization", "description": "Enhanced GBP with photos, posts, reviews, and service listings"},
+          {"title": "Content Creation", "description": "Created 50+ pages of original legal content targeting key practice areas"},
+          {"title": "Link Building", "description": "Built high-quality backlinks from legal directories and local sites"}
+        ],
+        "technologies": [
+          {"name": "WordPress", "icon": "bxl-wordpress", "description": "SEO-friendly CMS"},
+          {"name": "Yoast SEO", "icon": "bx-search", "description": "On-page SEO optimization"},
+          {"name": "Google Business Profile", "icon": "bx-map", "description": "Local search visibility"},
+          {"name": "SEMrush", "icon": "bx-line-chart", "description": "Keyword research and tracking"},
+          {"name": "Google Analytics 4", "icon": "bx-bar-chart-alt-2", "description": "Traffic and conversion tracking"},
+          {"name": "Schema.org", "icon": "bx-code-alt", "description": "Structured data markup"}
+        ]
+      },
+      "results": {
+        "summary": "The SEO campaign delivered outstanding results over 6 months. Organic traffic increased 500%, the firm now ranks #1 for 12 key practice area keywords in St. Louis, and they receive 35+ qualified leads monthly from organic search. Phone calls from Google Business Profile increased 350%, and the website's conversion rate improved to 8.5%.",
+        "metrics": [
+          {"icon": "bx-trending-up", "value": "500%", "label": "Organic Traffic Increase", "improvement": true},
+          {"icon": "bx-trophy", "value": "12", "label": "#1 Rankings Achieved", "improvement": true},
+          {"icon": "bx-phone", "value": "350%", "label": "More Phone Calls", "improvement": true},
+          {"icon": "bx-user-plus", "value": "35+", "label": "Monthly Qualified Leads", "improvement": true}
+        ]
+      },
+      "beforeAfter": {
+        "items": [
+          {"label": "Monthly Organic Traffic", "before": "450", "after": "2,700"},
+          {"label": "First Page Rankings", "before": "0", "after": "12"},
+          {"label": "Monthly Organic Leads", "before": "0", "after": "35"},
+          {"label": "Google Business Profile Calls", "before": "8", "after": "36"}
+        ],
+        "images": {
+          "before": "assets/img/portfolio/seo-before.jpg",
+          "after": "assets/img/portfolio/seo-after.jpg"
+        }
+      },
+      "testimonial": {
+        "quote": "The SEO results have been incredible. We're now #1 for most of our practice areas in St. Louis, and we're getting 35+ high-quality leads every month from Google. Our phone rings constantly with new client inquiries. Best investment we've made!",
+        "author": "David Thompson",
+        "title": "Managing Partner",
+        "company": "Thompson & Associates",
+        "rating": 5
+      },
+      "gallery": [
+        "assets/img/portfolio/lawfirm-1.jpg",
+        "assets/img/portfolio/lawfirm-2.jpg",
+        "assets/img/portfolio/lawfirm-3.jpg",
+        "assets/img/portfolio/lawfirm-4.jpg",
+        "assets/img/portfolio/lawfirm-5.jpg",
+        "assets/img/portfolio/lawfirm-6.jpg"
+      ],
+      "relatedProjects": ["wordpress-business", "local-business-seo", "content-marketing"]
+    },
+    {
+      "slug": "wordpress-optimization",
+      "name": "WordPress Performance Optimization",
+      "client": {
+        "name": "St. Louis News Blog",
+        "industry": "Online Publishing",
+        "location": "St. Louis, MO"
+      },
+      "category": ["hosting", "wordpress"],
+      "categoryDisplay": "WordPress Optimization",
+      "date": "November 2023",
+      "duration": "2 weeks",
+      "url": "",
+      "featured": false,
+      "keyMetric": "70% faster page loads",
+      "challenge": {
+        "summary": "St. Louis News Blog was experiencing slow load times that were causing readers to leave. Their bounce rate was 75%, ad revenue was declining due to poor Core Web Vitals scores, and they were losing search rankings. The site was running on outdated shared hosting with no caching.",
+        "points": [
+          "Average page load time of 12 seconds",
+          "Bounce rate of 75%",
+          "Poor Core Web Vitals failing all metrics",
+          "Declining ad revenue due to slow site",
+          "Outdated plugins and PHP version"
+        ]
+      },
+      "solution": {
+        "summary": "We migrated the blog to managed WordPress hosting with LiteSpeed, implemented comprehensive caching strategies, optimized images and code, upgraded to PHP 8.1, and cleaned up unnecessary plugins. We also implemented lazy loading for images and ads, and set up a CDN for global content delivery.",
+        "process": [
+          {"title": "Performance Analysis", "description": "Identified bottlenecks using GTmetrix, PageSpeed Insights, and Chrome DevTools"},
+          {"title": "Hosting Migration", "description": "Moved to managed WordPress hosting with LiteSpeed Cache"},
+          {"title": "Image Optimization", "description": "Compressed and converted 2,000+ images to WebP format"},
+          {"title": "Code Optimization", "description": "Minified CSS/JS, removed unused code, implemented critical CSS"},
+          {"title": "CDN Setup", "description": "Configured Cloudflare CDN for global content delivery"}
+        ],
+        "technologies": [
+          {"name": "LiteSpeed Cache", "icon": "bx-rocket", "description": "Advanced server-level caching"},
+          {"name": "WebP Images", "icon": "bx-image", "description": "Modern image format for faster loading"},
+          {"name": "Cloudflare", "icon": "bx-cloud", "description": "CDN and performance optimization"},
+          {"name": "PHP 8.1", "icon": "bx-code-alt", "description": "Latest PHP for better performance"},
+          {"name": "WP-Optimize", "icon": "bx-cog", "description": "Database optimization"},
+          {"name": "Lazy Load", "icon": "bx-show", "description": "Deferred image and iframe loading"}
+        ]
+      },
+      "results": {
+        "summary": "The optimization dramatically improved site performance. Page load times decreased by 70%, Core Web Vitals passed all metrics, and bounce rate dropped to 42%. Ad revenue increased 55% due to better ad viewability, and organic traffic grew 35% as search rankings improved.",
+        "metrics": [
+          {"icon": "bx-time", "value": "70%", "label": "Faster Page Loads", "improvement": true},
+          {"icon": "bx-check-circle", "value": "100%", "label": "Core Web Vitals Pass", "improvement": true},
+          {"icon": "bx-dollar", "value": "55%", "label": "Ad Revenue Increase", "improvement": true},
+          {"icon": "bx-trending-up", "value": "35%", "label": "Organic Traffic Growth", "improvement": true}
+        ]
+      },
+      "beforeAfter": {
+        "items": [
+          {"label": "Page Load Time", "before": "12.4s", "after": "3.7s"},
+          {"label": "PageSpeed Score", "before": "32/100", "after": "94/100"},
+          {"label": "Bounce Rate", "before": "75%", "after": "42%"},
+          {"label": "Monthly Ad Revenue", "before": "$4,200", "after": "$6,510"}
+        ],
+        "images": {
+          "before": "assets/img/portfolio/wp-opt-before.jpg",
+          "after": "assets/img/portfolio/wp-opt-after.jpg"
+        }
+      },
+      "testimonial": {
+        "quote": "The performance improvements have been amazing. Our readers are staying longer, ad revenue is up 55%, and we're ranking better in Google. The site loads so much faster now!",
+        "author": "Michael Chen",
+        "title": "Editor-in-Chief",
+        "company": "St. Louis News Blog",
+        "rating": 5
+      },
+      "gallery": [
+        "assets/img/portfolio/wp-opt-1.jpg",
+        "assets/img/portfolio/wp-opt-2.jpg",
+        "assets/img/portfolio/wp-opt-3.jpg",
+        "assets/img/portfolio/wp-opt-4.jpg"
+      ],
+      "relatedProjects": ["ecommerce-migration", "high-traffic-blog", "wordpress-business"]
+    },
+    {
+      "slug": "youtube-launch",
+      "name": "YouTube Channel Launch & Growth",
+      "client": {
+        "name": "Tech Tips Missouri",
+        "industry": "Technology Education",
+        "location": "O'Fallon, MO"
+      },
+      "category": ["video"],
+      "categoryDisplay": "Video Editing",
+      "date": "October 2023",
+      "duration": "3 months",
+      "url": "",
+      "featured": false,
+      "keyMetric": "10K subscribers in 3 months",
+      "challenge": {
+        "summary": "Tech Tips Missouri wanted to launch a YouTube channel to establish thought leadership and generate leads for their IT services business. They had no video production experience, no content strategy, and were unsure how to grow an audience from scratch.",
+        "points": [
+          "Zero YouTube presence or experience",
+          "No content strategy or video production skills",
+          "Limited budget for equipment",
+          "Difficulty explaining technical concepts visually",
+          "No understanding of YouTube algorithm"
+        ]
+      },
+      "solution": {
+        "summary": "We developed a comprehensive YouTube launch strategy including niche selection, content calendar, video production templates, and SEO optimization. We produced and edited 30 videos in the first 3 months, including tutorials, reviews, and thought leadership content. We also provided thumbnail design, channel branding, and growth strategies.",
+        "process": [
+          {"title": "Channel Strategy", "description": "Defined niche, target audience, content pillars, and monetization strategy"},
+          {"title": "Video Production Training", "description": "Trained client on shooting video with smartphone and basic equipment"},
+          {"title": "Video Editing", "description": "Professionally edited all videos with motion graphics, music, and captions"},
+          {"title": "SEO Optimization", "description": "Optimized titles, descriptions, tags, and thumbnails for discoverability"},
+          {"title": "Growth Strategy", "description": "Implemented consistent posting schedule, community engagement, and cross-promotion"}
+        ],
+        "technologies": [
+          {"name": "Adobe Premiere Pro", "icon": "bx-video", "description": "Professional video editing"},
+          {"name": "After Effects", "icon": "bx-movie", "description": "Animated intros and overlays"},
+          {"name": "TubeBuddy", "icon": "bxl-youtube", "description": "YouTube SEO and analytics"},
+          {"name": "Canva", "icon": "bx-palette", "description": "Custom thumbnail design"},
+          {"name": "VidIQ", "icon": "bx-line-chart", "description": "Keyword research and tracking"},
+          {"name": "Audacity", "icon": "bx-microphone", "description": "Audio editing and enhancement"}
+        ]
+      },
+      "results": {
+        "summary": "The YouTube channel exceeded all expectations. They gained 10,000 subscribers in the first 3 months, videos consistently receive 20,000+ views, and the channel generates 15-20 qualified B2B leads monthly. Several videos went viral in their niche, and the channel is now monetized with $800+ monthly ad revenue.",
+        "metrics": [
+          {"icon": "bx-group", "value": "10,000", "label": "Subscribers Gained", "improvement": true},
+          {"icon": "bx-show", "value": "500K+", "label": "Total Views", "improvement": true},
+          {"icon": "bx-user-plus", "value": "15-20", "label": "Monthly B2B Leads", "improvement": true},
+          {"icon": "bx-dollar", "value": "$800+", "label": "Monthly Ad Revenue", "improvement": true}
+        ]
+      },
+      "beforeAfter": {
+        "items": [
+          {"label": "Channel Subscribers", "before": "0", "after": "10,000"},
+          {"label": "Monthly Views", "before": "0", "after": "150,000"},
+          {"label": "Monthly Leads", "before": "0", "after": "17"},
+          {"label": "Monthly Ad Revenue", "before": "$0", "after": "$820"}
+        ],
+        "images": {
+          "before": "assets/img/portfolio/youtube-before.jpg",
+          "after": "assets/img/portfolio/youtube-after.jpg"
+        }
+      },
+      "testimonial": {
+        "quote": "We never imagined we'd grow this fast on YouTube. The professional editing and strategy guidance made all the difference. We're now getting qualified leads every week from our videos!",
+        "author": "Jason Williams",
+        "title": "Founder",
+        "company": "Tech Tips Missouri",
+        "rating": 5
+      },
+      "gallery": [
+        "assets/img/portfolio/youtube-1.jpg",
+        "assets/img/portfolio/youtube-2.jpg",
+        "assets/img/portfolio/youtube-3.jpg",
+        "assets/img/portfolio/youtube-4.jpg",
+        "assets/img/portfolio/youtube-5.jpg",
+        "assets/img/portfolio/youtube-6.jpg"
+      ],
+      "relatedProjects": ["social-media-campaign", "product-video", "brand-video"]
+    }
+  ]
+}

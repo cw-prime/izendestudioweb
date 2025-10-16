@@ -1,0 +1,15 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff5828;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d9441f;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#grad6)"/>
+  <rect x="340" y="200" width="120" height="100" fill="rgba(255,255,255,0.2)" rx="8"/>
+  <path d="M 380 230 L 380 270 L 420 250 Z" fill="white"/>
+  <text x="400" y="380" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">YouTube Channel Launch</text>
+  <text x="400" y="420" font-family="Arial, sans-serif" font-size="24" fill="rgba(255,255,255,0.9)" text-anchor="middle">Video Production</text>
+  <text x="400" y="480" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">10K Subscribers</text>
+  <rect x="290" y="500" width="220" height="4" fill="rgba(255,255,255,0.5)" rx="2"/>
+</svg>

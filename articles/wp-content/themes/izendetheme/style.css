@@ -19,6 +19,9 @@ Twenty Twenty-One WordPress Theme, (C) 2020 WordPress.org
 Twenty Twenty-One is distributed under the terms of the GNU GPL.
 */
 
+/* Import Google Fonts - Raleway and Open Sans for brand consistency */
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&family=Open+Sans:wght@400;600;700&display=swap');
+
 /**
  * SETTINGS
  * File-header..........The file header for the themes style.css file.
@@ -100,7 +103,7 @@ Twenty Twenty-One is distributed under the terms of the GNU GPL.
 /* Variables */
 :root {
 
-	/* Font Family */--global--font-primary: var(--font-headings, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif);--global--font-secondary: var(--font-base, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif);
+	/* Font Family */--global--font-primary: "Raleway", var(--font-headings, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif);--global--font-secondary: "Open Sans", var(--font-base, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif);
 
 	/* Font Size */--global--font-size-base: 1.25rem;--global--font-size-xs: 1rem;--global--font-size-sm: 1.125rem;--global--font-size-md: 1.25rem;--global--font-size-lg: 1.5rem;--global--font-size-xl: 2.25rem;--global--font-size-xxl: 4rem;--global--font-size-xxxl: 5rem;--global--font-size-page-title: var(--global--font-size-xxl);--global--letter-spacing: normal;
 
@@ -110,7 +113,8 @@ Twenty Twenty-One is distributed under the terms of the GNU GPL.
 
 	/* Block: Latest posts */--latest-posts--title-font-family: var(--heading--font-family);--latest-posts--title-font-size: var(--heading--font-size-h3);--latest-posts--description-font-family: var(--global--font-secondary);--latest-posts--description-font-size: var(--global--font-size-sm);--list--font-family: var(--global--font-secondary);--definition-term--font-family: var(--global--font-primary);
 
-	/* Colors */--global--color-black: #000;--global--color-dark-gray: #28303d;--global--color-gray: #39414d;--global--color-light-gray: #f0f0f0;--global--color-green: #d1e4dd;--global--color-blue: #d1dfe4;--global--color-purple: #d1d1e4;--global--color-red: #e4d1d1;--global--color-orange: #e4dad1;--global--color-yellow: #eeeadd;--global--color-white: #fff;--global--color-white-50: rgba(255, 255, 255, 0.5);--global--color-white-90: rgba(255, 255, 255, 0.9);--global--color-primary: var(--global--color-dark-gray);
+	/* Colors */--global--color-black: #000;--global--color-dark-gray: #28303d;--global--color-gray: #39414d;--global--color-light-gray: #f0f0f0;--global--color-green: #5cb874;--global--color-blue: #d1dfe4;--global--color-purple: #d1d1e4;--global--color-red: #e4d1d1;--global--color-orange: #e4dad1;--global--color-yellow: #eeeadd;--global--color-white: #fff;--global--color-white-50: rgba(255, 255, 255, 0.5);--global--color-white-90: rgba(255, 255, 255, 0.9);--global--color-primary: var(--global--color-dark-gray);
+	/* Brand Colors */--global--color-brand: #5cb874;--global--color-brand-hover: #6ec083;--global--color-brand-dark: #449d5b;--global--color-brand-light: #e8f5eb;
 
 	/* Body text color, site title, footer text color. */--global--color-secondary: var(--global--color-gray);
 
@@ -6006,4 +6010,338 @@ footer {
 
 .is-IE .post-thumbnail .wp-post-image {
 	min-width: auto;
+}
+
+/* ==========================================================================
+   Custom Single Post Layout - izendetheme
+   ========================================================================== */
+
+/* Featured Image */
+.izende-single-post .post-featured-image {
+	margin: 0 0 calc(2 * var(--global--spacing-unit));
+	width: 100%;
+	overflow: hidden;
+}
+
+.izende-single-post .post-featured-image .featured-image {
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+	border-radius: 8px;
+}
+
+/* Entry Header */
+.izende-single-post .entry-header {
+	margin-bottom: calc(2 * var(--global--spacing-unit));
+}
+
+.izende-single-post .entry-title {
+	font-family: var(--global--font-primary);
+	margin-bottom: var(--global--spacing-unit);
+	color: var(--global--color-primary);
+}
+
+/* Entry Meta */
+.izende-single-post .entry-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: calc(0.75 * var(--global--spacing-unit));
+	align-items: center;
+	margin-top: var(--global--spacing-unit);
+	font-family: var(--global--font-secondary);
+	font-size: var(--global--font-size-sm);
+	color: var(--global--color-primary);
+}
+
+.izende-single-post .meta-item {
+	display: flex;
+	align-items: center;
+	gap: calc(0.5 * var(--global--spacing-unit));
+}
+
+.izende-single-post .author-meta {
+	display: flex;
+	align-items: center;
+}
+
+.izende-single-post .author-avatar {
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+}
+
+.izende-single-post .author-name a {
+	color: var(--global--color-primary);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.izende-single-post .author-name a:hover,
+.izende-single-post .author-name a:focus {
+	color: var(--global--color-brand);
+}
+
+/* Category & Tag Pills */
+.izende-single-post .category-pill,
+.izende-single-post .tag-pill {
+	display: inline-block;
+	padding: 4px 12px;
+	background-color: var(--global--color-brand-light);
+	color: var(--global--color-brand-dark);
+	border-radius: 16px;
+	text-decoration: none;
+	font-size: var(--global--font-size-xs);
+	font-weight: 500;
+	transition: all 0.3s ease;
+}
+
+.izende-single-post .category-pill:hover,
+.izende-single-post .category-pill:focus,
+.izende-single-post .tag-pill:hover,
+.izende-single-post .tag-pill:focus {
+	background-color: var(--global--color-brand);
+	color: var(--global--color-background);
+	text-decoration: none;
+}
+
+/* Entry Content */
+.izende-single-post .entry-content {
+	font-family: var(--global--font-secondary);
+	line-height: var(--global--line-height-body);
+	margin-bottom: calc(2 * var(--global--spacing-unit));
+}
+
+/* Entry Footer - Tags & Social Share */
+.izende-single-post .entry-footer {
+	border-top: 2px solid var(--global--color-border);
+	padding-top: calc(1.5 * var(--global--spacing-unit));
+	margin-top: calc(2 * var(--global--spacing-unit));
+	margin-bottom: calc(2 * var(--global--spacing-unit));
+}
+
+.izende-single-post .tags-section {
+	margin-bottom: calc(1.5 * var(--global--spacing-unit));
+}
+
+.izende-single-post .tags-label,
+.izende-single-post .share-label {
+	font-weight: 600;
+	margin-right: calc(0.5 * var(--global--spacing-unit));
+	color: var(--global--color-primary);
+}
+
+.izende-single-post .tags-list {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: calc(0.5 * var(--global--spacing-unit));
+	margin-top: calc(0.5 * var(--global--spacing-unit));
+}
+
+.izende-single-post .social-share {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: calc(0.5 * var(--global--spacing-unit));
+}
+
+.izende-single-post .share-links {
+	display: flex;
+	gap: calc(0.5 * var(--global--spacing-unit));
+}
+
+.izende-single-post .share-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background-color: var(--global--color-brand);
+	color: var(--global--color-background);
+	text-decoration: none;
+	transition: all 0.3s ease;
+	font-weight: bold;
+}
+
+.izende-single-post .share-link:hover,
+.izende-single-post .share-link:focus {
+	background-color: var(--global--color-brand-dark);
+	transform: translateY(-2px);
+}
+
+.izende-single-post .share-icon {
+	font-size: 18px;
+	line-height: 1;
+}
+
+/* Author Bio Box */
+.author-bio-box {
+	display: flex;
+	gap: var(--global--spacing-unit);
+	padding: calc(1.5 * var(--global--spacing-unit));
+	background-color: var(--global--color-brand-light);
+	border-radius: 8px;
+	margin: calc(2 * var(--global--spacing-unit)) 0;
+}
+
+.author-bio-avatar {
+	flex-shrink: 0;
+}
+
+.author-bio-avatar img {
+	border-radius: 50%;
+	width: 80px;
+	height: 80px;
+}
+
+.author-bio-content {
+	flex: 1;
+}
+
+.author-bio-name {
+	font-family: var(--global--font-primary);
+	font-size: var(--heading--font-size-h4);
+	margin: 0 0 calc(0.5 * var(--global--spacing-unit));
+}
+
+.author-bio-name a {
+	color: var(--global--color-primary);
+	text-decoration: none;
+}
+
+.author-bio-name a:hover,
+.author-bio-name a:focus {
+	color: var(--global--color-brand);
+}
+
+.author-bio-description {
+	font-family: var(--global--font-secondary);
+	color: var(--global--color-primary);
+	margin: 0 0 calc(0.75 * var(--global--spacing-unit));
+	line-height: var(--global--line-height-body);
+}
+
+.author-bio-link {
+	color: var(--global--color-brand);
+	text-decoration: none;
+	font-weight: 500;
+	font-size: var(--global--font-size-sm);
+}
+
+.author-bio-link:hover,
+.author-bio-link:focus {
+	color: var(--global--color-brand-dark);
+	text-decoration: underline;
+}
+
+/* Related Posts Section */
+.related-posts-section {
+	margin: calc(3 * var(--global--spacing-unit)) 0;
+	padding-top: calc(2 * var(--global--spacing-unit));
+	border-top: 2px solid var(--global--color-border);
+}
+
+.related-posts-title {
+	font-family: var(--global--font-primary);
+	font-size: var(--heading--font-size-h2);
+	margin-bottom: calc(1.5 * var(--global--spacing-unit));
+	color: var(--global--color-primary);
+}
+
+.related-posts-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: var(--global--spacing-unit);
+}
+
+@media only screen and (min-width: 592px) {
+	.related-posts-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media only screen and (min-width: 822px) {
+	.related-posts-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+.related-post-card {
+	background-color: var(--global--color-background);
+	border: 1px solid var(--global--color-border);
+	border-radius: 8px;
+	overflow: hidden;
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.related-post-card:hover,
+.related-post-card:focus-within {
+	transform: translateY(-4px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.related-post-thumbnail {
+	display: block;
+	overflow: hidden;
+}
+
+.related-post-image {
+	width: 100%;
+	height: 200px;
+	object-fit: cover;
+	transition: transform 0.3s ease;
+}
+
+.related-post-card:hover .related-post-image {
+	transform: scale(1.05);
+}
+
+.related-post-content {
+	padding: var(--global--spacing-unit);
+}
+
+.related-post-title {
+	font-family: var(--global--font-primary);
+	font-size: var(--global--font-size-md);
+	margin: 0 0 calc(0.5 * var(--global--spacing-unit));
+	line-height: var(--global--line-height-heading);
+}
+
+.related-post-title a {
+	color: var(--global--color-primary);
+	text-decoration: none;
+}
+
+.related-post-title a:hover,
+.related-post-title a:focus {
+	color: var(--global--color-brand);
+}
+
+.related-post-meta {
+	font-family: var(--global--font-secondary);
+	font-size: var(--global--font-size-xs);
+	color: var(--global--color-primary);
+	opacity: 0.7;
+}
+
+/* Responsive Adjustments */
+@media only screen and (max-width: 481px) {
+	.izende-single-post .entry-meta {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.author-bio-box {
+		flex-direction: column;
+		text-align: center;
+	}
+
+	.author-bio-avatar {
+		margin: 0 auto;
+	}
+
+	.izende-single-post .social-share {
+		flex-direction: column;
+		align-items: flex-start;
+	}
 }

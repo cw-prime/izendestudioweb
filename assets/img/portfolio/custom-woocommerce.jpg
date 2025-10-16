@@ -1,0 +1,17 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#47aeff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3498db;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#grad3)"/>
+  <rect x="340" y="200" width="120" height="100" fill="rgba(255,255,255,0.2)" rx="8"/>
+  <circle cx="400" cy="240" r="20" fill="white"/>
+  <rect x="360" y="270" width="80" height="8" fill="rgba(255,255,255,0.8)" rx="4"/>
+  <rect x="360" y="285" width="60" height="6" fill="rgba(255,255,255,0.6)" rx="3"/>
+  <text x="400" y="380" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">Custom WooCommerce</text>
+  <text x="400" y="420" font-family="Arial, sans-serif" font-size="24" fill="rgba(255,255,255,0.9)" text-anchor="middle">E-Commerce Development</text>
+  <text x="400" y="480" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">200% ROI</text>
+  <rect x="310" y="500" width="180" height="4" fill="rgba(255,255,255,0.5)" rx="2"/>
+</svg>

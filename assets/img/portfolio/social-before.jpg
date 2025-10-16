@@ -1,0 +1,16 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#f5f5f5"/>
+  <rect x="50" y="50" width="700" height="500" fill="white" stroke="#ddd" stroke-width="2"/>
+  <text x="400" y="100" font-family="Arial, sans-serif" font-size="24" fill="#666" text-anchor="middle">Social Media - Before</text>
+  <circle cx="200" cy="250" r="40" fill="#ddd"/>
+  <text x="200" y="260" font-family="Arial, sans-serif" font-size="16" fill="#999" text-anchor="middle">50</text>
+  <text x="200" y="310" font-family="Arial, sans-serif" font-size="14" fill="#666" text-anchor="middle">Followers/mo</text>
+  <circle cx="400" cy="250" r="40" fill="#ddd"/>
+  <text x="400" y="260" font-family="Arial, sans-serif" font-size="16" fill="#999" text-anchor="middle">0.8%</text>
+  <text x="400" y="310" font-family="Arial, sans-serif" font-size="14" fill="#666" text-anchor="middle">Engagement</text>
+  <circle cx="600" cy="250" r="40" fill="#ddd"/>
+  <text x="600" y="260" font-family="Arial, sans-serif" font-size="16" fill="#999" text-anchor="middle">12K</text>
+  <text x="600" y="310" font-family="Arial, sans-serif" font-size="14" fill="#666" text-anchor="middle">Reach/mo</text>
+  <rect x="300" y="400" width="200" height="100" fill="#fafafa" stroke="#ddd" stroke-width="2"/>
+  <text x="400" y="460" font-family="Arial, sans-serif" font-size="18" fill="#dc3545" text-anchor="middle">Low Engagement</text>
+</svg>

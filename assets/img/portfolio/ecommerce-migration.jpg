@@ -1,0 +1,15 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5cb874;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#449d5b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#grad1)"/>
+  <circle cx="400" cy="250" r="80" fill="rgba(255,255,255,0.2)"/>
+  <path d="M 360 230 L 380 250 L 440 190" stroke="white" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="400" y="380" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">E-Commerce Migration</text>
+  <text x="400" y="420" font-family="Arial, sans-serif" font-size="24" fill="rgba(255,255,255,0.9)" text-anchor="middle">Web Hosting Optimization</text>
+  <text x="400" y="480" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">80% Faster</text>
+  <rect x="320" y="500" width="160" height="4" fill="rgba(255,255,255,0.5)" rx="2"/>
+</svg>

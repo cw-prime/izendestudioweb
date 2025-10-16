@@ -1,0 +1,577 @@
+/*
+Theme Name: OnePress Child - Izende Studio Web
+Template: onepress
+Author: Izende Studio Web
+Author URI: https://izendestudioweb.com
+Description: Child theme of OnePress customized for Izende Studio Web brand with #5cb874 color scheme and Raleway/Open Sans typography
+Version: 1.0.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: onepress-child
+*/
+
+/*--------------------------------------------------------------
+# Brand Color Fine-Tuning
+--------------------------------------------------------------*/
+/* Primary brand color already set in parent theme to #5cb874 */
+/* Fine-tune additional color states for consistency */
+
+a {
+  color: #5cb874;
+}
+
+a:hover {
+  color: #449d5b;
+  text-decoration: none;
+}
+
+/* Buttons */
+.btn-primary,
+.button-primary,
+input[type="submit"] {
+  background-color: #5cb874 !important;
+  border-color: #5cb874 !important;
+  color: #fff !important;
+}
+
+.btn-primary:hover,
+.button-primary:hover,
+input[type="submit"]:hover {
+  background-color: #6ec083 !important;
+  border-color: #6ec083 !important;
+}
+
+.btn-primary:active,
+.btn-primary:focus,
+.button-primary:active,
+.button-primary:focus,
+input[type="submit"]:active,
+input[type="submit"]:focus {
+  background-color: #449d5b !important;
+  border-color: #449d5b !important;
+  box-shadow: 0 0 0 0.25rem rgba(92, 184, 116, 0.25) !important;
+}
+
+/* Focus states for accessibility */
+a:focus,
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #5cb874;
+  outline-offset: 2px;
+}
+
+/*--------------------------------------------------------------
+# Back to Main Site Link
+--------------------------------------------------------------*/
+.back-to-main-site-container {
+  background: #f8f9fa;
+  padding: 12px 0;
+  border-bottom: 1px solid #dee2e6;
+  text-align: right;
+}
+
+.back-to-main-site-link {
+  color: #5cb874;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.back-to-main-site-link:hover {
+  color: #449d5b;
+  text-decoration: none;
+}
+
+.back-to-main-site-link i {
+  margin-right: 6px;
+  transition: transform 0.3s ease;
+}
+
+.back-to-main-site-link:hover i {
+  transform: translateX(-3px);
+}
+
+@media (max-width: 767px) {
+  .back-to-main-site-container {
+    text-align: center;
+    padding: 10px 0;
+  }
+
+  .back-to-main-site-link {
+    font-size: 13px;
+  }
+}
+
+/*--------------------------------------------------------------
+# Footer Customizations
+--------------------------------------------------------------*/
+/* Service Area Section */
+.footer-service-area {
+  background: #0a0a0a;
+  color: #fff;
+  text-align: center;
+  padding: 30px 0;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.footer-service-area i {
+  font-size: 24px;
+  color: #5cb874;
+  margin-bottom: 10px;
+}
+
+.footer-service-area h4 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.footer-service-area p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Legal Links Section */
+.footer-legal-links {
+  background: #090909;
+  padding: 20px 0;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.footer-legal-links .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.footer-legal-links a {
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-legal-links a:hover {
+  color: #5cb874;
+  text-decoration: none;
+}
+
+.footer-legal-links .separator {
+  color: rgba(255,255,255,0.3);
+  margin: 0 5px;
+}
+
+@media (max-width: 767px) {
+  .footer-service-area {
+    padding: 25px 15px;
+  }
+
+  .footer-service-area h4 {
+    font-size: 16px;
+  }
+
+  .footer-service-area p {
+    font-size: 13px;
+  }
+
+  .footer-legal-links .container {
+    gap: 10px;
+  }
+
+  .footer-legal-links a {
+    font-size: 12px;
+  }
+}
+
+/*--------------------------------------------------------------
+# Post Content Enhancements
+--------------------------------------------------------------*/
+/* Single Post Layout */
+.single-post .entry-content {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #444;
+}
+
+.single-post .entry-content p {
+  margin-bottom: 1.5em;
+}
+
+.single-post .entry-content h2 {
+  font-size: 28px;
+  margin-top: 2em;
+  margin-bottom: 1em;
+  font-weight: 600;
+  color: #222;
+}
+
+.single-post .entry-content h3 {
+  font-size: 22px;
+  margin-top: 1.8em;
+  margin-bottom: 0.8em;
+  font-weight: 600;
+  color: #222;
+}
+
+/* Featured Image */
+.single-post .post-thumbnail {
+  margin-bottom: 30px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.single-post .post-thumbnail img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Post Meta */
+.single-post .entry-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e9ecef;
+  font-size: 14px;
+  color: #666;
+}
+
+.single-post .entry-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.single-post .entry-meta i {
+  color: #5cb874;
+  font-size: 16px;
+}
+
+/* Category Badges */
+.post-categories {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.post-categories a {
+  background: #5cb874;
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background 0.3s ease;
+}
+
+.post-categories a:hover {
+  background: #449d5b;
+  color: #fff;
+}
+
+/* Tags */
+.post-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 1px solid #e9ecef;
+}
+
+.post-tags a {
+  background: #f8f9fa;
+  color: #666;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  text-decoration: none;
+  border: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+}
+
+.post-tags a:hover {
+  background: #5cb874;
+  color: #fff;
+  border-color: #5cb874;
+}
+
+/* Author Bio */
+.author-bio {
+  background: #f8f9fa;
+  padding: 30px;
+  border-radius: 8px;
+  margin-top: 40px;
+  display: flex;
+  gap: 25px;
+  align-items: flex-start;
+}
+
+.author-bio .author-avatar {
+  flex-shrink: 0;
+}
+
+.author-bio .author-avatar img {
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+}
+
+.author-bio .author-info h4 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+.author-bio .author-info p {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.author-bio .author-info .author-posts-link {
+  color: #5cb874;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.author-bio .author-info .author-posts-link:hover {
+  color: #449d5b;
+}
+
+@media (max-width: 767px) {
+  .author-bio {
+    flex-direction: column;
+    text-align: center;
+    padding: 25px 20px;
+  }
+
+  .author-bio .author-avatar {
+    margin: 0 auto;
+  }
+}
+
+/* Related Posts */
+.related-posts {
+  margin-top: 50px;
+  padding-top: 40px;
+  border-top: 2px solid #e9ecef;
+}
+
+.related-posts h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 30px;
+  color: #222;
+}
+
+.related-posts .related-post-card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.related-posts .related-post-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(92, 184, 116, 0.15);
+}
+
+.related-posts .related-post-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.related-posts .related-post-card .card-content {
+  padding: 20px;
+}
+
+.related-posts .related-post-card h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #222;
+  line-height: 1.4;
+}
+
+.related-posts .related-post-card h4 a {
+  color: #222;
+  text-decoration: none;
+}
+
+.related-posts .related-post-card h4 a:hover {
+  color: #5cb874;
+}
+
+.related-posts .related-post-card .excerpt {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.related-posts .related-post-card .read-more {
+  color: #5cb874;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.related-posts .related-post-card .read-more:hover {
+  color: #449d5b;
+}
+
+/* Social Sharing */
+.post-share {
+  margin-top: 30px;
+  padding: 25px 0;
+  border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.post-share h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #222;
+}
+
+.post-share .share-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.post-share .share-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.post-share .share-facebook {
+  background: #1877f2;
+  color: #fff;
+}
+
+.post-share .share-facebook:hover {
+  background: #0d63d8;
+  color: #fff;
+}
+
+.post-share .share-twitter {
+  background: #1da1f2;
+  color: #fff;
+}
+
+.post-share .share-twitter:hover {
+  background: #0c85d0;
+  color: #fff;
+}
+
+.post-share .share-linkedin {
+  background: #0077b5;
+  color: #fff;
+}
+
+.post-share .share-linkedin:hover {
+  background: #005e93;
+  color: #fff;
+}
+
+/*--------------------------------------------------------------
+# Typography Enhancements
+--------------------------------------------------------------*/
+/* Ensure Raleway is used for all headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Raleway", Helvetica, Arial, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* Ensure Open Sans for body text */
+body, p, li, td, th {
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+}
+
+/*--------------------------------------------------------------
+# Mobile Optimizations
+--------------------------------------------------------------*/
+@media (max-width: 767px) {
+  .single-post .entry-content {
+    font-size: 15px;
+  }
+
+  .single-post .entry-content h2 {
+    font-size: 24px;
+  }
+
+  .single-post .entry-content h3 {
+    font-size: 20px;
+  }
+
+  .single-post .entry-meta {
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  .post-share .share-buttons {
+    flex-direction: column;
+  }
+
+  .post-share .share-button {
+    justify-content: center;
+  }
+}
+
+/*--------------------------------------------------------------
+# Accessibility Improvements
+--------------------------------------------------------------*/
+/* Skip link visible on focus */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: #000;
+  color: #fff;
+  padding: 8px 12px;
+  z-index: 10000;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 10px;
+  top: 10px;
+  outline: 3px solid #5cb874;
+}
+
+/* Ensure proper focus indicators */
+*:focus-visible {
+  outline: 2px solid #5cb874;
+  outline-offset: 2px;
+}

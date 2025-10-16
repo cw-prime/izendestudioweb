@@ -195,7 +195,7 @@ if ( ! function_exists( 'twenty_twenty_one_setup' ) ) {
 		add_theme_support(
 			'custom-background',
 			array(
-				'default-color' => 'd1e4dd',
+				'default-color' => '5cb874',
 			)
 		);
 
@@ -203,7 +203,7 @@ if ( ! function_exists( 'twenty_twenty_one_setup' ) ) {
 		$black     = '#000000';
 		$dark_gray = '#28303D';
 		$gray      = '#39414D';
-		$green     = '#D1E4DD';
+		$green     = '#5cb874';
 		$blue      = '#D1DFE4';
 		$purple    = '#D1D1E4';
 		$red       = '#E4D1D1';
@@ -600,6 +600,26 @@ function twentytwentyone_customize_controls_enqueue_scripts() {
 	);
 }
 add_action( 'customize_controls_enqueue_scripts', 'twentytwentyone_customize_controls_enqueue_scripts' );
+
+/**
+ * Estimate reading time for a post.
+ *
+ * @since izendetheme 1.0
+ *
+ * @param int $post_id Optional. Post ID. Defaults to current post.
+ * @return int Estimated reading time in minutes.
+ */
+function izendetheme_get_reading_time( $post_id = null ) {
+	if ( ! $post_id ) {
+		$post_id = get_the_ID();
+	}
+
+	$content = get_post_field( 'post_content', $post_id );
+	$word_count = str_word_count( strip_tags( $content ) );
+	$reading_time = ceil( $word_count / 200 ); // Average reading speed: 200 words per minute
+
+	return max( 1, $reading_time ); // Minimum 1 minute
+}
 
 /**
  * Calculate classes for the main <html> element.

@@ -45,6 +45,16 @@
   <div id="page" class="site">
     <a class="skip-link screen-reader-text" href="#content"><?php esc_html_e('Skip to content', 'twentytwentyone'); ?></a>
 
+    <!-- Back to Main Site Link -->
+    <div style="background: #f8f9fa; padding: 10px 0; border-bottom: 1px solid #dee2e6;">
+      <div style="max-width: 1200px; margin: 0 auto; text-align: right; padding: 0 15px;">
+        <a href="https://izendestudioweb.com/" style="color: #5cb874; font-weight: 600; text-decoration: none; font-size: 14px;" aria-label="Return to main website">
+          <i class="bi bi-arrow-left"></i> Main Site
+        </a>
+      </div>
+    </div>
+    <!-- End Back to Main Site Link -->
+
     <?php get_template_part('template-parts/header/site-header'); ?>
 
     <div id="content" class="site-content">

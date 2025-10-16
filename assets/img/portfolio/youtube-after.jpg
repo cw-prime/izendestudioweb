@@ -1,0 +1,12 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#fff5f5"/>
+  <text x="400" y="80" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#ff5828" text-anchor="middle">YouTube Channel - After</text>
+  <rect x="250" y="200" width="300" height="200" fill="white" stroke="#ff5828" stroke-width="3" rx="8"/>
+  <rect x="280" y="230" width="240" height="140" fill="#ff5828" opacity="0.2" rx="4"/>
+  <circle cx="400" cy="300" r="30" fill="#ff5828"/>
+  <path d="M 390 290 L 390 310 L 410 300 Z" fill="white"/>
+  <text x="400" y="450" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="#ff5828" text-anchor="middle">10,000</text>
+  <text x="400" y="485" font-family="Arial, sans-serif" font-size="20" fill="#666" text-anchor="middle">Subscribers in 3 Months</text>
+  <path d="M 320 520 L 340 540 L 480 400" stroke="#ff5828" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="400" y="555" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ff5828" text-anchor="middle">500K+ Total Views • Monetized!</text>
+</svg>

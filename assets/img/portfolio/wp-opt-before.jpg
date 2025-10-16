@@ -1,0 +1,10 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#f5f5f5"/>
+  <text x="400" y="80" font-family="Arial, sans-serif" font-size="24" fill="#666" text-anchor="middle">WordPress Performance - Before</text>
+  <circle cx="400" cy="300" r="120" fill="none" stroke="#ddd" stroke-width="20"/>
+  <circle cx="400" cy="300" r="120" fill="none" stroke="#dc3545" stroke-width="20" stroke-dasharray="226 754" transform="rotate(-90 400 300)"/>
+  <text x="400" y="310" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="#dc3545" text-anchor="middle">32</text>
+  <text x="400" y="340" font-family="Arial, sans-serif" font-size="20" fill="#666" text-anchor="middle">/100</text>
+  <text x="400" y="480" font-family="Arial, sans-serif" font-size="20" fill="#dc3545" text-anchor="middle">PageSpeed Score</text>
+  <text x="400" y="510" font-family="Arial, sans-serif" font-size="16" fill="#999" text-anchor="middle">12.4s Load Time</text>
+</svg>

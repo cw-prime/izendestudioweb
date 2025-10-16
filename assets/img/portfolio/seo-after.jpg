@@ -1,0 +1,13 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#f8fcf9"/>
+  <text x="400" y="100" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#ffa76e" text-anchor="middle">Search Rankings - After</text>
+  <rect x="150" y="200" width="500" height="80" fill="#ffa76e" opacity="0.9" stroke="#ffa76e" stroke-width="3" rx="8"/>
+  <text x="200" y="235" font-family="Arial, sans-serif" font-size="16" fill="white" text-anchor="start">🏆 #1</text>
+  <text x="200" y="260" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white" text-anchor="start">Your Business</text>
+  <path d="M 550 230 L 570 250 L 630 190" stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="150" y="300" width="500" height="60" fill="white" stroke="#ddd" stroke-width="2" rx="4"/>
+  <text x="200" y="340" font-family="Arial, sans-serif" font-size="18" fill="#999" text-anchor="start">2. Competitor A</text>
+  <rect x="150" y="380" width="500" height="60" fill="white" stroke="#ddd" stroke-width="2" rx="4"/>
+  <text x="200" y="420" font-family="Arial, sans-serif" font-size="18" fill="#999" text-anchor="start">3. Competitor B</text>
+  <text x="400" y="500" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#ffa76e" text-anchor="middle">500% Traffic Increase</text>
+</svg>
