@@ -1,0 +1,13 @@
+# Protect downloads directory
+<Files "*.pdf">
+    Header set Content-Disposition attachment
+    Header set Content-Type application/pdf
+</Files>
+
+<Files "*.xlsx">
+    Header set Content-Disposition attachment
+    Header set Content-Type application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+</Files>
+
+# Enable downloads
+Options +Indexes

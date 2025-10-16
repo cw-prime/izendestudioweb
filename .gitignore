@@ -1,0 +1,59 @@
+# Environment variables
+.env
+config/.env
+
+# Sensitive configuration
+config/database.php
+
+# Logs
+*.log
+error_log
+logs/
+/logs/*.log
+
+# Rate limiting data
+/tmp/rate_limit_*
+
+# WordPress
+articles/wp-config.php
+articles/.htaccess
+
+# WHMCS
+adminIzende/configuration.php
+adminIzende/.htaccess
+
+# Backup files
+*.bak
+*.backup
+*.sql
+*.sql.gz
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+temp/
+tmp/
+
+# Composer
+vendor/
+composer.lock
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Build artifacts
+dist/
+build/
