@@ -46,6 +46,7 @@ setSecurityHeaders();
         </div>
       </div>
     </section><!-- End Breadcrumbs -->
+    <hr class="section-separator" aria-hidden="true">
 
     <!-- ======= Blog Hero Header ======= -->
     <section class="blog-hero">
@@ -56,6 +57,7 @@ setSecurityHeaders();
         </div>
       </div>
     </section><!-- End Blog Hero -->
+    <hr class="section-separator" aria-hidden="true">
 
     <!-- ======= Blog Filters Section ======= -->
     <section class="blog-filters">

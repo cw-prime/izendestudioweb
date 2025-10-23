@@ -249,6 +249,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <!-- ======= Featured Services Section ======= -->
 
+    <hr class="section-separator" aria-hidden="true">
 
     <!-- ======= Services Section ======= -->
     <section id="services" class="services">
@@ -399,6 +400,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </div>
     </section><!-- End Services Section -->
 
+    <hr class="section-separator" aria-hidden="true">
+
     <!-- ======= Stats Section ======= -->
     <section id="stats" class="stats section-bg">
       <div class="container">
@@ -434,6 +437,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
       </div>
     </section><!-- End Stats Section -->
+
+    <hr class="section-separator" aria-hidden="true">
 
     <!-- ======= Trust Badges Section ======= -->
     <section id="trust-badges" class="trust-badges">
@@ -489,6 +494,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </div>
     </section><!-- End Trust Badges Section -->
 
+    <hr class="section-separator" aria-hidden="true">
+
     <!-- ======= Cta Section ======= -->
     <section id="cta" class="cta">
       <div class="container">
@@ -505,6 +512,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
       </div>
     </section><!-- End Cta Section -->
+
+    <hr class="section-separator" aria-hidden="true">
 
     <!-- ======= Clients Section ======= -->
     <section id="clients" class="clients section-bg">
@@ -530,6 +539,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
       </div>
     </section><!-- End Clients Section -->
+
+    <hr class="section-separator" aria-hidden="true">
 
     <!-- ======= Portfolio Section ======= -->
     <section id="portfolio" class="portfolio">
@@ -680,6 +691,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </div>
     </section><!-- End Portfolio Section -->
 
+    <hr class="section-separator" aria-hidden="true">
+
     <!-- ======= Video Portfolio Section ======= -->
     <section id="video-portfolio" class="video-portfolio section-bg">
       <div class="container">
@@ -730,6 +743,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
       </div>
     </section><!-- End Video Portfolio Section -->
+
+    <hr class="section-separator" aria-hidden="true">
 
     <!-- ======= Featured Blog Section ======= -->
     <section id="featured-blog" class="featured-blog">
@@ -782,6 +797,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </div>
     </section><!-- End Featured Blog Section -->
 
+    <hr class="section-separator" aria-hidden="true">
 
     <!-- ======= Guarantees Section ======= -->
     <section id="guarantees" class="guarantees section-bg">
@@ -821,7 +837,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </div>
         </div>
       </div>
-    </section><!-- End Guarantees Section -->
+</section><!-- End Guarantees Section -->
+<hr class="section-separator" aria-hidden="true">
 
     <!-- ======= Team Section ======= -->
 
@@ -942,6 +959,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
       </div>
     </section><!-- End Contact Section -->
+<hr class="section-separator" aria-hidden="true">
 
     <!-- ======= Service Areas Section ======= -->
     <section id="service-areas" class="services section-bg">

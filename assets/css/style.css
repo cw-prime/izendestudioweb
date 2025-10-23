@@ -143,6 +143,23 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: none !important;
   border: none !important;
 }
+
+.section-separator {
+  border: none;
+  height: 4px;
+  width: 140px;
+  margin: 80px auto 40px;
+  background: linear-gradient(90deg, rgba(92, 184, 116, 0), #5cb874, rgba(92, 184, 116, 0));
+  border-radius: 999px;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .section-separator {
+    width: 100px;
+    margin: 60px auto 30px;
+  }
+}
 .whatsApp {
   z-index: 4;
   margin-bottom: 70px;;
