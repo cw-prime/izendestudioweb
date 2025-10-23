@@ -16,6 +16,7 @@
               <li><a href="/services/wordpress.php">WordPress Design</a></li>
               <li><a href="/services/seo.php">SEO Services</a></li>
               <li><a href="/hosting.php">Web Hosting</a></li>
+              <li><a href="/services/domain-lookup.php">Domain Lookup</a></li>
               <li><a href="/services/security-maintenance.php">Security & Maintenance</a></li>
               <li><a href="/services/ecommerce.php">E-Commerce Solutions</a></li>
               <li><a href="/services/social-media.php">Social Media Management</a></li>
@@ -25,7 +26,6 @@
             </ul>
           </li>
           <li><a class="nav-link scrollto " href="/index.php#portfolio">Portfolio</a></li>
-          <li><a class="nav-link scrollto" href="/index.php#about">About</a></li>
           <li><a class="nav-link scrollto" href="/index.php#contact">Contact</a></li>
           <li><a class="nav-link scrollto" href="/blog.php">Blog</a></li>
           <li><a class="getstarted scrollto" href="/quote.php" id="quote">Free Quote</a></li>

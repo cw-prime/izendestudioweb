@@ -8,9 +8,11 @@
 <link href="/assets/img/favicon.ico" rel="icon">
 <link href="/assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
-<!-- Preload Critical CSS -->
-<link rel="preload" href="/assets/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/css/style.css"></noscript>
+<!-- Main CSS File -->
+<link rel="stylesheet" href="/assets/css/style.css?v=<?php echo filemtime(__DIR__ . '/../css/style.css'); ?>">
+
+<!-- Blog CSS File -->
+<link rel="stylesheet" href="/assets/css/blog.css?v=<?php echo filemtime(__DIR__ . '/../css/blog.css'); ?>">
 
 <!-- Preload Critical Fonts -->
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Raleway:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Cinzel:wght@600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -22,7 +24,7 @@
 <link href="/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
 <link href="/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
 <link href="/assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-<link href="/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/swiper@11/swiper-bundle.min.css" />
 
 <!-- WebP Support Detection -->
 <script>

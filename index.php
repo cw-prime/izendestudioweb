@@ -144,10 +144,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </head>
 
 <body id="home">
-  <!-- Skip Links for Accessibility -->
-  <a href="#main" class="skip-link">Skip to main content</a>
-  <a href="#header" class="skip-link">Skip to navigation</a>
-  <a href="#footer" class="skip-link">Skip to footer</a>
+  <!-- Skip Links for Accessibility (provided by header include) -->
 
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
@@ -160,24 +157,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <?php include './assets/includes/header.php'; ?>
   <!-- End Header -->
 
+  <main id="main" role="main">
+
   <!-- ======= Hero Section ======= -->
   <section id="hero">
-
-    <div id="heroCarousel" data-bs-interval="5000" class="carousel slide carousel-fade" data-bs-ride="carousel" aria-label="Hero carousel" aria-live="polite">
-
-      <ol class="carousel-indicators" id="hero-carousel-indicators"></ol>
-
-      <div class="carousel-inner" role="listbox">
+    <div class="hero-carousel swiper" id="heroCarousel">
+      <div class="swiper-wrapper">
 
         <!-- Slide 1 -->
-        <div class="carousel-item active">
+        <div class="swiper-slide">
           <picture>
             <source srcset="assets/img/slide/3ZYUW.webp" type="image/webp">
             <img src="assets/img/slide/3ZYUW.jpg" alt="St. Louis Web Design and Hosting Services" class="hero-slide-img" loading="eager" width="1920" height="1080">
           </picture>
           <div class="carousel-container">
             <div class="container">
-              <h2 class="animate__animated animate__fadeInDown">St. Louis Web Design &amp; Hosting</h2>
+              <h1 class="animate__animated animate__fadeInDown">St. Louis Web Design &amp; Hosting</h1>
               <p class="animate__animated animate__fadeInUp"><span style="text-transform:capitalize">Serving Missouri &amp; Illinois businesses with professional web design and hosting. Get your business online quick &amp; easy with local St. Louis expertise.</span>
               <!-- Inline local link for quick access to St. Louis services -->
               <a href="/st-louis-web-design.php" style="color: #5cb874; font-weight:600; margin-left:8px; display:inline-block;" class="animate__animated animate__fadeInUp" aria-label="St. Louis Web Design — learn about our local St. Louis web design services">St. Louis Web Design</a>
@@ -188,7 +183,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
 
         <!-- Slide 2 -->
-        <div class="carousel-item">
+        <div class="swiper-slide">
           <picture>
             <source srcset="assets/img/slide/55768.webp" type="image/webp">
             <img src="assets/img/slide/55768.jpg" alt="Custom Web Development Services" class="hero-slide-img" loading="eager" width="1920" height="1080">
@@ -203,7 +198,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
 
         <!-- Slide 3 -->
-        <div class="carousel-item">
+        <div class="swiper-slide">
           <picture>
             <source srcset="assets/img/slide/545FZX.webp" type="image/webp">
             <img src="assets/img/slide/545FZX.jpg" alt="Domain Registration Services" class="hero-slide-img" loading="eager" width="1920" height="1080">
@@ -217,20 +212,40 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </div>
         </div>
 
+        <!-- Slide 4 -->
+        <div class="swiper-slide">
+          <img src="assets/img/slide/slide-1.jpg" alt="Professional SEO Services for Missouri and Illinois Businesses" class="hero-slide-img" loading="lazy" width="1920" height="1080">
+          <div class="carousel-container">
+            <div class="container">
+              <h2 class="animate__animated animate__fadeInDown">Boost Your Online Visibility</h2>
+              <p class="animate__animated animate__fadeInUp"><span style="text-transform:capitalize">Professional SEO services to help your business rank higher on Google and attract more customers in the St. Louis area.</span></p>
+              <a href="./quote.php" class="btn-get-started animate__animated animate__fadeInUp scrollto">Get SEO Quote</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="swiper-slide">
+          <img src="assets/img/slide/slide-2.jpg" alt="Fast and Reliable Web Hosting Solutions in Missouri" class="hero-slide-img" loading="lazy" width="1920" height="1080">
+          <div class="carousel-container">
+            <div class="container">
+              <h2 class="animate__animated animate__fadeInDown">Enterprise-Grade Hosting</h2>
+              <p class="animate__animated animate__fadeInUp"><span style="text-transform:capitalize">99.9% uptime guarantee, lightning-fast performance, and 24/7 support. Your website deserves the best hosting in Missouri.</span></p>
+              <a href="http://izendestudioweb.com/adminIzende/index.php?rp=/store/shared-hosting" class="btn-get-started animate__animated animate__fadeInUp scrollto">View Hosting Plans</a>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <a class="carousel-control-prev" href="#heroCarousel" role="button" data-bs-slide="prev" aria-label="Previous slide">
-        <span class="carousel-control-prev-icon bi bi-chevron-left" aria-hidden="true"></span>
-      </a>
+      <!-- Navigation arrows -->
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
 
-      <a class="carousel-control-next" href="#heroCarousel" role="button" data-bs-slide="next" aria-label="Next slide">
-        <span class="carousel-control-next-icon bi bi-chevron-right" aria-hidden="true"></span>
-      </a>
-
+      <!-- Pagination -->
+      <div class="swiper-pagination"></div>
     </div>
   </section><!-- End Hero -->
-
-  <main id="main" role="main">
 
     <!-- ======= Featured Services Section ======= -->
 
@@ -279,20 +294,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <i class="bx bxs-map"></i>
               </div>
               <h4><a href="./quote.php">Local SEO</a></h4>
-              <p>What good is having a nice site if customers can’t find it? We have the tool to make your site SEO friendly &amp; Visible Throughout The Web.</p>
-                <h4><a href="http://izendestudioweb.com/adminIzende/cart.php?a=add&amp;domain=register">Domain Lookup</a></h4>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4 mt-lg-0" data-aos="zoom-in" data-aos-delay="300">
-            <div class="icon-box iconbox-yellow">
-              <div class="icon">
-                <svg width="100" height="100" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke="none" stroke-width="0" fill="#f5f5f5" d="M426.667 874.667c-188.203 0-341.333-153.131-341.333-341.333s153.131-341.333 341.333-341.333c79.148 0.017 151.959 27.132 209.664 72.572l-0.725-0.55 187.563-187.563 60.331 60.331-187.563 187.563c44.913 56.987 72.044 129.814 72.064 208.977v0.005c0 188.203-153.131 341.333-341.333 341.333z"></path>
-                </svg>
-                <i class="bx bxs-search"></i>
-              </div>
-              <h4><a href="http://izendestudioweb.com/adminIzende/cart.php?a=add&domain=register">Domain Lookup</a></h4>
-              <p>Why do you need a domain name? Your domain gives you an exclusive piece of digital real estate that cannot be used by anyone else as long as it’s registered to you.</p>
+              <p>What good is having a nice site if customers can't find it? We have the tool to make your site SEO friendly &amp; Visible Throughout The Web.</p>
             </div>
           </div>
           <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4 mt-lg-0" data-aos="zoom-in" data-aos-delay="300">
@@ -378,6 +380,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               </div>
               <h4><a href="/services/speed-optimization.php">Website Speed Optimization</a></h4>
               <p>Make your website lightning fast. Improve Core Web Vitals, boost SEO rankings, and increase conversions. Professional speed optimization to reduce load times by up to 80%.</p>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4" data-aos="zoom-in" data-aos-delay="600">
+            <div class="icon-box iconbox-teal">
+              <div class="icon">
+                <svg width="100" height="100" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke="none" stroke-width="0" fill="#f5f5f5" d="M300,521.0016835830174C376.1290562159157,517.8887921683347,466.0731472004068,529.7835943286574,510.70327084640275,468.03025145048787C554.3714126377745,407.6079735673963,508.03601936045806,328.9844924480964,491.2728898941984,256.3432110539036C474.5976632858925,184.082847569629,479.9380746630129,96.60480741107993,416.23090153303,58.64404602377083C348.86323505073057,18.502131276798302,261.93793281208167,40.57373210992963,193.5410806939664,78.93577620505333C130.42746243093433,114.334589627462,98.30271207620316,179.96522072025542,76.75703585869454,249.04625023123273C51.97151888228291,328.5150500222984,13.704378332031375,421.85034740162234,66.52175969318436,486.19268352777647C119.04800174914682,550.1803526380478,217.28368757567262,524.383925680826,300,521.0016835830174"></path>
+                </svg>
+                <i class="bx bx-globe"></i>
+              </div>
+              <h4><a href="/services/domain-lookup.php">Domain Lookup</a></h4>
+              <p>Search and register your perfect domain name. Secure your brand online with the ideal web address for your business or project.</p>
             </div>
           </div>
         </div>
@@ -503,12 +517,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <div class="col-lg-12">
             <div class="clients-slider swiper">
               <div class="swiper-wrapper align-items-center">
-                <div class="swiper-slide"><div class="client-logo" style="padding: 20px; text-align: center; font-size: 24px; font-weight: 600; color: #ccc;">Client Logo 1</div></div>
-                <div class="swiper-slide"><div class="client-logo" style="padding: 20px; text-align: center; font-size: 24px; font-weight: 600; color: #ccc;">Client Logo 2</div></div>
-                <div class="swiper-slide"><div class="client-logo" style="padding: 20px; text-align: center; font-size: 24px; font-weight: 600; color: #ccc;">Client Logo 3</div></div>
-                <div class="swiper-slide"><div class="client-logo" style="padding: 20px; text-align: center; font-size: 24px; font-weight: 600; color: #ccc;">Client Logo 4</div></div>
-                <div class="swiper-slide"><div class="client-logo" style="padding: 20px; text-align: center; font-size: 24px; font-weight: 600; color: #ccc;">Client Logo 5</div></div>
-                <div class="swiper-slide"><div class="client-logo" style="padding: 20px; text-align: center; font-size: 24px; font-weight: 600; color: #ccc;">Client Logo 6</div></div>
+                <div class="swiper-slide"><img src="assets/img/clients/client-1.png" class="img-fluid" alt="Technology Company Client" loading="lazy"></div>
+                <div class="swiper-slide"><img src="assets/img/clients/client-2.png" class="img-fluid" alt="Retail Business Client" loading="lazy"></div>
+                <div class="swiper-slide"><img src="assets/img/clients/client-3.png" class="img-fluid" alt="Professional Services Client" loading="lazy"></div>
+                <div class="swiper-slide"><img src="assets/img/clients/client-4.png" class="img-fluid" alt="Restaurant Hospitality Client" loading="lazy"></div>
+                <div class="swiper-slide"><img src="assets/img/clients/client-5.png" class="img-fluid" alt="Healthcare Business Client" loading="lazy"></div>
+                <div class="swiper-slide"><img src="assets/img/clients/client-6.png" class="img-fluid" alt="Real Estate Company Client" loading="lazy"></div>
               </div>
               <div class="swiper-pagination"></div>
             </div>
@@ -676,41 +690,41 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         <div class="row">
           <div class="col-lg-4 col-md-6 video-item" data-aos="fade-up" data-aos-delay="100">
-            <a href="https://www.youtube.com/watch?v=jDDaplaOz7Q" class="video-lightbox" data-glightbox="type: video">
-              <img src="https://img.youtube.com/vi/jDDaplaOz7Q/maxresdefault.jpg" alt="Social Media Video Sample" class="img-fluid" loading="lazy">
+            <a href="https://www.youtube.com/watch?v=y881t8ilMyc" class="video-lightbox" data-glightbox="type: video">
+              <img src="https://img.youtube.com/vi/y881t8ilMyc/maxresdefault.jpg" alt="Social Media Motion Graphics Sample" class="img-fluid" loading="lazy">
               <div class="video-overlay">
                 <i class="bx bx-play-circle"></i>
               </div>
             </a>
             <div class="video-info">
-              <h4>Social Media Content</h4>
-              <p>Instagram Reel for local business</p>
+              <h4>Social Media Motion Graphics</h4>
+              <p>Professional animated content for social platforms</p>
             </div>
           </div>
 
           <div class="col-lg-4 col-md-6 video-item" data-aos="fade-up" data-aos-delay="200">
-            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="video-lightbox" data-glightbox="type: video">
-              <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="YouTube Tutorial Sample" class="img-fluid" loading="lazy">
+            <a href="https://www.youtube.com/watch?v=gfU1iZnjRZM" class="video-lightbox" data-glightbox="type: video">
+              <img src="https://img.youtube.com/vi/gfU1iZnjRZM/maxresdefault.jpg" alt="Polished Tutorial Video Sample" class="img-fluid" loading="lazy">
               <div class="video-overlay">
                 <i class="bx bx-play-circle"></i>
               </div>
             </a>
             <div class="video-info">
-              <h4>YouTube Tutorial</h4>
-              <p>Educational content with graphics</p>
+              <h4>Polished Tutorial Content</h4>
+              <p>Educational video with clean graphics and transitions</p>
             </div>
           </div>
 
           <div class="col-lg-4 col-md-6 video-item" data-aos="fade-up" data-aos-delay="300">
-            <a href="https://www.youtube.com/watch?v=9bZkp7q19f0" class="video-lightbox" data-glightbox="type: video">
-              <img src="https://img.youtube.com/vi/9bZkp7q19f0/maxresdefault.jpg" alt="Promotional Video Sample" class="img-fluid" loading="lazy">
+            <a href="https://www.youtube.com/watch?v=Zvq25PU9xHI" class="video-lightbox" data-glightbox="type: video">
+              <img src="https://img.youtube.com/vi/Zvq25PU9xHI/maxresdefault.jpg" alt="Cinematic Promotional Video Sample" class="img-fluid" loading="lazy">
               <div class="video-overlay">
                 <i class="bx bx-play-circle"></i>
               </div>
             </a>
             <div class="video-info">
-              <h4>Promotional Video</h4>
-              <p>Product launch campaign</p>
+              <h4>Cinematic Promotional Video</h4>
+              <p>High-quality brand and product showcase</p>
             </div>
           </div>
         </div>
@@ -768,44 +782,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </div>
     </section><!-- End Featured Blog Section -->
 
-    <!-- ======= About Us Section ======= -->
-    <section id="about" class="about">
-      <div class="container">
-
-        <div class="section-title">
-          <h2>About</h2>
-          <p>We are a small, but creative and passionate team of designers and developers specializing in web seo, web development, branding &amp; digital marketing.</p>
-        </div>
-
-        <div class="row">
-          <div class="col-lg-6 order-1 order-lg-2">
-            <picture>
-              <source srcset="assets/img/team/mark_a.webp" type="image/webp">
-              <img src="assets/img/team/mark_a.jpg" class="img-fluid" alt="Mark - Founder and Lead Developer at Izende Studio Web" loading="lazy" decoding="async" width="800" height="600">
-            </picture>
-          </div>
-          <div class="col-lg-6 pt-4 pt-lg-0 order-2 order-lg-1 content">
-            <h3>Hey! Thanks for stopping by. We would like to share with you a little bit about our Izende Web Design Company.</h3>
-            <p class="fst-italic">
-              A little about our founder
-            </p>
-
-              <i class="bi bi-check-circled"></i><p>Mark founded Izende Studio Web in 2021, based in St. Louis, Missouri. It's a rebrand of Tikohosting founded in 2013.</p>
-              <i class="bi bi-check-circled"></i><p>He has over 15 years of experience with web technologies, serving clients throughout Missouri and Illinois.</p>
-              <i class="bi bi-check-circled"></i><p>Mark has been a DevOps engineer for major corporations such as WebMD, AT&amp;T Mobility, State Farm Insurance, Wells Fargo Bank, and more.</p>
-
-
-            <p>
-              <h4>In his spare time…</h4>
-              <p>Mark is a digital nomad thats enjoys traveling with his wife. One of his favorites countries is Mexico. He is fluent in Spanish and is learning
-                French as well.  Being a Florida native, He is a fan of The Tampa Bay Bucaneers and enjoys spending winters in Florida.
-              </p>
-            </p>
-          </div>
-        </div>
-
-      </div>
-    </section><!-- End About Us Section -->
 
     <!-- ======= Guarantees Section ======= -->
     <section id="guarantees" class="guarantees section-bg">
@@ -880,7 +856,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               </div>
               <p style="margin-top: 20px; margin-bottom: 10px; font-weight: 600; color: #5cb874;"><i class="bx bx-map" style="margin-right: 5px;"></i> Based in St. Louis, Missouri</p>
               <div id="map-placeholder">
-                <iframe data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12464.924189415528!2d-90.24116621297298!3d38.64356743325632!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87d8b4af7beb781f%3A0x954ff3601377fd54!2sGrand%20Center%2C%20St.%20Louis%2C%20MO%2C%20USA!5e0!3m2!1sen!2sca!4v1637347839047!5m2!1sen!2sca" width="100%" height="290px" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                <iframe data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d401901.52278961786!2d-90.51996745!3d38.6354974!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87d8b4a9faed8ef9%3A0xbe39eaca22bbe05b!2sSt.%20Louis%2C%20MO!5e0!3m2!1sen!2sus!4v1637347839047!5m2!1sen!2sus" width="100%" height="290px" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
               </div>
 
              </div>

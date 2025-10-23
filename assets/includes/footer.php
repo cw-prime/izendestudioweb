@@ -69,9 +69,7 @@
     <script src="/assets/vendor/glightbox/js/glightbox.min.js" defer></script>
     <script src="/assets/vendor/isotope-layout/isotope.pkgd.min.js" defer></script>
     <script src="/assets/vendor/php-email-form/validate.js" defer></script>
-    <script src="/assets/vendor/swiper/swiper-bundle.min.js" defer></script>
+    <script src="https://unpkg.com/swiper@11/swiper-bundle.min.js"></script>
 
     <!-- Template Main JS File -->
     <script src="/assets/js/main.js" defer></script>
-    <script src="/assets/js/script.js" defer></script>
-

@@ -163,15 +163,51 @@
   });
 
   /**
-   * Hero carousel indicators
+   * Hero Carousel Swiper
    */
-  let heroCarouselIndicators = select("#hero-carousel-indicators")
-  let heroCarouselItems = select('#heroCarousel .carousel-item', true)
+  window.addEventListener('load', () => {
+    const heroCarouselEl = select('#heroCarousel');
+    if (!heroCarouselEl || typeof Swiper === 'undefined') {
+      return;
+    }
 
-  heroCarouselItems.forEach((item, index) => {
-    (index === 0) ?
-    heroCarouselIndicators.innerHTML += "<li data-bs-target='#heroCarousel' data-bs-slide-to='" + index + "' class='active'></li>":
-      heroCarouselIndicators.innerHTML += "<li data-bs-target='#heroCarousel' data-bs-slide-to='" + index + "'></li>"
+    try {
+      const heroSwiper = new Swiper('#heroCarousel', {
+        speed: 800,
+        loop: true,
+        autoplay: {
+          delay: 5000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: false
+        },
+        effect: 'fade',
+        fadeEffect: {
+          crossFade: true
+        },
+        navigation: {
+          nextEl: '#heroCarousel .swiper-button-next',
+          prevEl: '#heroCarousel .swiper-button-prev'
+        },
+        pagination: {
+          el: '#heroCarousel .swiper-pagination',
+          clickable: true,
+          type: 'bullets'
+        },
+        on: {
+          init: function() {
+            console.log('Hero Swiper initialized');
+          }
+        }
+      });
+
+      // Ensure autoplay starts
+      if (heroSwiper && heroSwiper.autoplay) {
+        heroSwiper.autoplay.start();
+        console.log('Hero Swiper autoplay started');
+      }
+    } catch (error) {
+      console.error('Error initializing Hero Swiper:', error);
+    }
   });
 
   /**
@@ -680,7 +716,6 @@
     new QuoteWizard('#myform');
   }
 
-})()
   /**
    * Stats Counter Animation with IntersectionObserver
    */
@@ -1259,6 +1294,7 @@
         s.onload = () => { window.__tawk_loaded = true; };
         document.body.appendChild(s);
       }
+    }
   }
 
   // CookieConsent is initialized in the main load handler above
@@ -1267,8 +1303,8 @@
    * WordPress Blog Integration
    */
   class WordPressBlog {
-    constructor(apiUrl) {
-      this.apiUrl = apiUrl;
+    constructor(apiUrl = '/api') {
+      this.apiUrl = apiUrl.replace(/\/$/, '');
       this.postsPerPage = 9;
       this.currentPage = 1;
       this.currentCategory = '';
@@ -1285,24 +1321,28 @@
       this.currentSearch = search;
 
       try {
-        let url = this.apiUrl + '/wp-json/wp/v2/posts?per_page=' + this.postsPerPage + '&page=' + page + '&_embed';
+        const params = new URLSearchParams({
+          per_page: this.postsPerPage,
+          page
+        });
 
         if (category) {
-          url += '&categories=' + category;
+          params.set('category', category);
         }
 
         if (search) {
-          url += '&search=' + encodeURIComponent(search);
+          params.set('search', search);
         }
 
-        const response = await fetch(url);
+        const response = await fetch(`${this.apiUrl}/blog-posts.php?${params.toString()}`);
+        const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch posts');
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Failed to fetch posts');
         }
 
-        const posts = await response.json();
-        const totalPages = parseInt(response.headers.get('X-WP-TotalPages')) || 1;
+        const posts = Array.isArray(data.data.posts) ? data.data.posts : [];
+        const totalPages = parseInt(data.data.total_pages, 10) || 1;
 
         this.isLoading = false;
         return { posts, totalPages };
@@ -1315,13 +1355,14 @@
 
     async fetchCategories() {
       try {
-        const response = await fetch(this.apiUrl + '/wp-json/wp/v2/categories?per_page=100&hide_empty=true');
+        const response = await fetch(`${this.apiUrl}/blog-categories.php`);
+        const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch categories');
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Failed to fetch categories');
         }
 
-        return await response.json();
+        return Array.isArray(data.data) ? data.data : [];
       } catch (error) {
         console.error('Error fetching categories:', error);
         return [];
@@ -1329,19 +1370,22 @@
     }
 
     renderPost(post) {
-      const title = post.title.rendered;
-      const excerpt = post.excerpt.rendered.replace(/<\/?[^>]+(>|$)/g, "").substring(0, 150) + '...';
-      const date = new Date(post.date).toLocaleDateString('en-US', {
+      const title = (post.title && post.title.rendered) ? post.title.rendered : (post.title || '');
+      const rawExcerpt = (post.excerpt && post.excerpt.rendered) ? post.excerpt.rendered : (post.excerpt || '');
+      const excerpt = rawExcerpt.replace(/<\/?[^>]+(>|$)/g, "").substring(0, 150) + '...';
+      const date = post.date ? new Date(post.date).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
-      });
-      const featuredImage = post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0] ? post._embedded['wp:featuredmedia'][0].source_url : '/assets/img/blog-placeholder.jpg';
-      const categories = post._embedded && post._embedded['wp:term'] && post._embedded['wp:term'][0] ? post._embedded['wp:term'][0] : [];
-      const categoryName = categories.length > 0 ? categories[0].name : 'Uncategorized';
-      const postUrl = '/articles/' + post.slug;
+      }) : '';
+      const imageData = post.featured_image || {};
+      const featuredImage = (imageData.url || imageData) || '/assets/img/blog-placeholder.jpg';
+      const imageAlt = imageData.alt ? escapeHtml(imageData.alt) : title;
+      const categories = Array.isArray(post.categories) ? post.categories : [];
+      const categoryName = categories.length > 0 && categories[0].name ? categories[0].name : 'Uncategorized';
+      const postUrl = post.link || (`/articles/${post.slug}`);
 
-      return '<div class="col-lg-4 col-md-6 mb-4"><article class="blog-card"><img src="' + featuredImage + '" alt="' + title + '" class="blog-card-image" loading="lazy"><div class="blog-card-content"><span class="blog-card-category">' + categoryName + '</span><h3>' + title + '</h3><p>' + excerpt + '</p><div class="blog-card-meta"><span><i class="bx bx-calendar"></i> ' + date + '</span></div><a href="' + postUrl + '" class="blog-card-link">Read More <i class="bx bx-right-arrow-alt"></i></a></div></article></div>';
+      return '<div class="col-lg-4 col-md-6 mb-4"><article class="blog-card"><div class="blog-card-image"><a href="' + postUrl + '"><img src="' + featuredImage + '" alt="' + imageAlt + '" class="img-fluid" loading="lazy"></a><span class="blog-card-category">' + categoryName + '</span></div><div class="blog-card-content"><div class="blog-card-meta"><span><i class="bx bx-calendar"></i> ' + date + '</span><span><i class="bx bx-time-five"></i> ' + (post.reading_time || 1) + ' min read</span></div><h3 class="blog-card-title"><a href="' + postUrl + '">' + title + '</a></h3><p class="blog-card-excerpt">' + excerpt + '</p><a href="' + postUrl + '" class="blog-card-link">Read More <i class="bx bx-right-arrow-alt"></i></a></div></article></div>';
     }
 
     renderPagination(currentPage, totalPages) {
@@ -1371,28 +1415,10 @@
   }
 
   /**
-   * Initialize Homepage Blog
+   * Initialize Homepage Blog (legacy alias)
    */
-  async function loadHomepageBlog() {
-    const container = document.getElementById('homepage-blog-posts');
-    if (!container) return;
-
-    const blog = new WordPressBlog('https://izendestudioweb.com/articles');
-
-    try {
-      const result = await blog.fetchPosts(1, '', '');
-
-      if (!result || !result.posts || result.posts.length === 0) {
-        container.innerHTML = blog.renderEmptyState();
-        return;
-      }
-
-      const homepagePosts = result.posts.slice(0, 3);
-      container.innerHTML = homepagePosts.map(post => blog.renderPost(post)).join('');
-    } catch (error) {
-      console.error('Error loading homepage blog:', error);
-      container.innerHTML = blog.renderEmptyState();
-    }
+  function loadHomepageBlog() {
+    loadHomepageBlogPosts();
   }
 
   /**
@@ -1406,13 +1432,13 @@
     const searchInput = document.getElementById('blog-search');
     const categoryFilter = document.getElementById('category-filter');
 
-    const blog = new WordPressBlog('https://izendestudioweb.com/articles');
+    const blog = new WordPressBlog('/api');
 
     const categories = await blog.fetchCategories();
     if (categories && categories.length > 0 && categoryFilter) {
       categories.forEach(cat => {
         const option = document.createElement('option');
-        option.value = cat.id;
+        option.value = cat.slug;
         option.textContent = cat.name;
         categoryFilter.appendChild(option);
       });
@@ -1432,6 +1458,7 @@
       }
 
       postsContainer.innerHTML = result.posts.map(post => blog.renderPost(post)).join('');
+      markLazyImagesLoaded(postsContainer);
 
       if (paginationContainer) {
         paginationContainer.innerHTML = blog.renderPagination(page || 1, result.totalPages);
@@ -1470,7 +1497,7 @@
    */
   document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('homepage-blog-posts')) {
-      loadHomepageBlog();
+      loadHomepageBlogPosts();
     }
 
     if (document.getElementById('blog-posts-container')) {
@@ -1891,5 +1918,109 @@
   });
 
   // AOS initialization remains at lines 988-996 (already implemented)
+
+  /**
+   * Load Homepage Blog Posts
+   */
+  function loadHomepageBlogPosts() {
+    const blogContainer = document.getElementById('homepage-blog-posts');
+
+    if (!blogContainer) return;
+
+    // Fetch latest 3 posts
+    fetch('/api/blog-posts.php?per_page=3')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.data.posts.length > 0) {
+          displayHomepageBlogPosts(data.data.posts, blogContainer);
+        } else {
+          // Hide section if no posts
+          const blogSection = blogContainer.closest('section');
+          if (blogSection) {
+            blogSection.style.display = 'none';
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error loading blog posts:', error);
+        // Hide section on error
+        const blogSection = blogContainer.closest('section');
+        if (blogSection) {
+          blogSection.style.display = 'none';
+        }
+      });
+  }
+
+  function displayHomepageBlogPosts(posts, container) {
+    let html = '';
+
+    posts.forEach((post, index) => {
+      const date = new Date(post.date);
+      const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      const imageData = post.featured_image || {};
+      const imageUrl = (imageData.url || imageData) || '/assets/img/blog-placeholder.jpg';
+      const imageAlt = imageData.alt ? escapeHtml(imageData.alt) : escapeHtml(post.title);
+      const categoryBadge = post.categories.length > 0
+        ? `<span class="blog-category-badge">${post.categories[0].name}</span>`
+        : '';
+
+      html += `
+        <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="${(index + 1) * 100}">
+          <article class="blog-card">
+            <div class="blog-card-image">
+              <a href="${post.link}">
+                <img src="${imageUrl}"
+                     alt="${imageAlt}"
+                     class="img-fluid"
+                     loading="lazy">
+              </a>
+              ${categoryBadge}
+            </div>
+            <div class="blog-card-content">
+              <div class="blog-card-meta">
+                <span><i class="bx bx-calendar"></i> ${formattedDate}</span>
+                <span><i class="bx bx-time-five"></i> ${post.reading_time} min read</span>
+              </div>
+              <h3 class="blog-card-title">
+                <a href="${post.link}">${post.title}</a>
+              </h3>
+              <p class="blog-card-excerpt">${post.excerpt}</p>
+              <a href="${post.link}" class="blog-card-link">
+                Read More <i class="bx bx-right-arrow-alt"></i>
+              </a>
+            </div>
+          </article>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+    markLazyImagesLoaded(container);
+    markLazyImagesLoaded(container);
+
+    // Re-initialize AOS if it exists
+    if (typeof AOS !== 'undefined') {
+      AOS.refresh();
+    }
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function markLazyImagesLoaded(scope = document) {
+    const images = scope.querySelectorAll('img[loading="lazy"]');
+    images.forEach((img) => {
+      const markLoaded = () => img.classList.add('loaded');
+      if (img.complete && img.naturalWidth > 0) {
+        markLoaded();
+      } else {
+        img.addEventListener('load', markLoaded, { once: true });
+        img.addEventListener('error', () => img.classList.add('loaded'), { once: true });
+      }
+    });
+  }
 
 })();
