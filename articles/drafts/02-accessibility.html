@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Improving Accessibility: Skip Links and Semantic Markup</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;max-width:780px;margin:32px auto;padding:0 16px;color:#222}h1{color:#111}pre{background:#f3f3f3;padding:12px;overflow:auto}</style>
+</head>
+<body>
+  <a href="/" rel="home">← Home</a>
+  <h1>Improving Accessibility: Skip Links and Semantic Markup</h1>
+  <p>Accessibility makes your website usable by more people. Implement these simple improvements to help keyboard and screen reader users.</p>
+
+  <h2>Skip links</h2>
+  <p>Add a skip link at the top of the page to allow keyboard users to jump directly to main content:</p>
+  <pre><code>&lt;a href="#maincontent" class="skip-link"&gt;Skip to main content&lt;/a&gt;</code></pre>
+
+  <h2>Semantic markup</h2>
+  <p>Use semantic elements like <code>&lt;main&gt;</code>, <code>&lt;nav&gt;</code>, and <code>&lt;header&gt;</code>, and add <code>role="main"</code> where necessary to help assistive tech find and announce content correctly.</p>
+
+  <p>Always test with a keyboard and a screen reader to validate the experience.</p>
+</body>
+</html>

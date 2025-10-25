@@ -1,0 +1,291 @@
+<?php
+/**
+ * Admin Dashboard
+ */
+
+define('ADMIN_PAGE', true);
+require_once __DIR__ . '/config/auth.php';
+
+// Require authentication
+Auth::requireAuth();
+
+// Get database connection
+global $conn;
+
+// Page config
+$pageTitle = 'Dashboard';
+
+// Get statistics
+$stats = [];
+
+// Count services
+$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_services");
+$stats['services'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+
+// Count portfolio items
+$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_portfolio");
+$stats['portfolio'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+
+// Count videos
+$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_videos");
+$stats['videos'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+
+// Count form submissions
+$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_form_submissions WHERE status = 'new'");
+$stats['new_submissions'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+
+// Count all submissions
+$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_form_submissions");
+$stats['total_submissions'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+
+// Get recent submissions
+$recentSubmissions = [];
+$result = mysqli_query($conn, "
+    SELECT id, form_type, name, email, subject, status, created_at
+    FROM iz_form_submissions
+    ORDER BY created_at DESC
+    LIMIT 5
+");
+while ($row = mysqli_fetch_assoc($result)) {
+    $recentSubmissions[] = $row;
+}
+
+// Get recent activity
+$recentActivity = [];
+$result = mysqli_query($conn, "
+    SELECT al.*, u.username
+    FROM iz_activity_log al
+    LEFT JOIN iz_users u ON al.user_id = u.id
+    ORDER BY al.created_at DESC
+    LIMIT 10
+");
+while ($row = mysqli_fetch_assoc($result)) {
+    $recentActivity[] = $row;
+}
+
+include __DIR__ . '/includes/header.php';
+?>
+
+<div class="row">
+    <!-- Stats Cards -->
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card primary">
+            <i class="bi bi-briefcase icon"></i>
+            <div class="number"><?php echo $stats['services']; ?></div>
+            <div class="label">Services</div>
+            <a href="services.php" class="stretched-link"></a>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card success">
+            <i class="bi bi-collection icon"></i>
+            <div class="number"><?php echo $stats['portfolio']; ?></div>
+            <div class="label">Portfolio Items</div>
+            <a href="portfolio.php" class="stretched-link"></a>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card warning">
+            <i class="bi bi-play-btn icon"></i>
+            <div class="number"><?php echo $stats['videos']; ?></div>
+            <div class="label">Videos</div>
+            <a href="videos.php" class="stretched-link"></a>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card danger">
+            <i class="bi bi-inbox icon"></i>
+            <div class="number"><?php echo $stats['new_submissions']; ?></div>
+            <div class="label">New Submissions</div>
+            <a href="submissions.php" class="stretched-link"></a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Form Submissions -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-inbox"></i> Recent Form Submissions</span>
+                <a href="submissions.php" class="btn btn-sm btn-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <?php if (empty($recentSubmissions)): ?>
+                    <div class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <h3>No Submissions Yet</h3>
+                        <p>Form submissions will appear here</p>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Subject</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($recentSubmissions as $submission): ?>
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                <?php echo ucfirst(str_replace('_', ' ', $submission['form_type'])); ?>
+                                            </span>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($submission['name'] ?? 'N/A'); ?></td>
+                                        <td><?php echo htmlspecialchars($submission['email'] ?? 'N/A'); ?></td>
+                                        <td class="text-truncate" style="max-width: 200px;">
+                                            <?php echo htmlspecialchars($submission['subject'] ?? 'No subject'); ?>
+                                        </td>
+                                        <td><?php echo date('M j, Y', strtotime($submission['created_at'])); ?></td>
+                                        <td>
+                                            <?php
+                                            $statusColors = [
+                                                'new' => 'danger',
+                                                'read' => 'info',
+                                                'replied' => 'success',
+                                                'archived' => 'secondary',
+                                                'spam' => 'warning'
+                                            ];
+                                            $color = $statusColors[$submission['status']] ?? 'secondary';
+                                            ?>
+                                            <span class="badge bg-<?php echo $color; ?>">
+                                                <?php echo ucfirst($submission['status']); ?>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions & Recent Activity -->
+    <div class="col-lg-4 mb-4">
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-lightning"></i> Quick Actions
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="services.php?action=add" class="btn btn-outline-primary">
+                        <i class="bi bi-plus-circle"></i> Add Service
+                    </a>
+                    <a href="portfolio.php?action=add" class="btn btn-outline-success">
+                        <i class="bi bi-plus-circle"></i> Add Portfolio Item
+                    </a>
+                    <a href="videos.php?action=add" class="btn btn-outline-warning">
+                        <i class="bi bi-plus-circle"></i> Add Video
+                    </a>
+                    <a href="hero-slides.php?action=add" class="btn btn-outline-info">
+                        <i class="bi bi-plus-circle"></i> Add Hero Slide
+                    </a>
+                    <a href="media.php" class="btn btn-outline-secondary">
+                        <i class="bi bi-upload"></i> Upload Media
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-info-circle"></i> System Info
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <td><strong>PHP Version:</strong></td>
+                        <td><?php echo PHP_VERSION; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total Submissions:</strong></td>
+                        <td><?php echo $stats['total_submissions']; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Database:</strong></td>
+                        <td class="text-success"><i class="bi bi-check-circle-fill"></i> Connected</td>
+                    </tr>
+                    <tr>
+                        <td><strong>User Role:</strong></td>
+                        <td>
+                            <span class="badge bg-primary">
+                                <?php echo ucfirst(Auth::user()['role']); ?>
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<?php if (Auth::isAdmin() && !empty($recentActivity)): ?>
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-clock-history"></i> Recent Activity</span>
+                <a href="activity-log.php" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Entity</th>
+                                <th>Description</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($recentActivity as $activity): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($activity['username'] ?? 'System'); ?></td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            <?php echo ucfirst($activity['action']); ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo ucfirst($activity['entity_type']); ?></td>
+                                    <td class="text-truncate" style="max-width: 300px;">
+                                        <?php echo htmlspecialchars($activity['description'] ?? ''); ?>
+                                    </td>
+                                    <td>
+                                        <?php
+                                        $time = strtotime($activity['created_at']);
+                                        $diff = time() - $time;
+                                        if ($diff < 60) echo 'Just now';
+                                        elseif ($diff < 3600) echo floor($diff / 60) . ' min ago';
+                                        elseif ($diff < 86400) echo floor($diff / 3600) . ' hrs ago';
+                                        else echo date('M j, Y', $time);
+                                        ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php include __DIR__ . '/includes/footer.php'; ?>

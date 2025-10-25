@@ -1,247 +1,33 @@
-# =============================================================================
-# Security Configuration for Izende Studio Web
-# Generated: 2025-10-14
-# =============================================================================
+# Izende Studio Web - Simplified .htaccess for Testing
+# Original complex .htaccess temporarily disabled
 
-# =============================================================================
-# 1. FORCE HTTPS REDIRECT
-# =============================================================================
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteCond %{HTTPS} off
-    RewriteRule ^(.*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-</IfModule>
+# Allow directory access
+Options -Indexes +FollowSymLinks
 
-# =============================================================================
-# 2. DISABLE DIRECTORY LISTING
-# =============================================================================
-Options -Indexes
-
-# =============================================================================
-# 3. PROTECT SENSITIVE FILES
-# =============================================================================
-<FilesMatch "^(\.env|\.git.*|\.htaccess|\.htpasswd|composer\.(json|lock)|package(-lock)?\.json|README\.md|.*\.log|.*\.bak|.*\.backup|.*\.sql)$">
+# Protect sensitive files
+<FilesMatch "^(\.env|\.git.*|composer\.(json|lock)|.*\.log|.*\.bak|.*\.sql)$">
     Require all denied
 </FilesMatch>
 
-# Protect specific config files
-<Files "config.php">
-    Require all denied
-</Files>
-
+# Protect WordPress config
 <Files "wp-config.php">
     Require all denied
 </Files>
 
-# =============================================================================
-# 4. PROTECT CONFIG DIRECTORY
-# =============================================================================
+# Protect config directory (EXCEPT admin/config for CMS)
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    # Allow /admin/config/ for CMS functionality
+    RewriteCond %{REQUEST_URI} !^/izendestudioweb/admin/
     RewriteRule ^config/ - [F,L]
 </IfModule>
 
-# =============================================================================
-# 5. PREVENT PHP EXECUTION IN UPLOADS DIRECTORY
-# =============================================================================
-<Directory "assets/uploads">
-    php_flag engine off
-    <FilesMatch "\.php$">
-        Require all denied
-    </FilesMatch>
-</Directory>
-
-# =============================================================================
-# 6. BLOCK COMMON ATTACK PATTERNS
-# =============================================================================
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-
-    # Block script injections
-    RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
-
-    # Block GLOBALS and REQUEST variable injections
-    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
-    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2}) [OR]
-
-    # Block directory traversal
-    RewriteCond %{QUERY_STRING} (\.\./|\.\.\\) [OR]
-
-    # Block eval() and base64
-    RewriteCond %{QUERY_STRING} (eval\(|base64_encode|base64_decode) [OR]
-
-    # Block script, embed, object tags
-    RewriteCond %{QUERY_STRING} (<|%3C)([^s]*s)+cript.*(>|%3E) [NC,OR]
-    RewriteCond %{QUERY_STRING} (<|%3C)([^e]*e)+mbed.*(>|%3E) [NC,OR]
-    RewriteCond %{QUERY_STRING} (<|%3C)([^o]*o)+bject.*(>|%3E) [NC,OR]
-
-    # Block SQL injection attempts
-    RewriteCond %{QUERY_STRING} (union.*select|insert.*into|drop.*table|update.*set|delete.*from) [NC,OR]
-
-    # Block file injection
-    RewriteCond %{QUERY_STRING} (\.\.;|php://|file://|etc/passwd|proc/self/environ) [NC]
-
-    # Return 403 Forbidden for all matched conditions
-    RewriteRule ^(.*)$ - [F,L]
-</IfModule>
-
-# =============================================================================
-# 7. SECURITY HEADERS (BACKUP TO PHP HEADERS)
-# =============================================================================
+# Security headers
 <IfModule mod_headers.c>
-    # Prevent clickjacking
     Header always set X-Frame-Options "SAMEORIGIN"
-
-    # Prevent MIME type sniffing
     Header always set X-Content-Type-Options "nosniff"
-
-    # XSS Protection (legacy, but useful for older browsers)
     Header always set X-XSS-Protection "1; mode=block"
-
-    # Referrer Policy
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-
-    # Permissions Policy (restrict access to browser features)
-    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-
-    # HTTP Strict Transport Security (HSTS) - only if HTTPS is configured
-    # Uncomment the line below after confirming HTTPS works properly
-    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" env=HTTPS
-
-    # Remove sensitive server information
-    Header always unset X-Powered-By
-    Header unset X-Powered-By
 </IfModule>
 
-# =============================================================================
-# 8. LIMIT REQUEST METHODS
-# =============================================================================
-<LimitExcept GET POST HEAD>
-    Require all denied
-</LimitExcept>
-
-# =============================================================================
-# 9. PROTECT AGAINST HOTLINKING (OPTIONAL)
-# =============================================================================
-# Uncomment to prevent other sites from linking to your images
-# <IfModule mod_rewrite.c>
-#     RewriteEngine On
-#     RewriteCond %{HTTP_REFERER} !^$
-#     RewriteCond %{HTTP_REFERER} !^https?://(www\.)?izendestudioweb\.com [NC]
-#     RewriteRule \.(jpg|jpeg|png|gif|webp|svg)$ - [F,L]
-# </IfModule>
-
-# =============================================================================
-# 10. SET PROPER MIME TYPES
-# =============================================================================
-<IfModule mod_mime.c>
-    AddType application/javascript js
-    AddType text/css css
-    AddType image/webp webp
-    AddType image/svg+xml svg svgz
-    AddType application/json json
-    AddType font/woff woff
-    AddType font/woff2 woff2
-</IfModule>
-
-# =============================================================================
-# 11. ENABLE COMPRESSION (PERFORMANCE)
-# =============================================================================
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript
-    AddOutputFilterByType DEFLATE application/javascript application/x-javascript application/json
-    AddOutputFilterByType DEFLATE application/xml application/xhtml+xml application/rss+xml
-    AddOutputFilterByType DEFLATE image/svg+xml
-</IfModule>
-
-# =============================================================================
-# 12. BROWSER CACHING (PERFORMANCE)
-# =============================================================================
-<IfModule mod_expires.c>
-    ExpiresActive On
-
-    # Images
-    ExpiresByType image/jpg "access plus 1 year"
-    ExpiresByType image/jpeg "access plus 1 year"
-    ExpiresByType image/gif "access plus 1 year"
-    ExpiresByType image/png "access plus 1 year"
-    ExpiresByType image/webp "access plus 1 year"
-    ExpiresByType image/svg+xml "access plus 1 year"
-    ExpiresByType image/x-icon "access plus 1 year"
-
-    # CSS and JavaScript
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType text/javascript "access plus 1 month"
-
-    # Fonts
-    ExpiresByType font/woff "access plus 1 year"
-    ExpiresByType font/woff2 "access plus 1 year"
-    ExpiresByType application/font-woff "access plus 1 year"
-    ExpiresByType application/font-woff2 "access plus 1 year"
-
-    # Default
-    ExpiresDefault "access plus 2 days"
-</IfModule>
-
-# =============================================================================
-# 13. BLOCK ACCESS TO HIDDEN FILES
-# =============================================================================
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteCond %{SCRIPT_FILENAME} -d [OR]
-    RewriteCond %{SCRIPT_FILENAME} -f
-    RewriteRule "(^|/)\." - [F]
-</IfModule>
-
-# =============================================================================
-# 14. PROTECT WordPress INSTALLATION (if WordPress is in subdirectory)
-# =============================================================================
-# Block access to WordPress configuration and sensitive files
-<FilesMatch "^(wp-config\.php|wp-config-sample\.php|readme\.html|license\.txt)$">
-    Require all denied
-</FilesMatch>
-
-# Protect wp-includes directory
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteRule ^wp-admin/includes/ - [F,L]
-    RewriteRule !^wp-includes/ - [S=3]
-    RewriteRule ^wp-includes/[^/]+\.php$ - [F,L]
-    RewriteRule ^wp-includes/js/tinymce/langs/.+\.php - [F,L]
-    RewriteRule ^wp-includes/theme-compat/ - [F,L]
-</IfModule>
-
-# =============================================================================
-# 15. DISABLE PHP ERROR DISPLAY (PRODUCTION)
-# =============================================================================
-<IfModule mod_php7.c>
-    php_flag display_errors Off
-    php_flag display_startup_errors Off
-    php_flag log_errors On
-    php_value error_log /var/www/html/izendestudioweb/logs/php_errors.log
-</IfModule>
-
-# =============================================================================
-# 16. CUSTOM ERROR PAGES (OPTIONAL)
-# =============================================================================
-# Uncomment and customize error pages as needed
-# ErrorDocument 400 /errors/400.html
-# ErrorDocument 401 /errors/401.html
-# ErrorDocument 403 /errors/403.html
-# ErrorDocument 404 /errors/404.html
-# ErrorDocument 500 /errors/500.html
-
-# =============================================================================
-# END OF SECURITY CONFIGURATION
-# =============================================================================
-#
-# IMPORTANT NOTES:
-# 1. Test all changes in a development environment first
-# 2. Backup this file before making changes
-# 3. Some directives may require specific Apache modules to be enabled
-# 4. After enabling HSTS, ensure HTTPS is working properly
-# 5. Monitor error logs after deployment: /var/www/html/izendestudioweb/logs/
-# 6. Adjust rules as needed based on your specific requirements
-#
-# =============================================================================
+# Note: HTTPS redirect temporarily disabled for local testing
+# Original .htaccess saved as .htaccess.disabled

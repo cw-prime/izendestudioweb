@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>How to Implement Dark Mode on a PHP Website</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;max-width:780px;margin:32px auto;padding:0 16px;color:#222}h1{color:#111}pre{background:#f3f3f3;padding:12px;overflow:auto}</style>
+</head>
+<body>
+  <a href="/" rel="home">← Home</a>
+  <h1>How to Implement Dark Mode on a PHP Website</h1>
+  <p>Dark mode reduces eye strain in low-light environments and is now expected by many users. Here’s a pragmatic approach to add a lightweight, accessible dark mode to a PHP website.</p>
+
+  <h2>1. Use CSS variables</h2>
+  <p>Define a palette with custom properties in your main stylesheet and provide a dark-mode override by applying a class to the <code>&lt;body&gt;</code> element.</p>
+  <pre><code>:root {
+  --background: #fff;
+  --text: #222;
+}
+
+body.dark-mode {
+  --background: #181818;
+  --text: #eee;
+}
+</code></pre>
+
+  <h2>2. Toggle with JavaScript</h2>
+  <p>Add a toggle control in your header and persist the preference in <code>localStorage</code>. On page load, apply the stored class to <code>body</code> so the theme persists across navigation.</p>
+
+  <h2>3. (Optional) Persist server-side</h2>
+  <p>If your site has user accounts, save the preference in the user profile and render a server-side class via a PHP include so the theme is applied before the page loads.</p>
+
+  <p>Using CSS variables keeps your implementation flexible and low-cost. Test contrast and keyboard accessibility before shipping.</p>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+    xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"
+    xmlns:content="http://purl.org/rss/1.0/modules/content/"
+    xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:wp="http://wordpress.org/export/1.2/">
+  <channel>
+    <title>IzendeStudioWeb Export</title>
+    <link>http://example.com/</link>
+    <description>Exported posts generated for import</description>
+    <pubDate>Fri, 17 Oct 2025 00:00:00 +0000</pubDate>
+    <wp:wxr_version>1.2</wp:wxr_version>
+
+    <!-- Post 1 -->
+    <item>
+      <title>How to Implement Dark Mode on a PHP Website</title>
+      <link>http://example.com/how-to-implement-dark-mode</link>
+      <pubDate>Fri, 17 Oct 2025 00:00:00 +0000</pubDate>
+      <dc:creator><![CDATA[admin]]></dc:creator>
+      <guid isPermaLink="false">http://example.com/?p=1</guid>
+      <description></description>
+      <content:encoded><![CDATA[
+        <h2>Why dark mode?</h2>
+        <p>Dark mode reduces eye strain in low-light environments and is a popular user preference. On a PHP-driven site you can implement it using CSS variables, a small JavaScript toggle, and optionally persist the preference server-side.</p>
+        <h3>1. Use CSS variables</h3>
+        <pre><code>:root {
+  --background: #fff;
+  --text: #222;
+}
+
+body.dark-mode {
+  --background: #181818;
+  --text: #eee;
+}
+</code></pre>
+        <h3>2. Toggle with JavaScript</h3>
+        <p>Add a toggle in your header and store the preference in <code>localStorage</code>. On load, apply the class to <code>body</code> so the theme persists across pages.</p>
+        <h3>3. (Optional) Persist server-side</h3>
+        <p>If you want the preference tied to user accounts, store it in the database and apply a server-side class via PHP includes when rendering pages.</p>
+        <p>With these steps you get a lightweight, accessible dark mode that works across your PHP site.</p>
+      ]]></content:encoded>
+      <excerpt:encoded><![CDATA[How to implement dark mode across a PHP website using CSS variables, JavaScript toggle and optional server-side persistence.]]></excerpt:encoded>
+      <wp:post_id>101</wp:post_id>
+      <wp:post_date>2025-10-17 00:00:00</wp:post_date>
+      <wp:post_date_gmt>2025-10-17 00:00:00</wp:post_date_gmt>
+      <wp:comment_status>closed</wp:comment_status>
+      <wp:ping_status>closed</wp:ping_status>
+      <wp:post_name>how-to-implement-dark-mode</wp:post_name>
+      <wp:status>draft</wp:status>
+      <wp:post_parent>0</wp:post_parent>
+      <wp:post_type>post</wp:post_type>
+    </item>
+
+    <!-- Post 2 -->
+    <item>
+      <title>Improving Accessibility: Skip Links and Semantic Markup</title>
+      <link>http://example.com/skip-links-semantic-markup</link>
+      <pubDate>Fri, 17 Oct 2025 00:00:00 +0000</pubDate>
+      <dc:creator><![CDATA[admin]]></dc:creator>
+      <guid isPermaLink="false">http://example.com/?p=2</guid>
+      <description></description>
+      <content:encoded><![CDATA[
+        <p>Accessibility improves usability for everyone. Small changes like skip links and proper ARIA roles make a big difference.</p>
+        <h3>Skip links</h3>
+        <p>Add a skip link at the top of the page and ensure it's visible on focus:</p>
+        <pre><code>&lt;a href="#maincontent" class="skip-link"&gt;Skip to main content&lt;/a&gt;</code></pre>
+        <h3>Semantic markup</h3>
+        <p>Use &lt;main&gt;, &lt;nav&gt;, &lt;header&gt;, and &lt;footer&gt; and set <code>role="main"</code> where appropriate for screen readers.</p>
+        <p>Test with keyboard navigation and a screen reader for the best results.</p>
+      ]]></content:encoded>
+      <excerpt:encoded><![CDATA[Make your PHP site more accessible with skip links, semantic HTML, and ARIA roles.]]></excerpt:encoded>
+      <wp:post_id>102</wp:post_id>
+      <wp:post_date>2025-10-17 00:00:00</wp:post_date>
+      <wp:post_date_gmt>2025-10-17 00:00:00</wp:post_date_gmt>
+      <wp:comment_status>closed</wp:comment_status>
+      <wp:ping_status>closed</wp:ping_status>
+      <wp:post_name>skip-links-semantic-markup</wp:post_name>
+      <wp:status>draft</wp:status>
+      <wp:post_parent>0</wp:post_parent>
+      <wp:post_type>post</wp:post_type>
+    </item>
+
+    <!-- Post 3 -->
+    <item>
+      <title>Building Consistent Layouts Across Service Pages</title>
+      <link>http://example.com/consistent-layouts-service-pages</link>
+      <pubDate>Fri, 17 Oct 2025 00:00:00 +0000</pubDate>
+      <dc:creator><![CDATA[admin]]></dc:creator>
+      <guid isPermaLink="false">http://example.com/?p=3</guid>
+      <description></description>
+      <content:encoded><![CDATA[
+        <p>Consistency helps users navigate and builds trust. Standardize hero sections, breadcrumbs, and main wrappers across service pages.</p>
+        <h3>Hero structure</h3>
+        <pre><code>&lt;section id="hero"&gt;
+  &lt;h1&gt;Service Title&lt;/h1&gt;
+  &lt;p&gt;Short description&lt;/p&gt;
+&lt;/section&gt;</code></pre>
+        <h3>Breadcrumbs and wrappers</h3>
+        <p>Use uniform breadcrumb markup and a single main wrapper with <code>role="main"</code> to improve accessibility and layout stability.</p>
+      ]]></content:encoded>
+      <excerpt:encoded><![CDATA[Strategies for keeping layout and markup consistent across service pages for better UX and maintainability.]]></excerpt:encoded>
+      <wp:post_id>103</wp:post_id>
+      <wp:post_date>2025-10-17 00:00:00</wp:post_date>
+      <wp:post_date_gmt>2025-10-17 00:00:00</wp:post_date_gmt>
+      <wp:comment_status>closed</wp:comment_status>
+      <wp:ping_status>closed</wp:ping_status>
+      <wp:post_name>consistent-layouts-service-pages</wp:post_name>
+      <wp:status>draft</wp:status>
+      <wp:post_parent>0</wp:post_parent>
+      <wp:post_type>post</wp:post_type>
+    </item>
+
+    <!-- Post 4 -->
+    <item>
+      <title>Managing Portfolio and Client Assets for a Professional Web Presence</title>
+      <link>http://example.com/managing-portfolio-client-assets</link>
+      <pubDate>Fri, 17 Oct 2025 00:00:00 +0000</pubDate>
+      <dc:creator><![CDATA[admin]]></dc:creator>
+      <guid isPermaLink="false">http://example.com/?p=4</guid>
+      <description></description>
+      <content:encoded><![CDATA[
+        <p>Organize images and logos to present a polished portfolio. Use `assets/img/portfolio/` and `assets/img/clients/` for clarity.</p>
+        <h3>Formats and optimization</h3>
+        <p>Use WEBP/JPG for photos and PNG for logos. Compress images before upload and provide descriptive alt text.</p>
+        <h3>Fallbacks</h3>
+        <p>Provide placeholders or alt text for missing assets to avoid broken visuals and improve accessibility.</p>
+      ]]></content:encoded>
+      <excerpt:encoded><![CDATA[Tips to organize, optimize and reference portfolio images and client logos for a professional site.]]></excerpt:encoded>
+      <wp:post_id>104</wp:post_id>
+      <wp:post_date>2025-10-17 00:00:00</wp:post_date>
+      <wp:post_date_gmt>2025-10-17 00:00:00</wp:post_date_gmt>
+      <wp:comment_status>closed</wp:comment_status>
+      <wp:ping_status>closed</wp:ping_status>
+      <wp:post_name>managing-portfolio-client-assets</wp:post_name>
+      <wp:status>draft</wp:status>
+      <wp:post_parent>0</wp:post_parent>
+      <wp:post_type>post</wp:post_type>
+    </item>
+
+    <!-- Post 5 -->
+    <item>
+      <title>Security Best Practices for PHP Websites</title>
+      <link>http://example.com/security-best-practices-php</link>
+      <pubDate>Fri, 17 Oct 2025 00:00:00 +0000</pubDate>
+      <dc:creator><![CDATA[admin]]></dc:creator>
+      <guid isPermaLink="false">http://example.com/?p=5</guid>
+      <description></description>
+      <content:encoded><![CDATA[
+        <p>Security is ongoing. Keep software updated, validate input, use password hashing, enable HTTPS, and review permissions.</p>
+        <h3>Quick checklist</h3>
+        <ul>
+          <li>Update PHP and plugins</li>
+          <li>Sanitize inputs and escape output</li>
+          <li>Use <code>password_hash()</code> for passwords</li>
+          <li>Enable HTTPS and redirect all traffic</li>
+        </ul>
+      ]]></content:encoded>
+      <excerpt:encoded><![CDATA[Essential security practices for PHP-based websites to protect users and data.]]></excerpt:encoded>
+      <wp:post_id>105</wp:post_id>
+      <wp:post_date>2025-10-17 00:00:00</wp:post_date>
+      <wp:post_date_gmt>2025-10-17 00:00:00</wp:post_date_gmt>
+      <wp:comment_status>closed</wp:comment_status>
+      <wp:ping_status>closed</wp:ping_status>
+      <wp:post_name>security-best-practices-php</wp:post_name>
+      <wp:status>draft</wp:status>
+      <wp:post_parent>0</wp:post_parent>
+      <wp:post_type>post</wp:post_type>
+    </item>
+
+  </channel>
+</rss>

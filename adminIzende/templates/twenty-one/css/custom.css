@@ -459,6 +459,665 @@ button:focus,
 }
 
 /* ==========================================================================
+   SECTION STYLING - MATCH MAIN SITE
+   ========================================================================== */
+
+/* Section separators */
+.section-separator,
+hr.section-separator {
+  border: none;
+  height: 4px;
+  width: 140px;
+  margin: 80px auto 40px;
+  background: linear-gradient(90deg, rgba(92, 184, 116, 0), var(--izende-brand), rgba(92, 184, 116, 0));
+  border-radius: 999px;
+}
+
+/* Section titles */
+.section-title {
+  text-align: center;
+  padding-bottom: 30px;
+}
+
+.section-title h2 {
+  font-size: 32px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  position: relative;
+}
+
+.section-title h2::before {
+  content: "";
+  position: absolute;
+  display: block;
+  width: 120px;
+  height: 1px;
+  background: #ddd;
+  bottom: 1px;
+  left: calc(50% - 60px);
+}
+
+.section-title h2::after {
+  content: "";
+  position: absolute;
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: var(--izende-brand);
+  bottom: 0;
+  left: calc(50% - 20px);
+}
+
+.section-title p {
+  margin-bottom: 0;
+  color: #666666;
+}
+
+/* ==========================================================================
+   PRICING TABLES - ENHANCED TO MATCH MAIN SITE
+   ========================================================================== */
+
+.pricing-table,
+.product-card,
+.price-option,
+.price-box,
+.package,
+.plan {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 40px 30px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  height: 100%;
+}
+
+.pricing-table:hover,
+.product-card:hover,
+.price-option:hover,
+.price-box:hover,
+.package:hover,
+.plan:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  border-color: var(--izende-brand);
+}
+
+.pricing-table.featured,
+.product-card.featured,
+.price-option.featured {
+  border: 2px solid var(--izende-brand);
+  box-shadow: 0 10px 40px rgba(92, 184, 116, 0.2);
+  position: relative;
+}
+
+.pricing-table .price,
+.product-card .price {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--izende-brand);
+  text-align: center;
+  margin-bottom: 30px;
+  font-family: "Raleway", sans-serif;
+}
+
+.pricing-table .price span,
+.product-card .price span {
+  font-size: 18px;
+  font-weight: 400;
+  color: #666666;
+}
+
+.pricing-table ul,
+.product-card ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 30px;
+}
+
+.pricing-table ul li,
+.product-card ul li {
+  padding: 10px 0;
+  color: #666666;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pricing-table ul li:last-child,
+.product-card ul li:last-child {
+  border-bottom: none;
+}
+
+.pricing-table ul li i,
+.product-card ul li i {
+  color: var(--izende-brand);
+  margin-right: 10px;
+  font-size: 18px;
+}
+
+/* Badge for "Most Popular" */
+.badge-popular,
+.featured-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--izende-brand);
+  color: #ffffff;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   ICON BOXES - MATCH MAIN SITE
+   ========================================================================== */
+
+.icon-box {
+  padding: 30px 20px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  text-align: center;
+  height: 100%;
+}
+
+.icon-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.icon-box i {
+  font-size: 48px;
+  color: var(--izende-brand);
+  margin-bottom: 15px;
+  display: inline-block;
+}
+
+.icon-box h4 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333333;
+}
+
+.icon-box p {
+  font-size: 14px;
+  color: #666666;
+  margin-bottom: 0;
+}
+
+/* Icon box color variants */
+.iconbox-brand i { color: var(--izende-brand); }
+.iconbox-blue i { color: #47aeff; }
+.iconbox-orange i { color: #ffa76e; }
+.iconbox-red i { color: #ff5828; }
+.iconbox-teal i { color: #11dbcf; }
+.iconbox-yellow i { color: #ffbb2c; }
+
+/* ==========================================================================
+   ENHANCED BUTTON STYLES
+   ========================================================================== */
+
+.btn-brand {
+  background-color: var(--izende-brand);
+  border-color: var(--izende-brand);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 10px 30px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.btn-brand:hover,
+.btn-brand:focus {
+  background-color: var(--izende-brand-hover);
+  border-color: var(--izende-brand-hover);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(92, 184, 116, 0.3);
+}
+
+.btn-brand:active {
+  background-color: var(--izende-brand-dark);
+  border-color: var(--izende-brand-dark);
+  transform: translateY(0);
+}
+
+/* Enhance existing button hover effects */
+.btn-primary,
+.btn-success {
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover,
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(92, 184, 116, 0.3);
+}
+
+.btn-primary:active,
+.btn-success:active {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   CART & CHECKOUT ENHANCEMENTS
+   ========================================================================== */
+
+.order-summary {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.order-summary h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333333;
+}
+
+.order-summary .total {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--izende-brand);
+  border-top: 2px solid var(--izende-brand);
+  padding-top: 15px;
+  margin-top: 15px;
+}
+
+/* ==========================================================================
+   TABLES - ENHANCED STYLING
+   ========================================================================== */
+
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid var(--izende-brand);
+  font-weight: 600;
+  color: #333333;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Feature comparison tables */
+.recommended-col {
+  background-color: var(--izende-brand-lighter);
+  font-weight: 600;
+}
+
+.feature-name {
+  font-weight: 600;
+  color: #333333;
+}
+
+.check-icon {
+  color: var(--izende-brand);
+  font-size: 20px;
+}
+
+.x-icon {
+  color: #999999;
+  font-size: 20px;
+}
+
+/* ==========================================================================
+   DOMAIN SEARCH ENHANCEMENTS
+   ========================================================================== */
+
+.domain-checker-container,
+.domain-search-container {
+  background: linear-gradient(135deg, var(--izende-brand) 0%, var(--izende-brand-dark) 100%);
+  padding: 60px 0;
+  color: #ffffff;
+}
+
+.domain-search-container h2,
+.domain-checker-container h2 {
+  color: #ffffff;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.domain-search-container .input-group,
+.domain-checker-container .input-group {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.domain-search-container .input-group .form-control,
+.domain-checker-container .input-group .form-control {
+  border: none;
+  padding: 15px 20px;
+  font-size: 16px;
+  border-radius: 4px 0 0 4px;
+}
+
+.domain-search-container .input-group .btn,
+.domain-checker-container .input-group .btn {
+  padding: 15px 30px;
+  background: #090909;
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 0 4px 4px 0;
+}
+
+.domain-search-container .input-group .btn:hover,
+.domain-checker-container .input-group .btn:hover {
+  background: #000000;
+}
+
+/* ==========================================================================
+   FOOTER ENHANCEMENTS
+   ========================================================================== */
+
+#footer {
+  background: #090909;
+  color: #ffffff;
+  padding: 40px 0 20px;
+}
+
+#footer h4 {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+#footer a {
+  color: #ffffff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+#footer a:hover {
+  color: var(--izende-brand);
+  text-decoration: none;
+}
+
+#footer .social-links a {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  text-align: center;
+  line-height: 40px;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+#footer .social-links a:hover {
+  background: var(--izende-brand);
+  color: #ffffff;
+  transform: translateY(-3px);
+}
+
+#footer .copyright {
+  text-align: center;
+  padding-top: 30px;
+  margin-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================================================
+   BREADCRUMBS - MATCH MAIN SITE
+   ========================================================================== */
+
+.master-breadcrumb {
+  background-color: #f8f9fa;
+  padding: 20px 0;
+  margin-bottom: 30px;
+}
+
+.breadcrumb {
+  background: transparent;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "›";
+  color: #666666;
+}
+
+.breadcrumb-item a {
+  color: var(--izende-brand);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+  color: var(--izende-brand-dark);
+}
+
+.breadcrumb-item.active {
+  color: #666666;
+}
+
+/* ==========================================================================
+   CARDS & PANELS
+   ========================================================================== */
+
+.panel,
+.card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.panel:hover,
+.card:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.panel-heading,
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid var(--izende-brand);
+  font-weight: 600;
+  border-radius: 8px 8px 0 0;
+}
+
+/* ==========================================================================
+   ANIMATIONS
+   ========================================================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Smooth transitions for all interactive elements */
+a, button, .btn, .card, .icon-box, .pricing-table, .product-card {
+  transition: all 0.3s ease;
+}
+
+/* ==========================================================================
+   RESPONSIVE ENHANCEMENTS
+   ========================================================================== */
+
+@media (max-width: 991px) {
+  .section-title h2 {
+    font-size: 28px;
+  }
+
+  .pricing-table .price,
+  .product-card .price {
+    font-size: 36px;
+  }
+
+  .domain-search-container,
+  .domain-checker-container {
+    padding: 40px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .section-title h2 {
+    font-size: 24px;
+  }
+
+  .pricing-table,
+  .product-card {
+    margin-bottom: 30px;
+  }
+
+  .icon-box {
+    margin-bottom: 20px;
+  }
+}
+
+/* ==========================================================================
+   WHMCS STORE PAGES - SPECIFIC STYLING
+   ========================================================================== */
+
+/* Store page pricing boxes */
+.landing-page .product-options .item,
+.price-box,
+.package-box {
+  background: #ffffff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.3s ease !important;
+  border: 2px solid transparent !important;
+  margin-bottom: 30px !important;
+}
+
+.landing-page .product-options .item:hover,
+.price-box:hover,
+.package-box:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
+  border-color: var(--izende-brand) !important;
+}
+
+/* Featured/Popular badge */
+.landing-page .product-options .item.featured,
+.price-box.featured,
+.package-box.most-popular {
+  border: 2px solid var(--izende-brand) !important;
+  box-shadow: 0 10px 40px rgba(92, 184, 116, 0.2) !important;
+}
+
+.landing-page .product-options .item.featured::before,
+.most-popular-badge {
+  background: var(--izende-brand) !important;
+  color: #ffffff !important;
+}
+
+/* Order/CTA Buttons in store */
+.landing-page .product-options .btn,
+.btn-order,
+.btn-add-to-cart,
+button[type="submit"].btn-primary {
+  background-color: var(--izende-brand) !important;
+  border-color: var(--izende-brand) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  padding: 10px 30px !important;
+  border-radius: 4px !important;
+  transition: all 0.3s ease !important;
+}
+
+.landing-page .product-options .btn:hover,
+.btn-order:hover,
+.btn-add-to-cart:hover,
+button[type="submit"].btn-primary:hover {
+  background-color: var(--izende-brand-hover) !important;
+  border-color: var(--izende-brand-hover) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(92, 184, 116, 0.3) !important;
+}
+
+/* Price display */
+.landing-page .product-options .price,
+.price-amount,
+.product-price {
+  font-size: 48px !important;
+  font-weight: 700 !important;
+  color: var(--izende-brand) !important;
+  font-family: "Raleway", sans-serif !important;
+}
+
+.landing-page .product-options .price span,
+.price-amount span,
+.product-price span {
+  font-size: 18px !important;
+  font-weight: 400 !important;
+  color: #666666 !important;
+}
+
+/* Feature lists in pricing boxes */
+.landing-page .product-options ul,
+.feature-list {
+  list-style: none !important;
+  padding: 0 !important;
+}
+
+.landing-page .product-options ul li,
+.feature-list li {
+  padding: 10px 0 !important;
+  color: #666666 !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+.landing-page .product-options ul li:last-child,
+.feature-list li:last-child {
+  border-bottom: none !important;
+}
+
+/* Store page headings */
+.landing-page h1,
+.landing-page h2 {
+  font-family: "Raleway", sans-serif !important;
+  font-weight: 700 !important;
+  color: #333333 !important;
+}
+
+/* Store hero section */
+.landing-page .hero {
+  background: linear-gradient(135deg, var(--izende-brand) 0%, var(--izende-brand-dark) 100%) !important;
+  color: #ffffff !important;
+  padding: 80px 0 !important;
+}
+
+.landing-page .hero h2,
+.landing-page .hero h3 {
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
    Print Styles
    ========================================================================== */
 
@@ -473,5 +1132,17 @@ button:focus,
 
   a {
     color: #449d5b !important;
+  }
+
+  .header,
+  .footer,
+  .navbar,
+  .breadcrumb {
+    display: none !important;
+  }
+
+  body {
+    color: #000;
+    background: #fff;
   }
 }
