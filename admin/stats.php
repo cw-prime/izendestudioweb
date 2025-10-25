@@ -20,11 +20,16 @@ $pageTitle = 'Stats & Counters Manager';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
+    // Debug logging
+    error_log("POST received. Action: {$action}");
+    error_log("POST data: " . print_r($_POST, true));
+
     if ($action === 'update') {
         $stats = $_POST['stats'] ?? [];
 
         if (empty($stats)) {
             $_SESSION['error_message'] = "No stats data received. Please try again.";
+            $_SESSION['stats_error'] = "No stats data was received from the form. Please try again or contact support if this persists.";
             header('Location: stats.php');
             exit;
         }
@@ -55,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $_SESSION['success_message'] = "Stats updated successfully! ({$updateCount} stats updated)";
+        $_SESSION['stats_success'] = "Successfully updated {$updateCount} stat(s). Changes are now visible on your website.";
         header('Location: stats.php');
         exit;
     }
@@ -210,6 +216,26 @@ include __DIR__ . '/includes/header.php';
 
 <?php else: ?>
     <!-- Stats Management -->
+
+    <!-- Additional success/error messages for better visibility -->
+    <?php if (isset($_SESSION['stats_success'])): ?>
+        <div class="alert alert-success alert-dismissible fade show alert-permanent" role="alert">
+            <i class="bi bi-check-circle-fill"></i>
+            <strong>Success!</strong> <?php echo htmlspecialchars($_SESSION['stats_success']); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php unset($_SESSION['stats_success']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['stats_error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show alert-permanent" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Error!</strong> <?php echo htmlspecialchars($_SESSION['stats_error']); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php unset($_SESSION['stats_error']); ?>
+    <?php endif; ?>
+
     <div class="row mb-4">
         <div class="col-12">
             <div class="alert alert-info">
@@ -246,7 +272,7 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
     <?php else: ?>
-        <form method="POST" action="stats.php">
+        <form method="POST" action="stats.php" id="statsForm">
             <input type="hidden" name="action" value="update">
 
             <div class="row">
@@ -255,13 +281,13 @@ include __DIR__ . '/includes/header.php';
                         <div class="card h-100">
                             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                                 <span><i class="bi bi-bar-chart"></i> Stat #<?php echo $index + 1; ?></span>
-                                <form method="POST" action="stats.php" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this stat?');">
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="id" value="<?php echo $stat['id']; ?>">
-                                    <button type="submit" class="btn btn-sm btn-danger" style="padding: 2px 8px;">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                <button type="button"
+                                        class="btn btn-sm btn-danger delete-stat-btn"
+                                        style="padding: 2px 8px;"
+                                        data-stat-id="<?php echo $stat['id']; ?>"
+                                        data-stat-label="<?php echo htmlspecialchars($stat['stat_label']); ?>">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
@@ -346,7 +372,7 @@ include __DIR__ . '/includes/header.php';
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="saveStatsBtn">
                                 <i class="bi bi-save"></i> Save All Stats
                             </button>
                             <a href="stats.php?action=add" class="btn btn-outline-primary">
@@ -357,6 +383,61 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
         </form>
+
+        <!-- Hidden delete form -->
+        <form method="POST" action="stats.php" id="deleteStatForm" style="display: none;">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="id" id="deleteStatId">
+        </form>
+
+        <script>
+        // Debug form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('statsForm');
+            const submitBtn = document.getElementById('saveStatsBtn');
+
+            if (form && submitBtn) {
+                console.log('✓ Form and button found');
+
+                form.addEventListener('submit', function(e) {
+                    console.log('✓ Form is submitting!');
+                    console.log('  Action:', form.action);
+                    console.log('  Method:', form.method);
+
+                    // Change button to show saving state
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+                    submitBtn.disabled = true;
+
+                    // Count how many stats are being submitted
+                    const formData = new FormData(form);
+                    let count = 0;
+                    for (let pair of formData.entries()) {
+                        if (pair[0].startsWith('stats[')) {
+                            count++;
+                        }
+                        console.log('  ' + pair[0] + ': ' + pair[1]);
+                    }
+                    console.log('  Total fields being submitted:', count);
+                });
+            } else {
+                console.error('✗ Form or button not found!', {form, submitBtn});
+                alert('ERROR: Form not found! Please refresh the page.');
+            }
+
+            // Handle delete buttons
+            document.querySelectorAll('.delete-stat-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const statId = this.getAttribute('data-stat-id');
+                    const statLabel = this.getAttribute('data-stat-label');
+
+                    if (confirm(`Are you sure you want to delete "${statLabel}"? This action cannot be undone.`)) {
+                        document.getElementById('deleteStatId').value = statId;
+                        document.getElementById('deleteStatForm').submit();
+                    }
+                });
+            });
+        });
+        </script>
     <?php endif; ?>
 <?php endif; ?>
 

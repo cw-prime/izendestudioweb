@@ -7,10 +7,18 @@
 // Load security infrastructure
 require_once __DIR__ . '/config/env-loader.php';
 require_once __DIR__ . '/config/security.php';
+require_once __DIR__ . '/config/cms-data.php';
 
 // Initialize secure session and set security headers
 initSecureSession();
 setSecurityHeaders();
+
+// Load CMS content
+$heroSlides = CMSData::getHeroSlides();
+$featuredServices = CMSData::getFeaturedServices(6);
+$stats = CMSData::getStats();
+$featuredPortfolio = CMSData::getFeaturedPortfolio(6);
+$portfolioVideos = CMSData::getVideos('portfolio', 6);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -143,7 +151,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </script>
 </head>
 
-<body id="home">
+<body id="home"
+      data-track-forms="<?php echo (CMSData::getSetting('track_form_submissions') ?? '1') == '1' ? 'true' : 'false'; ?>"
+      data-track-videos="<?php echo (CMSData::getSetting('track_video_plays') ?? '1') == '1' ? 'true' : 'false'; ?>"
+      data-track-external="<?php echo (CMSData::getSetting('track_external_links') ?? '1') == '1' ? 'true' : 'false'; ?>"
+      data-track-phone="<?php echo (CMSData::getSetting('track_phone_clicks') ?? '1') == '1' ? 'true' : 'false'; ?>">
   <!-- Skip Links for Accessibility (provided by header include) -->
 
   <!-- Google Tag Manager (noscript) -->
@@ -164,77 +176,42 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <div class="hero-carousel swiper" id="heroCarousel">
       <div class="swiper-wrapper">
 
-        <!-- Slide 1 -->
+        <?php foreach ($heroSlides as $index => $slide): ?>
+        <!-- Slide <?php echo $index + 1; ?> -->
         <div class="swiper-slide">
-          <picture>
-            <source srcset="assets/img/slide/3ZYUW.webp" type="image/webp">
-            <img src="assets/img/slide/3ZYUW.jpg" alt="St. Louis Web Design and Hosting Services" class="hero-slide-img" loading="eager" width="1920" height="1080">
-          </picture>
+          <?php if ($slide['background_image']): ?>
+            <img src="<?php echo htmlspecialchars($slide['background_image']); ?>"
+                 alt="<?php echo htmlspecialchars($slide['title']); ?>"
+                 class="hero-slide-img"
+                 loading="<?php echo $index === 0 ? 'eager' : 'lazy'; ?>"
+                 width="1920" height="1080">
+          <?php endif; ?>
           <div class="carousel-container">
             <div class="container">
-              <h1 class="animate__animated animate__fadeInDown">St. Louis Web Design &amp; Hosting</h1>
-              <p class="animate__animated animate__fadeInUp"><span style="text-transform:capitalize">Serving Missouri &amp; Illinois businesses with professional web design and hosting. Get your business online quick &amp; easy with local St. Louis expertise.</span>
-              <!-- Inline local link for quick access to St. Louis services -->
-              <a href="/st-louis-web-design.php" style="color: #5cb874; font-weight:600; margin-left:8px; display:inline-block;" class="animate__animated animate__fadeInUp" aria-label="St. Louis Web Design — learn about our local St. Louis web design services">St. Louis Web Design</a>
-              </p>
-              <a href="http://izendestudioweb.com/adminIzende/index.php?rp=/store/shared-hosting" class="btn-get-started animate__animated animate__fadeInUp scrollto">Choose A Plan</a>
-            </div>
-          </div>
-        </div>
+              <?php if ($slide['title']): ?>
+                <<?php echo $index === 0 ? 'h1' : 'h2'; ?> class="animate__animated animate__fadeInDown">
+                  <?php echo htmlspecialchars($slide['title']); ?>
+                </<?php echo $index === 0 ? 'h1' : 'h2'; ?>>
+              <?php endif; ?>
 
-        <!-- Slide 2 -->
-        <div class="swiper-slide">
-          <picture>
-            <source srcset="assets/img/slide/55768.webp" type="image/webp">
-            <img src="assets/img/slide/55768.jpg" alt="Custom Web Development Services" class="hero-slide-img" loading="eager" width="1920" height="1080">
-          </picture>
-          <div class="carousel-container">
-            <div class="container">
-              <h2 class="animate__animated animate__fadeInDown">Custom Web Development</h2>
-              <p class="animate__animated animate__fadeInUp"><span style="text-transform:capitalize">Using The Lastest Web Technologies Such As NodeJs, PHP and Javascript Let US Help You Plan Your Next Project.</span></p>
-              <a href="./quote.php" class="btn-get-started animate__animated animate__fadeInUp scrollto">Start Now</a>
-            </div>
-          </div>
-        </div>
+              <?php if ($slide['subtitle']): ?>
+                <p class="animate__animated animate__fadeInUp">
+                  <span style="text-transform:capitalize">
+                    <?php echo htmlspecialchars($slide['subtitle']); ?>
+                  </span>
+                </p>
+              <?php endif; ?>
 
-        <!-- Slide 3 -->
-        <div class="swiper-slide">
-          <picture>
-            <source srcset="assets/img/slide/545FZX.webp" type="image/webp">
-            <img src="assets/img/slide/545FZX.jpg" alt="Domain Registration Services" class="hero-slide-img" loading="eager" width="1920" height="1080">
-          </picture>
-          <div class="carousel-container">
-            <div class="container">
-              <h2 class="animate__animated animate__fadeInDown">Discover A Huge Variety of Domains</h2>
-              <p class="animate__animated animate__fadeInUp "><span style="text-transform:capitalize">Check domain name availability and secure yours now.</span></p>
-                <a href="http://izendestudioweb.com/adminIzende/cart.php?a=add&amp;domain=register" class="btn-get-started animate__animated animate__fadeInUp scrollto">Search Now</a>
+              <?php if ($slide['button_text'] && $slide['button_url']): ?>
+                <a href="<?php echo htmlspecialchars($slide['button_url']); ?>"
+                   class="btn-get-started animate__animated animate__fadeInUp scrollto">
+                  <?php echo htmlspecialchars($slide['button_text']); ?>
+                </a>
+              <?php endif; ?>
             </div>
           </div>
         </div>
-
-        <!-- Slide 4 -->
-        <div class="swiper-slide">
-          <img src="assets/img/slide/slide-1.jpg" alt="Professional SEO Services for Missouri and Illinois Businesses" class="hero-slide-img" loading="lazy" width="1920" height="1080">
-          <div class="carousel-container">
-            <div class="container">
-              <h2 class="animate__animated animate__fadeInDown">Boost Your Online Visibility</h2>
-              <p class="animate__animated animate__fadeInUp"><span style="text-transform:capitalize">Professional SEO services to help your business rank higher on Google and attract more customers in the St. Louis area.</span></p>
-              <a href="./quote.php" class="btn-get-started animate__animated animate__fadeInUp scrollto">Get SEO Quote</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 5 -->
-        <div class="swiper-slide">
-          <img src="assets/img/slide/slide-2.jpg" alt="Fast and Reliable Web Hosting Solutions in Missouri" class="hero-slide-img" loading="lazy" width="1920" height="1080">
-          <div class="carousel-container">
-            <div class="container">
-              <h2 class="animate__animated animate__fadeInDown">Enterprise-Grade Hosting</h2>
-              <p class="animate__animated animate__fadeInUp"><span style="text-transform:capitalize">99.9% uptime guarantee, lightning-fast performance, and 24/7 support. Your website deserves the best hosting in Missouri.</span></p>
-              <a href="http://izendestudioweb.com/adminIzende/index.php?rp=/store/shared-hosting" class="btn-get-started animate__animated animate__fadeInUp scrollto">View Hosting Plans</a>
-            </div>
-          </div>
-        </div>
+        <?php endforeach; ?>
 
       </div>
 
@@ -261,6 +238,33 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
 
         <div class="row">
+          <?php
+          $iconboxColors = ['blue', 'orange', 'pink', 'red', 'brand', 'yellow', 'teal', 'purple'];
+          foreach ($featuredServices as $index => $service):
+            $colorClass = 'iconbox-' . $iconboxColors[$index % count($iconboxColors)];
+            $delay = ($index + 1) * 100;
+            $mtClass = $index >= 4 ? 'mt-4' : ($index >= 1 ? 'mt-4 mt-lg-0' : '');
+            if ($index == 2) $mtClass = 'mt-4 mt-md-0';
+          ?>
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch <?php echo $mtClass; ?>" data-aos="zoom-in" data-aos-delay="<?php echo $delay; ?>">
+            <div class="icon-box <?php echo $colorClass; ?>">
+              <div class="icon">
+                <svg width="100" height="100" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke="none" stroke-width="0" fill="#f5f5f5" d="M300,521.0016835830174C376.1290562159157,517.8887921683347,466.0731472004068,529.7835943286574,510.70327084640275,468.03025145048787C554.3714126377745,407.6079735673963,508.03601936045806,328.9844924480964,491.2728898941984,256.3432110539036C474.5976632858925,184.082847569629,479.9380746630129,96.60480741107993,416.23090153303,58.64404602377083C348.86323505073057,18.502131276798302,261.93793281208167,40.57373210992963,193.5410806939664,78.93577620505333C130.42746243093433,114.334589627462,98.30271207620316,179.96522072025542,76.75703585869454,249.04625023123273C51.97151888228291,328.5150500222984,13.704378332031375,421.85034740162234,66.52175969318436,486.19268352777647C119.04800174914682,550.1803526380478,217.28368757567262,524.383925680826,300,521.0016835830174"></path>
+                </svg>
+                <i class="<?php echo htmlspecialchars($service['icon_class']); ?>"></i>
+              </div>
+              <h4><a href="<?php echo htmlspecialchars($service['link_url']); ?>"><?php echo htmlspecialchars($service['title']); ?></a></h4>
+              <p><?php echo htmlspecialchars($service['description']); ?></p>
+              <?php if ($service['link_text']): ?>
+                <p class="mt-2"><a href="<?php echo htmlspecialchars($service['link_url']); ?>" class="btn btn-link" style="padding:0;"><?php echo htmlspecialchars($service['link_text']); ?></a></p>
+              <?php endif; ?>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+
+        <div class="row" style="display: none;">
           <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-aos="zoom-in" data-aos-delay="100">
             <div class="icon-box iconbox-blue">
               <div class="icon">
@@ -271,7 +275,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               </div>
               <h4><a href="https://izendestudioweb.com/adminIzende/index.php/store/wordpress-starters">WordPress</a></h4>
               <p>WordPress is one of the most popular content management systems in use today. Affordable website packages for small business and professionals starting at $499.</p>
-              <p class="mt-2"><a href="/st-louis-web-design.php" class="btn btn-link" style="padding:0;" aria-label="St. Louis Web Design — learn about our local St. Louis web design services">St. Louis Web Design</a></p>
+              <p class="mt-2"><a href="st-louis-web-design.php" class="btn btn-link" style="padding:0;" aria-label="St. Louis Web Design — learn about our local St. Louis web design services">St. Louis Web Design</a></p>
             </div>
           </div>
           <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4 mt-lg-0" data-aos="zoom-in" data-aos-delay="300">
@@ -306,9 +310,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </svg>
                 <i class="bx bxs-server"></i>
               </div>
-              <h4><a href="/hosting.php">Web Hosting</a></h4>
+              <h4><a href="hosting.php">Web Hosting</a></h4>
               <p>Fast, secure, and reliable web hosting with 99.9% uptime guarantee. From shared hosting to dedicated servers, we have the perfect solution for your website. Starting at $4.99/month with free SSL and 24/7 support.</p>
-              <p class="mt-2"><a href="/missouri-web-hosting.php" class="btn btn-link" style="padding:0;" aria-label="Missouri Web Hosting — learn about web hosting in Missouri">Missouri Web Hosting</a></p>
+              <p class="mt-2"><a href="missouri-web-hosting.php" class="btn btn-link" style="padding:0;" aria-label="Missouri Web Hosting — learn about web hosting in Missouri">Missouri Web Hosting</a></p>
             </div>
           </div>
           <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4" data-aos="zoom-in" data-aos-delay="400">
@@ -319,7 +323,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </svg>
                 <i class="bx bxs-movie-play"></i>
               </div>
-              <h4><a href="/services/video-editing.php">Video Editing Services</a></h4>
+              <h4><a href="services/video-editing.php">Video Editing Services</a></h4>
               <p>Professional video editing for social media, marketing, and promotional content. From short-form Reels to long-form YouTube videos, we bring your vision to life.</p>
             </div>
           </div>
@@ -331,7 +335,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </svg>
                 <i class="bx bx-shield-alt-2"></i>
               </div>
-              <h4><a href="/services/security-maintenance.php">Website Security &amp; Maintenance</a></h4>
+              <h4><a href="services/security-maintenance.php">Website Security &amp; Maintenance</a></h4>
               <p>Protect your website with 24/7 monitoring, daily backups, malware scanning, and automatic updates. Keep your site secure and running smoothly with our comprehensive maintenance plans starting at $99/month.</p>
             </div>
           </div>
@@ -343,7 +347,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </svg>
                 <i class="bx bx-cart"></i>
               </div>
-              <h4><a href="/services/ecommerce.php">E-Commerce Solutions</a></h4>
+              <h4><a href="services/ecommerce.php">E-Commerce Solutions</a></h4>
               <p>Launch your online store with WooCommerce or Shopify. Complete e-commerce solutions with payment integration, inventory management, and secure checkout. Start selling online today.</p>
             </div>
           </div>
@@ -355,7 +359,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </svg>
                 <i class="bx bx-share-alt"></i>
               </div>
-              <h4><a href="/services/social-media.php">Social Media Management</a></h4>
+              <h4><a href="services/social-media.php">Social Media Management</a></h4>
               <p>Grow your brand with professional social media management. Content creation, daily posting, community engagement, and analytics for Facebook, Instagram, LinkedIn, and more. Plans starting at $499/month.</p>
             </div>
           </div>
@@ -367,7 +371,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </svg>
                 <i class="bx bx-envelope"></i>
               </div>
-              <h4><a href="/services/email-marketing.php">Email Marketing Automation</a></h4>
+              <h4><a href="services/email-marketing.php">Email Marketing Automation</a></h4>
               <p>Turn subscribers into customers with strategic email marketing. Automated campaigns, beautiful templates, list building, and analytics. Get $42 ROI for every $1 spent with professional email marketing.</p>
             </div>
           </div>
@@ -379,7 +383,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </svg>
                 <i class="bx bx-rocket"></i>
               </div>
-              <h4><a href="/services/speed-optimization.php">Website Speed Optimization</a></h4>
+              <h4><a href="services/speed-optimization.php">Website Speed Optimization</a></h4>
               <p>Make your website lightning fast. Improve Core Web Vitals, boost SEO rankings, and increase conversions. Professional speed optimization to reduce load times by up to 80%.</p>
             </div>
           </div>
@@ -391,11 +395,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </svg>
                 <i class="bx bx-globe"></i>
               </div>
-              <h4><a href="/services/domain-lookup.php">Domain Lookup</a></h4>
+              <h4><a href="services/domain-lookup.php">Domain Lookup</a></h4>
               <p>Search and register your perfect domain name. Secure your brand online with the ideal web address for your business or project.</p>
             </div>
           </div>
-        </div>
+        </div><!-- End hidden hardcoded services -->
 
       </div>
     </section><!-- End Services Section -->
@@ -406,34 +410,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <section id="stats" class="stats section-bg">
       <div class="container">
         <div class="row">
-          <div class="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="100">
+          <?php foreach ($stats as $index => $stat): ?>
+          <div class="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="<?php echo ($index + 1) * 100; ?>">
             <div class="icon-box text-center w-100">
-              <i class="bx bx-trophy" style="font-size: 48px; color: #5cb874;"></i>
-              <h3 class="counter" data-target="15">0</h3>
-              <p><strong>Years Experience</strong></p>
+              <?php if ($stat['icon_class']): ?>
+                <i class="<?php echo htmlspecialchars($stat['icon_class']); ?>" style="font-size: 48px; color: #5cb874;"></i>
+              <?php endif; ?>
+              <h3>
+                <span class="counter" data-target="<?php echo htmlspecialchars($stat['stat_value']); ?>">0</span><?php echo htmlspecialchars($stat['stat_suffix'] ?? ''); ?>
+              </h3>
+              <p><strong><?php echo htmlspecialchars($stat['stat_label']); ?></strong></p>
             </div>
           </div>
-          <div class="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="200">
-            <div class="icon-box text-center w-100">
-              <i class="bx bx-check-shield" style="font-size: 48px; color: #5cb874;"></i>
-              <h3><span class="counter" data-target="500">0</span>+</h3>
-              <p><strong>Projects Completed</strong></p>
-            </div>
-          </div>
-          <div class="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="300">
-            <div class="icon-box text-center w-100">
-              <i class="bx bx-happy" style="font-size: 48px; color: #5cb874;"></i>
-              <h3><span class="counter" data-target="99">0</span>%</h3>
-              <p><strong>Client Satisfaction</strong></p>
-            </div>
-          </div>
-          <div class="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="400">
-            <div class="icon-box text-center w-100">
-              <i class="bx bx-time-five" style="font-size: 48px; color: #5cb874;"></i>
-              <h3><span class="counter" data-target="24">0</span>/7</h3>
-              <p><strong>Support Available</strong></p>
-            </div>
-          </div>
+          <?php endforeach; ?>
         </div>
       </div>
     </section><!-- End Stats Section -->
@@ -566,125 +555,53 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         <div class="row portfolio-container">
 
-          <!-- E-Commerce Migration -->
-          <div class="col-lg-4 col-md-6 portfolio-item filter-hosting filter-web" data-aos="fade-up" data-aos-delay="100">
-            <div class="portfolio-wrap">
-              <picture>
-                <source srcset="assets/img/portfolio/ecommerce-migration.webp" type="image/webp">
-                <img src="assets/img/portfolio/ecommerce-migration.jpg" class="img-fluid" alt="E-Commerce Site Migration & Optimization" loading="lazy" decoding="async" width="600" height="400">
-              </picture>
-              <span class="portfolio-category-badge">Web Hosting</span>
-              <div class="portfolio-info">
-                <h4>E-Commerce Site Migration</h4>
-                <p>Web Hosting & Development</p>
-                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> 80% Faster Load Times</span>
-                <div class="portfolio-links">
-                  <a href="assets/img/portfolio/ecommerce-migration.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="E-Commerce Site Migration & Optimization"><i class="bx bx-plus"></i></a>
-                  <a href="portfolio-details.php?project=ecommerce-migration" title="View Case Study"><i class="bx bx-link"></i></a>
-                </div>
-              </div>
-            </div>
-          </div>
+          <?php if (!empty($featuredPortfolio)): ?>
+            <?php
+            $delay = 100;
+            foreach ($featuredPortfolio as $index => $item):
+              // Create filter class from category
+              $filterClass = 'filter-' . strtolower(str_replace([' ', '&'], ['-', ''], $item['category']));
 
-          <!-- Social Media Campaign -->
-          <div class="col-lg-4 col-md-6 portfolio-item filter-video" data-aos="fade-up" data-aos-delay="200">
-            <div class="portfolio-wrap">
-              <picture>
-                <source srcset="assets/img/portfolio/social-campaign.webp" type="image/webp">
-                <img src="assets/img/portfolio/social-campaign.jpg" class="img-fluid" alt="Social Media Video Campaign" loading="lazy" decoding="async" width="600" height="400">
-              </picture>
-              <span class="portfolio-category-badge">Video Editing</span>
-              <div class="portfolio-info">
-                <h4>Social Media Video Campaign</h4>
-                <p>Video Editing</p>
-                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> 300% Engagement Increase</span>
-                <div class="portfolio-links">
-                  <a href="assets/img/portfolio/social-campaign.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="Social Media Video Campaign"><i class="bx bx-plus"></i></a>
-                  <a href="portfolio-details.php?project=social-media-campaign" title="View Case Study"><i class="bx bx-link"></i></a>
-                </div>
-              </div>
-            </div>
-          </div>
+              // Get image paths
+              $imagePath = $item['thumbnail_image'] ?? $item['featured_image'] ?? 'assets/img/placeholder.jpg';
 
-          <!-- Custom WooCommerce -->
-          <div class="col-lg-4 col-md-6 portfolio-item filter-web filter-wordpress" data-aos="fade-up" data-aos-delay="300">
+              // Check if image has webp version
+              $pathInfo = pathinfo($imagePath);
+              $webpPath = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '.webp';
+            ?>
+          <div class="col-lg-4 col-md-6 portfolio-item <?php echo htmlspecialchars($filterClass); ?>" data-aos="fade-up" data-aos-delay="<?php echo $delay; ?>">
             <div class="portfolio-wrap">
               <picture>
-                <source srcset="assets/img/portfolio/custom-woocommerce.webp" type="image/webp">
-                <img src="assets/img/portfolio/custom-woocommerce.jpg" class="img-fluid" alt="Custom WooCommerce Platform" loading="lazy" decoding="async" width="600" height="400">
+                <?php if (file_exists($webpPath)): ?>
+                <source srcset="<?php echo htmlspecialchars($webpPath); ?>" type="image/webp">
+                <?php endif; ?>
+                <img src="<?php echo htmlspecialchars($imagePath); ?>" class="img-fluid" alt="<?php echo htmlspecialchars($item['title']); ?>" loading="lazy" decoding="async" width="600" height="400">
               </picture>
-              <span class="portfolio-category-badge">Web Development</span>
+              <span class="portfolio-category-badge"><?php echo htmlspecialchars($item['category']); ?></span>
               <div class="portfolio-info">
-                <h4>Custom WooCommerce Platform</h4>
-                <p>Web Development</p>
-                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> 200% Conversion Increase</span>
+                <h4><?php echo htmlspecialchars($item['title']); ?></h4>
+                <p><?php echo htmlspecialchars($item['category']); ?></p>
+                <?php if (!empty($item['tags'])): ?>
+                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> <?php echo htmlspecialchars($item['tags']); ?></span>
+                <?php endif; ?>
                 <div class="portfolio-links">
-                  <a href="assets/img/portfolio/custom-woocommerce.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="Custom WooCommerce Platform"><i class="bx bx-plus"></i></a>
-                  <a href="portfolio-details.php?project=custom-ecommerce" title="View Case Study"><i class="bx bx-link"></i></a>
+                  <a href="<?php echo htmlspecialchars($imagePath); ?>" data-gallery="portfolioGallery" class="portfolio-lightbox" title="<?php echo htmlspecialchars($item['title']); ?>"><i class="bx bx-plus"></i></a>
+                  <a href="portfolio-details.php?project=<?php echo htmlspecialchars($item['slug']); ?>" title="View Case Study"><i class="bx bx-link"></i></a>
                 </div>
               </div>
             </div>
           </div>
-
-          <!-- Local SEO -->
-          <div class="col-lg-4 col-md-6 portfolio-item filter-seo filter-web" data-aos="fade-up" data-aos-delay="100">
-            <div class="portfolio-wrap">
-              <picture>
-                <source srcset="assets/img/portfolio/local-seo.webp" type="image/webp">
-                <img src="assets/img/portfolio/local-seo.jpg" class="img-fluid" alt="Local SEO Campaign for Law Firm" loading="lazy" decoding="async" width="600" height="400">
-              </picture>
-              <span class="portfolio-category-badge">SEO</span>
-              <div class="portfolio-info">
-                <h4>Local SEO Campaign</h4>
-                <p>SEO & Web Development</p>
-                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> 500% Organic Traffic Increase</span>
-                <div class="portfolio-links">
-                  <a href="assets/img/portfolio/local-seo.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="Local SEO Campaign for Law Firm"><i class="bx bx-plus"></i></a>
-                  <a href="portfolio-details.php?project=local-seo" title="View Case Study"><i class="bx bx-link"></i></a>
-                </div>
-              </div>
+            <?php
+              $delay = ($delay == 300) ? 100 : $delay + 100;
+            endforeach; ?>
+          <?php else: ?>
+          <!-- No portfolio items found - show placeholder message -->
+          <div class="col-12">
+            <div class="alert alert-info text-center">
+              <i class="bx bx-info-circle"></i> No portfolio items available yet. Add some from the admin panel!
             </div>
           </div>
-
-          <!-- WordPress Optimization -->
-          <div class="col-lg-4 col-md-6 portfolio-item filter-hosting filter-wordpress" data-aos="fade-up" data-aos-delay="200">
-            <div class="portfolio-wrap">
-              <picture>
-                <source srcset="assets/img/portfolio/wordpress-optimization.webp" type="image/webp">
-                <img src="assets/img/portfolio/wordpress-optimization.jpg" class="img-fluid" alt="WordPress Performance Optimization" loading="lazy" decoding="async" width="600" height="400">
-              </picture>
-              <span class="portfolio-category-badge">WordPress</span>
-              <div class="portfolio-info">
-                <h4>WordPress Performance Optimization</h4>
-                <p>WordPress Optimization</p>
-                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> 70% Faster Page Loads</span>
-                <div class="portfolio-links">
-                  <a href="assets/img/portfolio/wordpress-optimization.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="WordPress Performance Optimization"><i class="bx bx-plus"></i></a>
-                  <a href="portfolio-details.php?project=wordpress-optimization" title="View Case Study"><i class="bx bx-link"></i></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- YouTube Launch -->
-          <div class="col-lg-4 col-md-6 portfolio-item filter-video" data-aos="fade-up" data-aos-delay="300">
-            <div class="portfolio-wrap">
-              <picture>
-                <source srcset="assets/img/portfolio/youtube-launch.webp" type="image/webp">
-                <img src="assets/img/portfolio/youtube-launch.jpg" class="img-fluid" alt="YouTube Channel Launch & Growth" loading="lazy" decoding="async" width="600" height="400">
-              </picture>
-              <span class="portfolio-category-badge">Video Editing</span>
-              <div class="portfolio-info">
-                <h4>YouTube Channel Launch</h4>
-                <p>Video Editing</p>
-                <span class="portfolio-metric"><i class="bx bx-trending-up"></i> 10K Subscribers in 3 Months</span>
-                <div class="portfolio-links">
-                  <a href="assets/img/portfolio/youtube-launch.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="YouTube Channel Launch & Growth"><i class="bx bx-plus"></i></a>
-                  <a href="portfolio-details.php?project=youtube-launch" title="View Case Study"><i class="bx bx-link"></i></a>
-                </div>
-              </div>
-            </div>
-          </div>
+          <?php endif; ?>
 
         </div>
 
@@ -702,44 +619,36 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
 
         <div class="row">
-          <div class="col-lg-4 col-md-6 video-item" data-aos="fade-up" data-aos-delay="100">
-            <a href="https://www.youtube.com/watch?v=y881t8ilMyc" class="video-lightbox" data-glightbox="type: video">
-              <img src="https://img.youtube.com/vi/y881t8ilMyc/maxresdefault.jpg" alt="Social Media Motion Graphics Sample" class="img-fluid" loading="lazy">
+          <?php if (!empty($portfolioVideos)): ?>
+            <?php
+            $videoDelay = 100;
+            foreach ($portfolioVideos as $video):
+              // Get thumbnail - use custom or YouTube thumbnail
+              $thumbnail = $video['custom_thumbnail'] ?? $video['thumbnail_url'] ?? 'https://img.youtube.com/vi/' . $video['youtube_id'] . '/maxresdefault.jpg';
+            ?>
+          <div class="col-lg-4 col-md-6 video-item" data-aos="fade-up" data-aos-delay="<?php echo $videoDelay; ?>">
+            <a href="<?php echo htmlspecialchars($video['youtube_url']); ?>" class="video-lightbox" data-glightbox="type: video">
+              <img src="<?php echo htmlspecialchars($thumbnail); ?>" alt="<?php echo htmlspecialchars($video['title']); ?>" class="img-fluid" loading="lazy">
               <div class="video-overlay">
                 <i class="bx bx-play-circle"></i>
               </div>
             </a>
             <div class="video-info">
-              <h4>Social Media Motion Graphics</h4>
-              <p>Professional animated content for social platforms</p>
+              <h4><?php echo htmlspecialchars($video['title']); ?></h4>
+              <p><?php echo htmlspecialchars($video['description'] ?? 'Video Portfolio'); ?></p>
             </div>
           </div>
-
-          <div class="col-lg-4 col-md-6 video-item" data-aos="fade-up" data-aos-delay="200">
-            <a href="https://www.youtube.com/watch?v=gfU1iZnjRZM" class="video-lightbox" data-glightbox="type: video">
-              <img src="https://img.youtube.com/vi/gfU1iZnjRZM/maxresdefault.jpg" alt="Polished Tutorial Video Sample" class="img-fluid" loading="lazy">
-              <div class="video-overlay">
-                <i class="bx bx-play-circle"></i>
-              </div>
-            </a>
-            <div class="video-info">
-              <h4>Polished Tutorial Content</h4>
-              <p>Educational video with clean graphics and transitions</p>
+            <?php
+              $videoDelay = ($videoDelay == 300) ? 100 : $videoDelay + 100;
+            endforeach; ?>
+          <?php else: ?>
+          <!-- No videos found - show placeholder message -->
+          <div class="col-12">
+            <div class="alert alert-info text-center">
+              <i class="bx bx-info-circle"></i> No videos available yet. Add some from the admin panel!
             </div>
           </div>
-
-          <div class="col-lg-4 col-md-6 video-item" data-aos="fade-up" data-aos-delay="300">
-            <a href="https://www.youtube.com/watch?v=Zvq25PU9xHI" class="video-lightbox" data-glightbox="type: video">
-              <img src="https://img.youtube.com/vi/Zvq25PU9xHI/maxresdefault.jpg" alt="Cinematic Promotional Video Sample" class="img-fluid" loading="lazy">
-              <div class="video-overlay">
-                <i class="bx bx-play-circle"></i>
-              </div>
-            </a>
-            <div class="video-info">
-              <h4>Cinematic Promotional Video</h4>
-              <p>High-quality brand and product showcase</p>
-            </div>
-          </div>
+          <?php endif; ?>
         </div>
       </div>
     </section><!-- End Video Portfolio Section -->
@@ -792,7 +701,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
 
         <div class="text-center mt-4">
-          <a href="/blog.php" class="btn btn-brand">View All Articles</a>
+          <a href="blog.php" class="btn btn-brand">View All Articles</a>
         </div>
       </div>
     </section><!-- End Featured Blog Section -->
@@ -926,7 +835,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               <div class="form-group mb-3">
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="consent" name="consent" required>
-                  <label class="form-check-label" for="consent">I agree to the <a href="/privacy-policy.php" target="_blank" rel="noopener">Privacy Policy</a>.</label>
+                  <label class="form-check-label" for="consent">I agree to the <a href="privacy-policy.php" target="_blank" rel="noopener">Privacy Policy</a>.</label>
                 </div>
                 <div class="form-check mt-2">
                   <input class="form-check-input" type="checkbox" id="marketing_consent" name="marketing_consent" value="1">
@@ -1006,9 +915,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div class="text-center mt-4" data-aos="fade-up" data-aos-delay="300">
           <p style="font-size: 16px; margin-bottom: 10px;"><strong>Remote Services Available Nationwide</strong></p>
           <p style="color: #777;">While we're based in St. Louis, we work with clients across the United States through virtual consultations and remote project management.</p>
-          <a href="/service-areas.php" class="btn btn-primary btn-brand" style="margin-top: 20px;">View Full Service Area Coverage</a>
+          <a href="service-areas.php" class="btn btn-primary btn-brand" style="margin-top: 20px;">View Full Service Area Coverage</a>
           <!-- Deep links for popular location pages to improve internal linking -->
-          <div class="mt-2"><small>Popular: <a href="/st-louis-web-design.php" aria-label="St. Louis Web Design — popular location">St. Louis Web Design</a>, <a href="/missouri-web-hosting.php" aria-label="Missouri Web Hosting — popular location">Missouri Web Hosting</a>, <a href="/illinois-seo-services.php" aria-label="Illinois SEO Services — popular location">Illinois SEO</a></small></div>
+          <div class="mt-2"><small>Popular: <a href="st-louis-web-design.php" aria-label="St. Louis Web Design — popular location">St. Louis Web Design</a>, <a href="missouri-web-hosting.php" aria-label="Missouri Web Hosting — popular location">Missouri Web Hosting</a>, <a href="illinois-seo-services.php" aria-label="Illinois SEO Services — popular location">Illinois SEO</a></small></div>
         </div>
       </div>
     </section><!-- End Service Areas Section -->

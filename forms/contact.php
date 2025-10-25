@@ -131,7 +131,30 @@ if (isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response
     }
 }
 
-// 5. Load and use PHP Email Form library
+// 5. Save to database
+require_once __DIR__ . '/../config/cms-data.php';
+
+$formData = [
+    'name' => $name,
+    'email' => $email,
+    'subject' => $subject,
+    'message' => $message,
+    'phone' => '',  // Contact form doesn't have phone field
+    'marketing_consent' => $marketing_consent,
+    'privacy_consent' => $privacy_consent,
+    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+];
+
+$saved = CMSData::saveFormSubmission('contact', $formData);
+
+if (!$saved) {
+    logSecurityEvent('form_submission_db_save_failed', [
+        'form' => 'contact',
+        'email' => $email
+    ], 'WARNING');
+}
+
+// 6. Load and use PHP Email Form library
 $receiving_email_address = getEnv('MAIL_TO', 'support@izendestudioweb.com');
 
 if (file_exists($php_email_form = '../assets/vendor/php-email-form/php-email-form.php')) {

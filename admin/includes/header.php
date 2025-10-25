@@ -167,6 +167,18 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link <?php echo $currentPage === 'analytics-dashboard' ? 'active' : ''; ?>" href="analytics-dashboard.php">
+                                <i class="bi bi-speedometer2"></i>
+                                Analytics Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $currentPage === 'analytics' ? 'active' : ''; ?>" href="analytics.php">
+                                <i class="bi bi-gear"></i>
+                                Analytics Settings
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link <?php echo $currentPage === 'users' ? 'active' : ''; ?>" href="users.php">
                                 <i class="bi bi-people"></i>
                                 Users

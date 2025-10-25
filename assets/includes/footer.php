@@ -1,3 +1,7 @@
+<?php
+// Detect if we're in a subdirectory
+$base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudioweb') ? '../' : '';
+?>
   <!-- ======= Footer ======= -->
   <footer id="footer">
     <div class="container">
@@ -44,13 +48,13 @@
 
       <div class="footer-legal-links" style="margin-top:18px; margin-bottom:12px;">
         <nav aria-label="Legal">
-          <a href="/privacy-policy.php" class="text-white me-3" aria-label="Privacy Policy">Privacy</a>
-          <a href="/terms-of-service.php" class="text-white me-3" aria-label="Terms of Service">Terms</a>
-          <a href="/cookie-policy.php" class="text-white me-3" aria-label="Cookie Policy">Cookies</a>
-          <a href="/refund-policy.php" class="text-white me-3" aria-label="Refund Policy">Refunds</a>
-          <a href="/service-level-agreement.php" class="text-white me-3" aria-label="Service Level Agreement">SLA</a>
-          <a href="/accessibility-statement.php" class="text-white me-3" aria-label="Accessibility Statement">Accessibility</a>
-          <a href="/do-not-sell.php" class="text-white me-3" aria-label="Do Not Sell or Share">Do Not Sell</a>
+          <a href="<?php echo $base_path; ?>privacy-policy.php" class="text-white me-3" aria-label="Privacy Policy">Privacy</a>
+          <a href="<?php echo $base_path; ?>terms-of-service.php" class="text-white me-3" aria-label="Terms of Service">Terms</a>
+          <a href="<?php echo $base_path; ?>cookie-policy.php" class="text-white me-3" aria-label="Cookie Policy">Cookies</a>
+          <a href="<?php echo $base_path; ?>refund-policy.php" class="text-white me-3" aria-label="Refund Policy">Refunds</a>
+          <a href="<?php echo $base_path; ?>service-level-agreement.php" class="text-white me-3" aria-label="Service Level Agreement">SLA</a>
+          <a href="<?php echo $base_path; ?>accessibility-statement.php" class="text-white me-3" aria-label="Accessibility Statement">Accessibility</a>
+          <a href="<?php echo $base_path; ?>do-not-sell.php" class="text-white me-3" aria-label="Do Not Sell or Share">Do Not Sell</a>
           <a href="#" id="cookie-settings-link" class="text-white" aria-label="Cookie Settings">Cookie Settings</a>
         </nav>
       </div>
@@ -65,11 +69,16 @@
             class="bi bi-arrow-up-short"></i></a>
 
     <!-- Vendor JS Files -->
-    <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js" defer></script>
-    <script src="/assets/vendor/glightbox/js/glightbox.min.js" defer></script>
-    <script src="/assets/vendor/isotope-layout/isotope.pkgd.min.js" defer></script>
-    <script src="/assets/vendor/php-email-form/validate.js" defer></script>
+    <script src="<?php echo $base_path; ?>assets/vendor/bootstrap/js/bootstrap.bundle.min.js" defer></script>
+    <script src="<?php echo $base_path; ?>assets/vendor/glightbox/js/glightbox.min.js" defer></script>
+    <script src="<?php echo $base_path; ?>assets/vendor/isotope-layout/isotope.pkgd.min.js" defer></script>
+    <script src="<?php echo $base_path; ?>assets/vendor/php-email-form/validate.js" defer></script>
     <script src="https://unpkg.com/swiper@11/swiper-bundle.min.js"></script>
 
     <!-- Template Main JS File -->
-    <script src="/assets/js/main.js" defer></script>
+    <script src="<?php echo $base_path; ?>assets/js/main.js" defer></script>
+
+    <!-- Analytics Event Tracking -->
+    <?php if ((CMSData::getSetting('analytics_enabled') ?? '1') == '1' && (!empty(CMSData::getSetting('google_analytics_id')) || !empty(CMSData::getSetting('google_tag_manager_id')))): ?>
+    <script src="<?php echo $base_path; ?>assets/js/analytics-events.js" defer></script>
+    <?php endif; ?>
