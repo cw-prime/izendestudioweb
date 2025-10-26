@@ -15,6 +15,7 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
           <li><a class="nav-link scrollto active" href="<?php echo $base_path; ?>index.php#home">Home</a></li>
           <li class="dropdown"><a href="#"><span>Services</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
+              <li><a href="<?php echo $base_path; ?>services/chatbot.php">24/7 Chatbot Service</a></li>
               <li><a href="<?php echo $base_path; ?>services/video-editing.php">Video Editing</a></li>
               <li><a href="<?php echo $base_path; ?>services/web-development.php">Web Development</a></li>
               <li><a href="<?php echo $base_path; ?>services/wordpress.php">WordPress Design</a></li>
@@ -32,6 +33,7 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
           <li><a class="nav-link scrollto " href="<?php echo $base_path; ?>index.php#portfolio">Portfolio</a></li>
           <li><a class="nav-link scrollto" href="<?php echo $base_path; ?>index.php#contact">Contact</a></li>
           <li><a class="nav-link scrollto" href="<?php echo $base_path; ?>blog.php">Blog</a></li>
+          <li><a class="nav-link" href="<?php echo $base_path; ?>book-consultation.php"><i class="bi bi-calendar-check"></i> Book Consultation</a></li>
           <li><a class="getstarted scrollto" href="<?php echo $base_path; ?>quote.php" id="quote">Free Quote</a></li>
         </ul>
         <button id="dark-mode-toggle" class="dark-mode-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">

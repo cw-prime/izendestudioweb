@@ -251,6 +251,62 @@ class AnalyticsFetcher {
     }
 
     /**
+     * Get blog-specific analytics
+     * Filters for pages containing 'blog-post.php' or '/blog/'
+     */
+    public function getBlogStats($days = 30) {
+        $dateRange = [
+            'startDate' => $days . 'daysAgo',
+            'endDate' => 'today'
+        ];
+
+        // Get blog page views over time
+        $result = $this->runReport(
+            [['name' => 'pageTitle'], ['name' => 'pagePath']],
+            [['name' => 'screenPageViews'], ['name' => 'averageSessionDuration']],
+            $dateRange
+        );
+
+        return $this->formatBlogData($result);
+    }
+
+    /**
+     * Get top blog posts
+     */
+    public function getTopBlogPosts($limit = 10, $days = 30) {
+        $dateRange = [
+            'startDate' => $days . 'daysAgo',
+            'endDate' => 'today'
+        ];
+
+        $result = $this->runReport(
+            [['name' => 'pageTitle'], ['name' => 'pagePath']],
+            [['name' => 'screenPageViews'], ['name' => 'averageSessionDuration']],
+            $dateRange
+        );
+
+        return $this->formatTopBlogPosts($result, $limit);
+    }
+
+    /**
+     * Get blog traffic sources
+     */
+    public function getBlogTrafficSources($days = 30) {
+        $dateRange = [
+            'startDate' => $days . 'daysAgo',
+            'endDate' => 'today'
+        ];
+
+        $result = $this->runReport(
+            [['name' => 'sessionSource'], ['name' => 'pagePath']],
+            [['name' => 'sessions']],
+            $dateRange
+        );
+
+        return $this->formatBlogTrafficSources($result);
+    }
+
+    /**
      * Format page views data for charts
      */
     private function formatPageViewsData($data) {
@@ -356,5 +412,117 @@ class AnalyticsFetcher {
             'users' => (int)$row['metricValues'][2]['value'],
             'avgDuration' => round((float)$row['metricValues'][3]['value'])
         ];
+    }
+
+    /**
+     * Format blog-specific data
+     */
+    private function formatBlogData($data) {
+        if (isset($data['error'])) {
+            return ['error' => $data['error']];
+        }
+
+        if (!isset($data['rows'])) {
+            return [
+                'totalViews' => 0,
+                'avgDuration' => 0,
+                'postCount' => 0
+            ];
+        }
+
+        $totalViews = 0;
+        $totalDuration = 0;
+        $blogPosts = 0;
+
+        foreach ($data['rows'] as $row) {
+            $pagePath = $row['dimensionValues'][1]['value'] ?? '';
+
+            // Filter for blog posts (blog-post.php or /blog/ paths)
+            if (strpos($pagePath, 'blog-post.php') !== false || strpos($pagePath, '/blog/') !== false) {
+                $totalViews += (int)$row['metricValues'][0]['value'];
+                $totalDuration += (float)$row['metricValues'][1]['value'];
+                $blogPosts++;
+            }
+        }
+
+        return [
+            'totalViews' => $totalViews,
+            'avgDuration' => $blogPosts > 0 ? round($totalDuration / $blogPosts) : 0,
+            'postCount' => $blogPosts
+        ];
+    }
+
+    /**
+     * Format top blog posts
+     */
+    private function formatTopBlogPosts($data, $limit) {
+        if (isset($data['error'])) {
+            return ['error' => $data['error']];
+        }
+
+        if (!isset($data['rows'])) {
+            return [];
+        }
+
+        $posts = [];
+
+        foreach ($data['rows'] as $row) {
+            $pagePath = $row['dimensionValues'][1]['value'] ?? '';
+
+            // Filter for blog posts only
+            if (strpos($pagePath, 'blog-post.php') !== false || strpos($pagePath, '/blog/') !== false) {
+                $posts[] = [
+                    'title' => $row['dimensionValues'][0]['value'],
+                    'path' => $pagePath,
+                    'views' => (int)$row['metricValues'][0]['value'],
+                    'avgDuration' => round((float)$row['metricValues'][1]['value'])
+                ];
+            }
+        }
+
+        // Sort by views descending
+        usort($posts, function($a, $b) {
+            return $b['views'] - $a['views'];
+        });
+
+        return array_slice($posts, 0, $limit);
+    }
+
+    /**
+     * Format blog traffic sources
+     */
+    private function formatBlogTrafficSources($data) {
+        if (isset($data['error'])) {
+            return ['error' => $data['error']];
+        }
+
+        if (!isset($data['rows'])) {
+            return ['labels' => [], 'values' => []];
+        }
+
+        $sources = [];
+
+        foreach ($data['rows'] as $row) {
+            $pagePath = $row['dimensionValues'][1]['value'] ?? '';
+
+            // Filter for blog posts only
+            if (strpos($pagePath, 'blog-post.php') !== false || strpos($pagePath, '/blog/') !== false) {
+                $source = $row['dimensionValues'][0]['value'];
+                $sessions = (int)$row['metricValues'][0]['value'];
+
+                if (!isset($sources[$source])) {
+                    $sources[$source] = 0;
+                }
+                $sources[$source] += $sessions;
+            }
+        }
+
+        // Sort by sessions descending
+        arsort($sources);
+
+        $labels = array_map('ucfirst', array_keys($sources));
+        $values = array_values($sources);
+
+        return ['labels' => $labels, 'values' => $values];
     }
 }

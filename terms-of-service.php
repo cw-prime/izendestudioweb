@@ -116,8 +116,7 @@ setSecurityHeaders();
         <h2 id="contact">15. Contact</h2>
         <p>Questions about these Terms may be directed to:</p>
         <p>Email: <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a><br>
-        Phone: +1 314-312-6441<br>
-        Mail: PO Box 23456, St. Louis, MO 63156</p>
+        Phone: +1 314-312-6441</p>
       </div>
     </section>
 

@@ -114,8 +114,7 @@ setSecurityHeaders();
         <h3>Contact and Questions</h3>
         <p>If you have questions about this Refund Policy or need assistance with a refund or cancellation, please contact us:</p>
         <p>Email: <a href="mailto:billing@izendestudioweb.com">billing@izendestudioweb.com</a> or <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a><br>
-        Phone: +1 314-312-6441<br>
-        Mail: PO Box 23456, St. Louis, MO 63156</p>
+        Phone: +1 314-312-6441</p>
         <h3>Frequently Asked Questions</h3>
         <p><strong>Q: Can I get a refund if I don't like my website?</strong><br>
         A: Yes, if you request a refund within the first 30 days and before substantial work has been completed. Otherwise, refunds are based on completed milestones.</p>

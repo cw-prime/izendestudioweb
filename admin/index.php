@@ -38,6 +38,46 @@ $stats['new_submissions'] = mysqli_fetch_assoc($result)['count'] ?? 0;
 $result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_form_submissions");
 $stats['total_submissions'] = mysqli_fetch_assoc($result)['count'] ?? 0;
 
+// Count upcoming bookings
+$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_bookings WHERE preferred_date >= NOW() AND status IN ('pending', 'confirmed')");
+$stats['upcoming_bookings'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+
+// Count newsletter subscribers
+$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_newsletter_subscribers WHERE status = 'active'");
+$stats['newsletter_subscribers'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+
+// Count active testimonials
+$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_testimonials WHERE is_active = 1");
+$stats['testimonials'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+
+// Count active banners
+$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_promo_banners WHERE is_active = 1");
+$stats['active_banners'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+
+// Get recent bookings
+$recentBookings = [];
+$result = mysqli_query($conn, "
+    SELECT id, client_name, client_email, service_type, preferred_date, status
+    FROM iz_bookings
+    ORDER BY created_at DESC
+    LIMIT 5
+");
+while ($row = mysqli_fetch_assoc($result)) {
+    $recentBookings[] = $row;
+}
+
+// Get recent newsletter signups
+$recentSubscribers = [];
+$result = mysqli_query($conn, "
+    SELECT id, email, first_name, last_name, subscribe_date
+    FROM iz_newsletter_subscribers
+    ORDER BY subscribe_date DESC
+    LIMIT 5
+");
+while ($row = mysqli_fetch_assoc($result)) {
+    $recentSubscribers[] = $row;
+}
+
 // Get recent submissions
 $recentSubmissions = [];
 $result = mysqli_query($conn, "
@@ -66,8 +106,54 @@ while ($row = mysqli_fetch_assoc($result)) {
 include __DIR__ . '/includes/header.php';
 ?>
 
+<!-- Welcome Message -->
+<div class="alert alert-primary alert-dismissible fade show mb-4" role="alert">
+    <h5><i class="bi bi-house-heart"></i> Welcome back, <?php echo htmlspecialchars(Auth::getUser()['username'] ?? 'Admin'); ?>!</h5>
+    <p class="mb-0">Here's what's happening with your website today.</p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<!-- Top Stats Row -->
 <div class="row">
-    <!-- Stats Cards -->
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card" style="border-left: 4px solid #667eea;">
+            <i class="bi bi-calendar-check icon" style="color: #667eea;"></i>
+            <div class="number"><?php echo $stats['upcoming_bookings']; ?></div>
+            <div class="label">Upcoming Bookings</div>
+            <a href="bookings.php" class="stretched-link"></a>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card" style="border-left: 4px solid #dc3545;">
+            <i class="bi bi-inbox-fill icon" style="color: #dc3545;"></i>
+            <div class="number"><?php echo $stats['new_submissions']; ?></div>
+            <div class="label">New Form Submissions</div>
+            <a href="submissions.php" class="stretched-link"></a>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card" style="border-left: 4px solid #28a745;">
+            <i class="bi bi-envelope-check icon" style="color: #28a745;"></i>
+            <div class="number"><?php echo $stats['newsletter_subscribers']; ?></div>
+            <div class="label">Newsletter Subscribers</div>
+            <small class="text-muted">Active</small>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card" style="border-left: 4px solid #ffc107;">
+            <i class="bi bi-megaphone icon" style="color: #ffc107;"></i>
+            <div class="number"><?php echo $stats['active_banners']; ?></div>
+            <div class="label">Active Banners</div>
+            <a href="banners.php" class="stretched-link"></a>
+        </div>
+    </div>
+</div>
+
+<!-- Second Stats Row -->
+<div class="row">
     <div class="col-md-3 mb-4">
         <div class="card stats-card primary">
             <i class="bi bi-briefcase icon"></i>
@@ -88,19 +174,19 @@ include __DIR__ . '/includes/header.php';
 
     <div class="col-md-3 mb-4">
         <div class="card stats-card warning">
-            <i class="bi bi-play-btn icon"></i>
-            <div class="number"><?php echo $stats['videos']; ?></div>
-            <div class="label">Videos</div>
-            <a href="videos.php" class="stretched-link"></a>
+            <i class="bi bi-chat-quote icon"></i>
+            <div class="number"><?php echo $stats['testimonials']; ?></div>
+            <div class="label">Testimonials</div>
+            <a href="testimonials.php" class="stretched-link"></a>
         </div>
     </div>
 
     <div class="col-md-3 mb-4">
-        <div class="card stats-card danger">
-            <i class="bi bi-inbox icon"></i>
-            <div class="number"><?php echo $stats['new_submissions']; ?></div>
-            <div class="label">New Submissions</div>
-            <a href="submissions.php" class="stretched-link"></a>
+        <div class="card stats-card info">
+            <i class="bi bi-play-btn icon"></i>
+            <div class="number"><?php echo $stats['videos']; ?></div>
+            <div class="label">Videos</div>
+            <a href="videos.php" class="stretched-link"></a>
         </div>
     </div>
 </div>
@@ -228,6 +314,128 @@ include __DIR__ . '/includes/header.php';
                         </td>
                     </tr>
                 </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Bookings & Subscribers -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-calendar-check"></i> Recent Bookings</span>
+                <a href="bookings.php" class="btn btn-sm btn-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <?php if (empty($recentBookings)): ?>
+                    <div class="empty-state">
+                        <i class="bi bi-calendar-x"></i>
+                        <h3>No Bookings Yet</h3>
+                        <p>Consultation bookings will appear here</p>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Service</th>
+                                    <th>Date & Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($recentBookings as $booking): ?>
+                                    <tr>
+                                        <td>
+                                            <strong><?php echo htmlspecialchars($booking['client_name']); ?></strong><br>
+                                            <small class="text-muted"><?php echo htmlspecialchars($booking['client_email']); ?></small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                <?php echo htmlspecialchars($booking['service_type']); ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $bookingDate = strtotime($booking['preferred_date']);
+                                            echo date('M j, Y', $bookingDate) . '<br>';
+                                            echo '<small class="text-muted">' . date('g:i A', $bookingDate) . '</small>';
+                                            ?>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $statusColors = [
+                                                'pending' => 'warning',
+                                                'confirmed' => 'success',
+                                                'cancelled' => 'danger',
+                                                'completed' => 'secondary'
+                                            ];
+                                            $color = $statusColors[$booking['status']] ?? 'secondary';
+                                            ?>
+                                            <span class="badge bg-<?php echo $color; ?>">
+                                                <?php echo ucfirst($booking['status']); ?>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-envelope-check"></i> Recent Newsletter Signups</span>
+            </div>
+            <div class="card-body p-0">
+                <?php if (empty($recentSubscribers)): ?>
+                    <div class="empty-state">
+                        <i class="bi bi-envelope-x"></i>
+                        <h3>No Subscribers Yet</h3>
+                        <p>Newsletter subscribers will appear here</p>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Name</th>
+                                    <th>Subscribed Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($recentSubscribers as $subscriber): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($subscriber['email']); ?></td>
+                                        <td>
+                                            <?php
+                                            $name = trim(($subscriber['first_name'] ?? '') . ' ' . ($subscriber['last_name'] ?? ''));
+                                            echo htmlspecialchars($name ?: 'N/A');
+                                            ?>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $subDate = strtotime($subscriber['subscribe_date']);
+                                            $diff = time() - $subDate;
+                                            if ($diff < 60) echo 'Just now';
+                                            elseif ($diff < 3600) echo floor($diff / 60) . ' min ago';
+                                            elseif ($diff < 86400) echo floor($diff / 3600) . ' hrs ago';
+                                            else echo date('M j, Y', $subDate);
+                                            ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

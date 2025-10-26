@@ -8,6 +8,8 @@
 require_once __DIR__ . '/config/env-loader.php';
 require_once __DIR__ . '/config/security.php';
 require_once __DIR__ . '/config/cms-data.php';
+require_once __DIR__ . '/includes/SEOHelper.php';
+require_once __DIR__ . '/includes/BannerHelper.php';
 
 // Initialize secure session and set security headers
 initSecureSession();
@@ -19,6 +21,15 @@ $featuredServices = CMSData::getFeaturedServices(6);
 $stats = CMSData::getStats();
 $featuredPortfolio = CMSData::getFeaturedPortfolio(6);
 $portfolioVideos = CMSData::getVideos('portfolio', 6);
+
+// Get featured testimonials
+require_once __DIR__ . '/admin/config/database.php';
+global $conn;
+$testimonialsResult = mysqli_query($conn, "SELECT * FROM iz_testimonials WHERE is_active = 1 ORDER BY is_featured DESC, display_order ASC LIMIT 6");
+$testimonials = [];
+while ($row = mysqli_fetch_assoc($testimonialsResult)) {
+    $testimonials[] = $row;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,10 +37,18 @@ $portfolioVideos = CMSData::getVideos('portfolio', 6);
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>St. Louis Web Design &amp; Hosting | Izende Studio Web | Missouri &amp; Illinois</title>
-  <meta content="Professional web design, hosting, and digital marketing services in St. Louis, Missouri. Serving businesses throughout Missouri and Illinois with custom websites, SEO, and web development. 15+ years experience." name="description">
-  <meta content="st louis web design, missouri web hosting, illinois seo, st louis web developer, missouri website design, web design st louis, hosting missouri" name="keywords">
   <meta name="google-site-verification" content="Wg2VOCCDPOm1l4Cof11F3kBTUqOSDR6yir-YKnoeHsM" />
+
+<?php
+// Output SEO meta tags from SEO Manager (with fallback defaults)
+SEOHelper::outputMetaTags('homepage', [
+    'page_title' => 'St. Louis Web Design & Hosting | Izende Studio Web | Missouri & Illinois',
+    'meta_description' => 'Professional web design, hosting, and digital marketing services in St. Louis, Missouri. Serving businesses throughout Missouri and Illinois with custom websites, SEO, and web development. 15+ years experience.',
+    'meta_keywords' => 'st louis web design, missouri web hosting, illinois seo, st louis web developer, missouri website design, web design st louis, hosting missouri',
+    'og_image' => 'https://izendestudioweb.com/assets/img/izende-T.png',
+    'canonical_url' => 'https://izendestudioweb.com'
+]);
+?>
 
   <!-- LocalBusiness Schema Markup -->
   <script type="application/ld+json">
@@ -44,14 +63,6 @@ $portfolioVideos = CMSData::getVideos('portfolio', 6);
     "description": "Professional web design, hosting, and digital marketing services in St. Louis, Missouri. Serving businesses throughout Missouri and Illinois.",
     "telephone": "+1-314-312-6441",
     "email": "support@izendestudioweb.com",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "PO Box 23456",
-      "addressLocality": "St. Louis",
-      "addressRegion": "MO",
-      "postalCode": "63156",
-      "addressCountry": "US"
-    },
     "geo": {
       "@type": "GeoCoordinates",
       "latitude": 38.64357,
@@ -156,6 +167,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       data-track-videos="<?php echo (CMSData::getSetting('track_video_plays') ?? '1') == '1' ? 'true' : 'false'; ?>"
       data-track-external="<?php echo (CMSData::getSetting('track_external_links') ?? '1') == '1' ? 'true' : 'false'; ?>"
       data-track-phone="<?php echo (CMSData::getSetting('track_phone_clicks') ?? '1') == '1' ? 'true' : 'false'; ?>">
+
+  <?php
+  // Display promotional banners at top
+  BannerHelper::displayBanners('top');
+  ?>
+
   <!-- Skip Links for Accessibility (provided by header include) -->
 
   <!-- Google Tag Manager (noscript) -->
@@ -429,6 +446,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <hr class="section-separator" aria-hidden="true">
 
+    <!-- ======= Book Consultation CTA ======= -->
+    <section class="cta-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 0; color: white;">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-lg-8" data-aos="fade-right">
+            <h2 style="color: white; margin-bottom: 15px;">Ready to Transform Your Online Presence?</h2>
+            <p style="font-size: 18px; margin-bottom: 0; opacity: 0.95;">Schedule a free 30-minute consultation to discuss your project. No obligation, just expert advice tailored to your business needs.</p>
+          </div>
+          <div class="col-lg-4 text-lg-end mt-4 mt-lg-0" data-aos="fade-left">
+            <a href="book-consultation.php" class="btn btn-light btn-lg" style="padding: 15px 40px; font-size: 18px; font-weight: 600; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+              <i class="bi bi-calendar-check"></i> Book Free Consultation
+            </a>
+          </div>
+        </div>
+      </div>
+    </section><!-- End CTA Section -->
+
+    <hr class="section-separator" aria-hidden="true">
+
     <!-- ======= Trust Badges Section ======= -->
     <section id="trust-badges" class="trust-badges">
       <div class="container">
@@ -655,6 +691,64 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <hr class="section-separator" aria-hidden="true">
 
+    <!-- ======= Testimonials Section ======= -->
+    <section id="testimonials" class="testimonials">
+      <div class="container">
+        <div class="section-title">
+          <h2>Client Testimonials</h2>
+          <p>See what our clients say about working with us</p>
+        </div>
+
+        <?php if (!empty($testimonials)): ?>
+        <div class="row">
+          <?php
+          $testDelay = 100;
+          foreach ($testimonials as $testimonial):
+          ?>
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="<?php echo $testDelay; ?>">
+            <div class="testimonial-item w-100">
+              <div class="stars mb-2">
+                <?php for ($i = 0; $i < 5; $i++): ?>
+                  <i class="bi bi-star<?php echo $i < $testimonial['rating'] ? '-fill' : ''; ?>" style="color: #ffc107;"></i>
+                <?php endfor; ?>
+              </div>
+              <p class="testimonial-text">
+                <i class="bx bxs-quote-alt-left quote-icon-left"></i>
+                <?php echo htmlspecialchars($testimonial['testimonial_text']); ?>
+                <i class="bx bxs-quote-alt-right quote-icon-right"></i>
+              </p>
+              <div class="testimonial-author mt-3">
+                <?php if (!empty($testimonial['client_photo'])): ?>
+                <img src="<?php echo htmlspecialchars($testimonial['client_photo']); ?>" class="testimonial-img" alt="<?php echo htmlspecialchars($testimonial['client_name']); ?>">
+                <?php endif; ?>
+                <h4><?php echo htmlspecialchars($testimonial['client_name']); ?></h4>
+                <?php if (!empty($testimonial['client_position']) && !empty($testimonial['client_company'])): ?>
+                <p class="mb-0"><?php echo htmlspecialchars($testimonial['client_position']); ?></p>
+                <p class="text-muted"><?php echo htmlspecialchars($testimonial['client_company']); ?></p>
+                <?php elseif (!empty($testimonial['client_company'])): ?>
+                <p class="text-muted"><?php echo htmlspecialchars($testimonial['client_company']); ?></p>
+                <?php endif; ?>
+                <?php if (!empty($testimonial['project_type'])): ?>
+                <span class="badge bg-primary mt-2"><?php echo htmlspecialchars($testimonial['project_type']); ?></span>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+          <?php
+          $testDelay += 100;
+          endforeach;
+          ?>
+        </div>
+        <?php else: ?>
+        <div class="alert alert-info text-center">
+          <i class="bi bi-info-circle"></i> No testimonials available yet.
+        </div>
+        <?php endif; ?>
+      </div>
+    </section><!-- End Testimonials Section -->
+
+    <hr class="section-separator" aria-hidden="true">
+
     <!-- ======= Featured Blog Section ======= -->
     <section id="featured-blog" class="featured-blog">
       <div class="container">
@@ -757,19 +851,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         <div class="section-title">
           <h2>Contact</h2>
-          <p>You can get in touch with us directly by e-mail, or by using this contact form. Leave me a message, and I will get back to you shortly. For a quick response you can start a chat with us on WhatsApp</p>
+          <p style="text-align: center; max-width: 100%; padding: 0 15px;">You can get in touch with us directly by e-mail, or by using this contact form. Leave me a message, and I will get back to you shortly. For a quick response you can start a chat with us on WhatsApp</p>
         </div>
 
         <div class="row">
 
           <div class="col-lg-5 d-flex align-items-stretch">
             <div class="info">
-              <div class="address">
-                <i class="bi bi-geo-alt"></i>
-                <h4>Location:</h4>
-                <p>PO Box 23456, St.Louis MO, 63156</p>
-              </div>
-
               <div class="email">
                 <i class="bi bi-envelope"></i>
                 <h4>Email:</h4>
@@ -780,10 +868,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <h4>Call:</h4>
                 <p> <a href="tel:314-312-6441">+1 314.312.6441 </a></p>
               </div>
-              <p style="margin-top: 20px; margin-bottom: 10px; font-weight: 600; color: #5cb874;"><i class="bx bx-map" style="margin-right: 5px;"></i> Based in St. Louis, Missouri</p>
-              <div id="map-placeholder">
-                <iframe data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d401901.52278961786!2d-90.51996745!3d38.6354974!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87d8b4a9faed8ef9%3A0xbe39eaca22bbe05b!2sSt.%20Louis%2C%20MO!5e0!3m2!1sen!2sus!4v1637347839047!5m2!1sen!2sus" width="100%" height="290px" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-              </div>
+              <p style="margin-top: 20px; margin-bottom: 10px; font-weight: 600; color: #5cb874;"><i class="bx bx-map" style="margin-right: 5px;"></i> Serving Greater St. Louis Area (20-Mile Radius)</p>
+              <div id="service-area-map" style="height: 450px; width: 120%; margin-left: -10%; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1);"></div>
 
              </div>
 
@@ -974,3 +1060,57 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </body>
 
 </html>
+
+<!-- Leaflet Map CSS and JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Service Area Map Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // St. Louis coordinates (downtown)
+    const stlLat = 38.6270;
+    const stlLng = -90.1994;
+    
+    // Initialize map
+    const map = L.map('service-area-map').setView([stlLat, stlLng], 10);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    // Add 20-mile radius circle
+    const radiusCircle = L.circle([stlLat, stlLng], {
+        color: '#5cb874',
+        fillColor: '#5cb874',
+        fillOpacity: 0.15,
+        radius: 32186.9  // 20 miles in meters
+    }).addTo(map);
+    
+    // Add marker for St. Louis
+    const marker = L.marker([stlLat, stlLng]).addTo(map);
+    marker.bindPopup('<div style="text-align: center;"><strong>Izende Studio Web</strong><br>St. Louis, MO<br><small>Serving 20-Mile Radius</small></div>');
+    
+    // Add major cities within range as markers
+    const cities = [
+        {name: 'Clayton', lat: 38.6425, lng: -90.3237},
+        {name: 'Chesterfield', lat: 38.6631, lng: -90.5771},
+        {name: 'Florissant', lat: 38.7892, lng: -90.3229},
+        {name: 'University City', lat: 38.6567, lng: -90.3148},
+        {name: 'Belleville, IL', lat: 38.5201, lng: -89.9840}
+    ];
+    
+    cities.forEach(city => {
+        L.circleMarker([city.lat, city.lng], {
+            radius: 6,
+            fillColor: "#667eea",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`<strong>${city.name}</strong><br><small>In Service Area</small>`);
+    });
+});
+</script>

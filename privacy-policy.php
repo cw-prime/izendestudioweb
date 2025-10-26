@@ -56,7 +56,7 @@ setSecurityHeaders();
         </div>
 
         <h2 id="who-we-are">1. Who We Are</h2>
-        <p>Izende Studio Web is a Professional Service based in St. Louis, Missouri. PO Box 23456, St. Louis, MO 63156. Email: support@izendestudioweb.com. Phone: +1 314-312-6441. We are the data controller for personal information collected through our website and services.</p>
+        <p>Izende Studio Web is a Professional Service based in St. Louis, Missouri. Email: support@izendestudioweb.com. Phone: +1 314-312-6441. We are the data controller for personal information collected through our website and services.</p>
 
         <h2 id="services">2. Our Services</h2>
         <p>We provide web design, web hosting, domain registration, SEO, e-commerce development, video editing, social media management, email marketing, website maintenance and speed optimization. We act as controller for our website and marketing operations and as a processor for some hosting customers under a separate DPA.</p>
@@ -157,7 +157,7 @@ setSecurityHeaders();
         <p>We may update this policy when necessary. We will post the revised policy with a new effective date.</p>
 
         <h2 id="contact">14. Contact Information</h2>
-        <p>For privacy requests: <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a> | Phone: +1 314-312-6441 | Mail: PO Box 23456, St. Louis, MO 63156</p>
+        <p>For privacy requests: <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a> | Phone: +1 314-312-6441</p>
 
       </div>
     </section>

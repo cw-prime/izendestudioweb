@@ -121,6 +121,18 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link <?php echo $currentPage === 'banners' ? 'active' : ''; ?>" href="banners.php">
+                                <i class="bi bi-megaphone"></i>
+                                Banners
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $currentPage === 'testimonials' ? 'active' : ''; ?>" href="testimonials.php">
+                                <i class="bi bi-chat-quote"></i>
+                                Testimonials
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link <?php echo $currentPage === 'stats' ? 'active' : ''; ?>" href="stats.php">
                                 <i class="bi bi-bar-chart"></i>
                                 Stats
@@ -132,6 +144,12 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                         <span>FORMS & MEDIA</span>
                     </h6>
                     <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $currentPage === 'bookings' ? 'active' : ''; ?>" href="bookings.php">
+                                <i class="bi bi-calendar-check"></i>
+                                Bookings
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link <?php echo $currentPage === 'submissions' ? 'active' : ''; ?>" href="submissions.php">
                                 <i class="bi bi-inbox"></i>
@@ -164,6 +182,12 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                             <a class="nav-link <?php echo $currentPage === 'site-settings' ? 'active' : ''; ?>" href="site-settings.php">
                                 <i class="bi bi-sliders"></i>
                                 Site Settings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $currentPage === 'seo-manager' ? 'active' : ''; ?>" href="seo-manager.php">
+                                <i class="bi bi-search"></i>
+                                SEO Manager
                             </a>
                         </li>
                         <li class="nav-item">

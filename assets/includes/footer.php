@@ -5,8 +5,28 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
   <!-- ======= Footer ======= -->
   <footer id="footer">
     <div class="container">
+      <!-- Newsletter Signup -->
+      <div class="newsletter-signup" style="max-width: 600px; margin: 0 auto 40px;">
+        <h3><i class="bx bx-envelope"></i> Subscribe to Our Newsletter</h3>
+        <p>Get web development tips, SEO insights, and special offers delivered to your inbox!</p>
+        <form id="newsletterForm" style="margin-top: 20px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+            <input type="email"
+                   name="email"
+                   placeholder="Enter your email address"
+                   required
+                   style="flex: 1; min-width: 250px; padding: 12px 20px; border: none; border-radius: 50px; font-size: 15px;">
+            <button type="submit"
+                    style="padding: 12px 30px; background: linear-gradient(45deg, #5cb874 0%, #4aa360 100%); color: white; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; transition: all 0.3s;">
+              Subscribe
+            </button>
+          </div>
+          <div id="newsletterMessage" style="margin-top: 15px; font-size: 14px;"></div>
+        </form>
+      </div>
+
       <h3>Follow Us</h3>
-      <p>Stay updated with the latest news from us!</p>
+      <p>Connect with us on social media!</p>
       <div class="social-links">
         <a href="https://twitter.com/IzendeWeb" target="_blank" class="twitter"><i class="bx bxl-twitter"></i></a>
         <a href="https://www.facebook.com/Izende-Studio-Web-109880234906868" target="_blank" class="facebook"><i class="bx bxl-facebook"></i></a>
@@ -78,7 +98,65 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
     <!-- Template Main JS File -->
     <script src="<?php echo $base_path; ?>assets/js/main.js" defer></script>
 
+    <!-- Newsletter Signup Script -->
+    <script>
+    document.getElementById('newsletterForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const form = this;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const messageDiv = document.getElementById('newsletterMessage');
+        const emailInput = form.querySelector('input[name="email"]');
+
+        // Disable button and show loading
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Subscribing...';
+        messageDiv.textContent = '';
+        messageDiv.className = '';
+
+        try {
+            const response = await fetch('<?php echo $base_path; ?>api/newsletter-signup.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: emailInput.value,
+                    source: 'footer_form'
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                messageDiv.textContent = data.message;
+                messageDiv.style.color = '#5cb874';
+                emailInput.value = '';
+
+                // Track newsletter signup in analytics
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'newsletter_signup', {
+                        'method': 'footer_form'
+                    });
+                }
+            } else {
+                messageDiv.textContent = data.message;
+                messageDiv.style.color = '#ff6b6b';
+            }
+        } catch (error) {
+            messageDiv.textContent = 'An error occurred. Please try again.';
+            messageDiv.style.color = '#ff6b6b';
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Subscribe';
+        }
+    });
+    </script>
+
     <!-- Analytics Event Tracking -->
     <?php if ((CMSData::getSetting('analytics_enabled') ?? '1') == '1' && (!empty(CMSData::getSetting('google_analytics_id')) || !empty(CMSData::getSetting('google_tag_manager_id')))): ?>
     <script src="<?php echo $base_path; ?>assets/js/analytics-events.js" defer></script>
     <?php endif; ?>
+
+    <!-- Tidio Live Chat Widget -->
+    <?php include __DIR__ . '/tidio-widget.php'; ?>
