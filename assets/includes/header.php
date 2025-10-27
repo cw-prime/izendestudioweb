@@ -7,8 +7,8 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
 <header id="header" class="d-flex align-items-center">
     <div class="container d-flex align-items-center">
 
-      <!-- Uncomment below if you prefer to use an image logo -->
-       <a href="<?php echo $base_path; ?>index.php" class="logo me-auto"><img src="<?php echo $base_path; ?>assets/img/izende-T.png" alt="" class="img-fluid"><br><div class="logo-font">Studio Web</div></a>
+      <!-- Original Logo with Image -->
+       <a href="<?php echo $base_path; ?>index.php" class="logo me-auto"><img src="<?php echo $base_path; ?>assets/img/izende-T.png" alt="Izende Studio Web" class="img-fluid"><br><div class="logo-font">Studio Web</div></a>
 
       <nav id="navbar" class="navbar">
         <ul>
