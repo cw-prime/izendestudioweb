@@ -16,6 +16,8 @@ ini_set('display_errors', 0);
   <?php @include_once './assets/includes/header-links.php'; ?>
 </head>
 <body>
+  <?php @include_once './assets/includes/header.php'; ?>
+
   <h1>Izende Studio Web</h1>
   <p>Professional Web Design & Hosting Solutions</p>
   <p>Fast, secure, and reliable services for your St. Louis business.</p>
