@@ -1,11 +1,10 @@
 <?php
 /**
  * Izende Studio Web - Homepage
+ * Testing includes one by one
  */
 error_reporting(0);
 ini_set('display_errors', 0);
-
-// Don't include any files - just output HTML directly
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,6 +13,7 @@ ini_set('display_errors', 0);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>St. Louis Web Design & Hosting | Izende Studio Web</title>
   <meta name="description" content="Professional web design, hosting, and digital marketing services in St. Louis, Missouri.">
+  <?php @include_once './assets/includes/header-links.php'; ?>
 </head>
 <body>
   <h1>Izende Studio Web</h1>
