@@ -1,134 +1,65 @@
 <?php
 /**
- * Izende Studio Web - Homepage
- * Minimal version - just load the HTML
+ * Izende Studio Web - Homepage - Ultra Minimal Version
  */
-
-// Suppress all errors
 error_reporting(0);
 ini_set('display_errors', 0);
-
-// Try to set basic security headers if possible
-if (!headers_sent()) {
-    @header('X-Frame-Options: SAMEORIGIN');
-    @header('X-Content-Type-Options: nosniff');
-    @header('X-XSS-Protection: 1; mode=block');
-}
-
-// Initialize empty arrays for content
-$heroSlides = [];
-$featuredServices = [];
-$stats = [];
-$featuredPortfolio = [];
-$portfolioVideos = [];
-$testimonials = [];
-
-// Try to load CMS data - but don't fail if it errors
-$cmsLoaded = false;
-if (function_exists('get_included_files') && file_exists(__DIR__ . '/config/cms-data.php')) {
-    if (@include_once __DIR__ . '/config/cms-data.php') {
-        $cmsLoaded = class_exists('CMSData');
-        if ($cmsLoaded) {
-            $heroSlides = @CMSData::getHeroSlides() ?: [];
-            $featuredServices = @CMSData::getFeaturedServices(6) ?: [];
-            $stats = @CMSData::getStats() ?: [];
-            $featuredPortfolio = @CMSData::getFeaturedPortfolio(6) ?: [];
-            $portfolioVideos = @CMSData::getVideos('portfolio', 6) ?: [];
-        }
-    }
-}
-
-// Try to load testimonials
-$testimonials = [];
-if (file_exists(__DIR__ . '/admin/config/database.php')) {
-    @include_once __DIR__ . '/admin/config/database.php';
-    if (isset($conn) && $conn && function_exists('mysqli_query')) {
-        $result = @mysqli_query($conn, "SELECT * FROM iz_testimonials WHERE is_active = 1 ORDER BY is_featured DESC LIMIT 6");
-        if ($result) {
-            while ($row = @mysqli_fetch_assoc($result)) {
-                $testimonials[] = $row;
-            }
-        }
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <meta name="google-site-verification" content="Wg2VOCCDPOm1l4Cof11F3kBTUqOSDR6yir-YKnoeHsM" />
-
-  <title>St. Louis Web Design & Hosting | Izende Studio Web | Missouri & Illinois</title>
-  <meta name="description" content="Professional web design, hosting, and digital marketing services in St. Louis, Missouri. Serving businesses throughout Missouri and Illinois with custom websites, SEO, and web development. 15+ years experience.">
-
-  <?php include_once './assets/includes/header-links.php'; ?>
-
+  <title>St. Louis Web Design & Hosting | Izende Studio Web</title>
+  <meta name="description" content="Professional web design, hosting, and digital marketing services in St. Louis, Missouri.">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    header { background: #34a853; color: white; padding: 20px; text-align: center; }
+    main { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    section { margin-bottom: 40px; }
+    h1, h2 { color: #34a853; margin-bottom: 20px; }
+    p { margin-bottom: 15px; }
+    footer { background: #f0f0f0; padding: 20px; text-align: center; border-top: 1px solid #ddd; }
+  </style>
 </head>
+<body>
 
-<body id="home">
+<header>
+  <h1>Izende Studio Web</h1>
+  <p>Professional Web Design & Hosting Solutions</p>
+</header>
 
-  <!-- Skip Links for Accessibility -->
-  <a href="#main" class="skip-link">Skip to main content</a>
-
-  <!-- ======= Header ======= -->
-  <?php include_once './assets/includes/header.php'; ?>
-  <!-- End Header -->
-
-  <main id="main" role="main">
-
-  <!-- ======= Hero Section ======= -->
-  <section id="hero" class="hero-modern">
-    <div class="container">
-      <div class="hero-content fade-in-new">
-        <h1>Professional Web Design & Hosting Solutions</h1>
-        <p>Fast, secure, and reliable services for your St. Louis business. Serving Missouri and Illinois.</p>
-      </div>
-    </div>
-  </section><!-- End Hero -->
-
-  <!-- ======= Services Section ======= -->
-  <section id="services" class="services">
-    <div class="container">
-      <div class="section-title">
-        <h2>Services</h2>
-        <p>Serving St. Louis, Missouri, and Illinois businesses with professional web design, hosting, and digital marketing services.</p>
-      </div>
-      <p style="text-align: center; padding: 40px; color: #666;">Services content loading...</p>
-    </div>
+<main>
+  <section id="hero">
+    <h2>Welcome to Izende Studio Web</h2>
+    <p>Fast, secure, and reliable web design and hosting services for your St. Louis business.</p>
+    <p>Serving Missouri and Illinois with professional web solutions since 2013.</p>
   </section>
 
-  <!-- ======= Contact Section ======= -->
-  <section id="contact" class="contact">
-    <div class="container">
-      <div class="section-title">
-        <h2>Contact</h2>
-        <p>Get in touch with us</p>
-      </div>
-      <div class="row">
-        <div class="col-lg-5">
-          <div class="info">
-            <div class="email">
-              <i class="bi bi-envelope"></i>
-              <h4>Email:</h4>
-              <p><a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a></p>
-            </div>
-            <div class="phone">
-              <i class="bi bi-phone"></i>
-              <h4>Call:</h4>
-              <p><a href="tel:314-312-6441">+1 314.312.6441</a></p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <section id="services">
+    <h2>Services</h2>
+    <ul>
+      <li><strong>Web Design:</strong> Custom website design and development</li>
+      <li><strong>Web Hosting:</strong> Fast, secure, reliable hosting with 99.9% uptime</li>
+      <li><strong>SEO Services:</strong> Local and national SEO optimization</li>
+      <li><strong>Digital Marketing:</strong> Social media, email marketing, and more</li>
+      <li><strong>E-Commerce:</strong> WooCommerce and Shopify solutions</li>
+      <li><strong>Website Maintenance:</strong> Security updates, backups, and support</li>
+    </ul>
   </section>
 
-  </main><!-- End #main -->
+  <section id="contact">
+    <h2>Contact Us</h2>
+    <p><strong>Email:</strong> <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a></p>
+    <p><strong>Phone:</strong> <a href="tel:314-312-6441">+1 314.312.6441</a></p>
+    <p><strong>Service Area:</strong> St. Louis, Missouri and Illinois</p>
+  </section>
+</main>
 
-  <?php include_once './assets/includes/footer.php'; ?>
+<footer>
+  <p>&copy; 2025 Izende Studio Web. All rights reserved.</p>
+</footer>
 
 </body>
-
 </html>
