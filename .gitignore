@@ -57,3 +57,6 @@ package-lock.json
 # Build artifacts
 dist/
 build/
+analytics-dashboard-*.json
+*.pem
+*.key
