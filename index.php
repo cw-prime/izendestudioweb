@@ -4,31 +4,77 @@
  * Secured with session management and security headers
  */
 
-// Load security infrastructure
-require_once __DIR__ . '/config/env-loader.php';
-require_once __DIR__ . '/config/security.php';
-require_once __DIR__ . '/config/cms-data.php';
-require_once __DIR__ . '/includes/SEOHelper.php';
-require_once __DIR__ . '/includes/BannerHelper.php';
+// Set error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Don't display errors to users
+ini_set('log_errors', 1); // Log errors to file
 
-// Initialize secure session and set security headers
-initSecureSession();
-setSecurityHeaders();
+// Load security infrastructure with error handling
+try {
+    if (!file_exists(__DIR__ . '/config/env-loader.php')) {
+        throw new Exception('env-loader.php not found');
+    }
+    require_once __DIR__ . '/config/env-loader.php';
 
-// Load CMS content
-$heroSlides = CMSData::getHeroSlides();
-$featuredServices = CMSData::getFeaturedServices(6);
-$stats = CMSData::getStats();
-$featuredPortfolio = CMSData::getFeaturedPortfolio(6);
-$portfolioVideos = CMSData::getVideos('portfolio', 6);
+    if (!file_exists(__DIR__ . '/config/security.php')) {
+        throw new Exception('security.php not found');
+    }
+    require_once __DIR__ . '/config/security.php';
 
-// Get featured testimonials
-require_once __DIR__ . '/admin/config/database.php';
-global $conn;
-$testimonialsResult = mysqli_query($conn, "SELECT * FROM iz_testimonials WHERE is_active = 1 ORDER BY is_featured DESC, display_order ASC LIMIT 6");
+    if (!file_exists(__DIR__ . '/config/cms-data.php')) {
+        throw new Exception('cms-data.php not found');
+    }
+    require_once __DIR__ . '/config/cms-data.php';
+
+    if (file_exists(__DIR__ . '/includes/SEOHelper.php')) {
+        require_once __DIR__ . '/includes/SEOHelper.php';
+    }
+
+    if (file_exists(__DIR__ . '/includes/BannerHelper.php')) {
+        require_once __DIR__ . '/includes/BannerHelper.php';
+    }
+
+    // Initialize secure session and set security headers
+    if (function_exists('initSecureSession')) {
+        initSecureSession();
+    }
+    if (function_exists('setSecurityHeaders')) {
+        setSecurityHeaders();
+    }
+} catch (Exception $e) {
+    error_log("Homepage initialization error: " . $e->getMessage());
+    // Continue anyway - site will load with fallback
+}
+
+// Load CMS content with error handling
+$heroSlides = [];
+$featuredServices = [];
+$stats = [];
+$featuredPortfolio = [];
+$portfolioVideos = [];
 $testimonials = [];
-while ($row = mysqli_fetch_assoc($testimonialsResult)) {
-    $testimonials[] = $row;
+
+try {
+    $heroSlides = CMSData::getHeroSlides() ?: [];
+    $featuredServices = CMSData::getFeaturedServices(6) ?: [];
+    $stats = CMSData::getStats() ?: [];
+    $featuredPortfolio = CMSData::getFeaturedPortfolio(6) ?: [];
+    $portfolioVideos = CMSData::getVideos('portfolio', 6) ?: [];
+
+    // Get featured testimonials
+    require_once __DIR__ . '/admin/config/database.php';
+    global $conn;
+    if ($conn && !mysqli_connect_errno()) {
+        $testimonialsResult = mysqli_query($conn, "SELECT * FROM iz_testimonials WHERE is_active = 1 ORDER BY is_featured DESC, display_order ASC LIMIT 6");
+        if ($testimonialsResult) {
+            while ($row = mysqli_fetch_assoc($testimonialsResult)) {
+                $testimonials[] = $row;
+            }
+        }
+    }
+} catch (Exception $e) {
+    // Silently fail and use empty arrays - site will still load
+    error_log("Homepage CMS Error: " . $e->getMessage());
 }
 ?>
 <!DOCTYPE html>
