@@ -18,7 +18,7 @@ Options -Indexes +FollowSymLinks
 <IfModule mod_rewrite.c>
     RewriteEngine On
     # Allow /admin/config/ for CMS functionality
-    RewriteCond %{REQUEST_URI} !^/izendestudioweb/admin/
+    RewriteCond %{REQUEST_URI} !^/admin/
     RewriteRule ^config/ - [F,L]
 </IfModule>
 
