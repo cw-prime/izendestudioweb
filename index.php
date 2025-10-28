@@ -6,47 +6,10 @@
 
 // Set error reporting
 error_reporting(E_ALL);
-ini_set('display_errors', 0); // Don't display errors to users
-ini_set('log_errors', 1); // Log errors to file
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
-// Load security infrastructure with error handling
-try {
-    if (!file_exists(__DIR__ . '/config/env-loader.php')) {
-        throw new Exception('env-loader.php not found');
-    }
-    require_once __DIR__ . '/config/env-loader.php';
-
-    if (!file_exists(__DIR__ . '/config/security.php')) {
-        throw new Exception('security.php not found');
-    }
-    require_once __DIR__ . '/config/security.php';
-
-    if (!file_exists(__DIR__ . '/config/cms-data.php')) {
-        throw new Exception('cms-data.php not found');
-    }
-    require_once __DIR__ . '/config/cms-data.php';
-
-    if (file_exists(__DIR__ . '/includes/SEOHelper.php')) {
-        require_once __DIR__ . '/includes/SEOHelper.php';
-    }
-
-    if (file_exists(__DIR__ . '/includes/BannerHelper.php')) {
-        require_once __DIR__ . '/includes/BannerHelper.php';
-    }
-
-    // Initialize secure session and set security headers
-    if (function_exists('initSecureSession')) {
-        initSecureSession();
-    }
-    if (function_exists('setSecurityHeaders')) {
-        setSecurityHeaders();
-    }
-} catch (Exception $e) {
-    error_log("Homepage initialization error: " . $e->getMessage());
-    // Continue anyway - site will load with fallback
-}
-
-// Load CMS content with error handling
+// Initialize variables
 $heroSlides = [];
 $featuredServices = [];
 $stats = [];
@@ -54,27 +17,42 @@ $featuredPortfolio = [];
 $portfolioVideos = [];
 $testimonials = [];
 
-try {
-    $heroSlides = CMSData::getHeroSlides() ?: [];
-    $featuredServices = CMSData::getFeaturedServices(6) ?: [];
-    $stats = CMSData::getStats() ?: [];
-    $featuredPortfolio = CMSData::getFeaturedPortfolio(6) ?: [];
-    $portfolioVideos = CMSData::getVideos('portfolio', 6) ?: [];
+// Load basic configuration - don't fail if missing
+@require_once __DIR__ . '/config/env-loader.php';
+@require_once __DIR__ . '/config/security.php';
+@require_once __DIR__ . '/config/cms-data.php';
+@require_once __DIR__ . '/includes/SEOHelper.php';
+@require_once __DIR__ . '/includes/BannerHelper.php';
 
-    // Get featured testimonials
-    require_once __DIR__ . '/admin/config/database.php';
+// Try to initialize security
+if (function_exists('initSecureSession')) {
+    @initSecureSession();
+}
+if (function_exists('setSecurityHeaders')) {
+    @setSecurityHeaders();
+}
+
+// Load CMS content if available
+if (class_exists('CMSData')) {
+    $heroSlides = @CMSData::getHeroSlides() ?: [];
+    $featuredServices = @CMSData::getFeaturedServices(6) ?: [];
+    $stats = @CMSData::getStats() ?: [];
+    $featuredPortfolio = @CMSData::getFeaturedPortfolio(6) ?: [];
+    $portfolioVideos = @CMSData::getVideos('portfolio', 6) ?: [];
+}
+
+// Load testimonials if database is available
+if (file_exists(__DIR__ . '/admin/config/database.php')) {
+    @require_once __DIR__ . '/admin/config/database.php';
     global $conn;
-    if ($conn && !mysqli_connect_errno()) {
-        $testimonialsResult = mysqli_query($conn, "SELECT * FROM iz_testimonials WHERE is_active = 1 ORDER BY is_featured DESC, display_order ASC LIMIT 6");
+    if (isset($conn) && $conn) {
+        $testimonialsResult = @mysqli_query($conn, "SELECT * FROM iz_testimonials WHERE is_active = 1 ORDER BY is_featured DESC, display_order ASC LIMIT 6");
         if ($testimonialsResult) {
             while ($row = mysqli_fetch_assoc($testimonialsResult)) {
                 $testimonials[] = $row;
             }
         }
     }
-} catch (Exception $e) {
-    // Silently fail and use empty arrays - site will still load
-    error_log("Homepage CMS Error: " . $e->getMessage());
 }
 ?>
 <!DOCTYPE html>
