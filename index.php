@@ -24,5 +24,7 @@ ini_set('display_errors', 0);
   <p>Serving Missouri and Illinois.</p>
   <p><strong>Email:</strong> support@izendestudioweb.com</p>
   <p><strong>Phone:</strong> +1 314.312.6441</p>
+
+  <?php @include_once './assets/includes/footer.php'; ?>
 </body>
 </html>
