@@ -196,37 +196,37 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <div class="zen-circle zen-circle-2"></div>
     <!-- Subtle nature-inspired SVG decorative elements -->
     <!-- Bamboo stems - bottom left -->
-    <svg class="hero-decoration-bamboo" style="position: absolute; bottom: 0; left: 0; width: 300px; height: 300px; opacity: 0.12; z-index: 0;" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-      <path d="M50,300 L50,150 Q50,100 80,80 Q50,60 50,10 M80,300 L80,180 Q80,140 110,120 M30,120 L70,120 M35,90 L65,90 M60,200 L100,200" stroke="#34a853" stroke-width="3" fill="none" opacity="0.6"/>
-      <circle cx="50" cy="10" r="8" fill="#34a853" opacity="0.4"/>
-      <circle cx="80" cy="120" r="6" fill="#34a853" opacity="0.4"/>
+    <svg class="hero-decoration-bamboo" style="position: absolute; bottom: 0; left: 0; width: 300px; height: 300px; opacity: 0.12; z-index: 0; pointer-events: none;" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,300 L50,150 Q50,100 80,80 Q50,60 50,10 M80,300 L80,180 Q80,140 110,120 M30,120 L70,120 M35,90 L65,90 M60,200 L100,200" stroke="#34a853" stroke-width="5" fill="none" opacity="1"/>
+      <circle cx="50" cy="10" r="8" fill="#34a853" opacity="0.9"/>
+      <circle cx="80" cy="120" r="6" fill="#34a853" opacity="0.9"/>
     </svg>
     <!-- Waterfall/Stream - top right -->
-    <svg class="hero-decoration-waterfall" style="position: absolute; top: 80px; right: 50px; width: 350px; height: 400px; opacity: 0.15; z-index: 0;" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+    <svg class="hero-decoration-waterfall" style="position: absolute; top: 80px; right: 50px; width: 350px; height: 400px; opacity: 0.15; z-index: 0; pointer-events: none;" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
       <!-- Rock cliff -->
       <path d="M150,0 L180,40 L170,80 L190,120 L180,160" stroke="#0f9d58" stroke-width="8" fill="none" opacity="0.7"/>
       <!-- Main waterfall cascade -->
-      <path d="M180,160 Q185,180 175,200 Q170,220 180,240 Q185,260 175,280 Q170,300 180,320 Q185,340 175,360 Q170,380 180,400" stroke="#34a853" stroke-width="12" fill="none" opacity="0.6" stroke-linecap="round"/>
+      <path d="M180,160 Q185,180 175,200 Q170,220 180,240 Q185,260 175,280 Q170,300 180,320 Q185,340 175,360 Q170,380 180,400" stroke="#34a853" stroke-width="16" fill="none" opacity="1" stroke-linecap="round"/>
       <!-- Secondary cascade -->
-      <path d="M175,170 Q180,190 170,210 Q165,230 175,250 Q180,270 170,290 Q165,310 175,330 Q180,350 170,370" stroke="#0f9d58" stroke-width="8" fill="none" opacity="0.5" stroke-linecap="round"/>
+      <path d="M175,170 Q180,190 170,210 Q165,230 175,250 Q180,270 170,290 Q165,310 175,330 Q180,350 170,370" stroke="#0f9d58" stroke-width="11" fill="none" opacity="1" stroke-linecap="round"/>
       <!-- Water splashes -->
-      <circle cx="180" cy="400" r="15" fill="#34a853" opacity="0.3"/>
-      <ellipse cx="175" cy="390" rx="25" ry="12" fill="#34a853" opacity="0.25"/>
+      <circle cx="180" cy="400" r="15" fill="#34a853" opacity="0.8"/>
+      <ellipse cx="175" cy="390" rx="25" ry="12" fill="#34a853" opacity="0.7"/>
       <circle cx="170" cy="240" r="8" fill="#34a853" opacity="0.3"/>
       <circle cx="185" cy="320" r="6" fill="#34a853" opacity="0.3"/>
       <!-- Mist effect -->
       <ellipse cx="180" cy="300" rx="40" ry="20" fill="#e4f5e8" opacity="0.4"/>
     </svg>
     <!-- Mountain silhouette - bottom right -->
-    <svg class="hero-decoration-mountain" style="position: absolute; bottom: 0; right: 80px; width: 400px; height: 300px; opacity: 0.15; z-index: 0;" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <svg class="hero-decoration-mountain" style="position: absolute; bottom: 0; right: 80px; width: 400px; height: 300px; opacity: 0.15; z-index: 0; pointer-events: none;" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
       <!-- Far background mountain -->
-      <path d="M0,300 L80,180 L140,220 L200,150 L260,200 L320,140 L400,300 Z" fill="#34a853" opacity="0.25"/>
+      <path d="M0,300 L80,180 L140,220 L200,150 L260,200 L320,140 L400,300 Z" fill="#34a853" opacity="0.9"/>
       <!-- Mid mountain range -->
-      <path d="M0,300 L60,200 L120,240 L180,160 L240,210 L300,170 L360,220 L400,300 Z" fill="#0f9d58" opacity="0.35"/>
+      <path d="M0,300 L60,200 L120,240 L180,160 L240,210 L300,170 L360,220 L400,300 Z" fill="#0f9d58" opacity="0.7"/>
       <!-- Front mountain with peak -->
-      <path d="M80,300 L140,200 L180,240 L220,140 L260,180 L300,220 L340,300 Z" fill="#34a853" opacity="0.45"/>
+      <path d="M80,300 L140,200 L180,240 L220,140 L260,180 L300,220 L340,300 Z" fill="#34a853" opacity="0.8"/>
       <!-- Snow cap on main peak -->
-      <ellipse cx="220" cy="145" rx="35" ry="18" fill="#e4f5e8" opacity="0.6"/>
+      <ellipse cx="220" cy="145" rx="35" ry="18" fill="#e4f5e8" opacity="0.9"/>
       <path d="M200,155 L220,140 L240,155 Z" fill="#ffffff" opacity="0.5"/>
       <!-- Tree line suggestions -->
       <line x1="100" y1="300" x2="100" y2="280" stroke="#0f9d58" stroke-width="2" opacity="0.4"/>
@@ -235,13 +235,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       <line x1="160" y1="300" x2="160" y2="278" stroke="#0f9d58" stroke-width="2" opacity="0.4"/>
     </svg>
     <!-- Cloud shapes - top left -->
-    <svg class="hero-decoration-cloud" style="position: absolute; top: 50px; left: 8%; width: 280px; height: 140px; opacity: 0.12; z-index: 0;" viewBox="0 0 280 140" xmlns="http://www.w3.org/2000/svg">
+    <svg class="hero-decoration-cloud" style="position: absolute; top: 50px; left: 8%; width: 280px; height: 140px; opacity: 0.12; z-index: 0; pointer-events: none;" viewBox="0 0 280 140" xmlns="http://www.w3.org/2000/svg">
       <!-- Large fluffy cloud -->
-      <ellipse cx="70" cy="80" rx="45" ry="35" fill="#34a853" opacity="0.5"/>
-      <ellipse cx="120" cy="70" rx="55" ry="40" fill="#34a853" opacity="0.55"/>
-      <ellipse cx="165" cy="75" rx="48" ry="38" fill="#34a853" opacity="0.5"/>
-      <ellipse cx="95" cy="60" rx="40" ry="32" fill="#34a853" opacity="0.6"/>
-      <ellipse cx="140" cy="55" rx="42" ry="30" fill="#34a853" opacity="0.6"/>
+      <ellipse cx="70" cy="80" rx="45" ry="35" fill="#34a853" opacity="0.8"/>
+      <ellipse cx="120" cy="70" rx="55" ry="40" fill="#34a853" opacity="0.85"/>
+      <ellipse cx="165" cy="75" rx="48" ry="38" fill="#34a853" opacity="0.8"/>
+      <ellipse cx="95" cy="60" rx="40" ry="32" fill="#34a853" opacity="0.9"/>
+      <ellipse cx="140" cy="55" rx="42" ry="30" fill="#34a853" opacity="0.9"/>
       <!-- Smaller background cloud -->
       <ellipse cx="200" cy="95" rx="35" ry="25" fill="#0f9d58" opacity="0.4"/>
       <ellipse cx="235" cy="90" rx="38" ry="28" fill="#0f9d58" opacity="0.45"/>
@@ -469,7 +469,30 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <hr class="section-separator" aria-hidden="true">
 
     <!-- ======= Book Consultation CTA ======= -->
-    <section class="cta-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 0; color: white;">
+    <section class="cta-section zen-cta" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 0; color: white; position: relative; overflow: hidden;">
+      <div class="cta-illustrations" aria-hidden="true">
+        <!-- Bamboo silhouette -->
+        <svg class="cta-bamboo" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40,260 L40,110 Q40,80 60,70 Q40,54 40,12 M70,260 L70,150 Q70,120 95,105" stroke="#b3d9c2" stroke-width="4" fill="none" opacity="0.45"/>
+          <line x1="20" y1="140" x2="60" y2="140" stroke="#b3d9c2" stroke-width="4" opacity="0.35"/>
+          <line x1="25" y1="110" x2="55" y2="110" stroke="#b3d9c2" stroke-width="4" opacity="0.35"/>
+          <circle cx="40" cy="14" r="10" fill="#b3d9c2" opacity="0.35"/>
+        </svg>
+        <!-- Cloud -->
+        <svg class="cta-cloud" viewBox="0 0 260 140" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="80" cy="90" rx="60" ry="40" fill="#f0f6f2" opacity="0.35"/>
+          <ellipse cx="130" cy="80" rx="70" ry="46" fill="#f2f7f3" opacity="0.35"/>
+          <ellipse cx="180" cy="95" rx="55" ry="34" fill="#edf4ef" opacity="0.35"/>
+        </svg>
+        <!-- Bonsai -->
+        <svg class="cta-bonsai" viewBox="0 0 240 220" xmlns="http://www.w3.org/2000/svg">
+          <path d="M120,210 Q130,170 120,140 Q110,110 120,80 Q135,45 120,20" stroke="#d0e6d6" stroke-width="12" stroke-linecap="round" fill="none" opacity="0.45"/>
+          <ellipse cx="110" cy="50" rx="46" ry="32" fill="#d8eadf" opacity="0.5"/>
+          <ellipse cx="150" cy="90" rx="38" ry="26" fill="#d0e6d6" opacity="0.4"/>
+          <ellipse cx="90" cy="100" rx="34" ry="24" fill="#d0e6d6" opacity="0.4"/>
+          <rect x="80" y="210" width="80" height="10" rx="4" fill="#d0e6d6" opacity="0.5"/>
+        </svg>
+      </div>
       <div class="container">
         <div class="row align-items-center">
           <div class="col-lg-8" data-aos="fade-right">

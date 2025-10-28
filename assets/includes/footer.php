@@ -153,6 +153,11 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
     });
     </script>
 
+    <!-- Blog Page Script -->
+    <?php if (basename($_SERVER['SCRIPT_FILENAME']) === 'blog.php'): ?>
+    <script src="<?php echo $base_path; ?>assets/js/blog.js" defer></script>
+    <?php endif; ?>
+
     <!-- Analytics Event Tracking -->
     <?php if ((CMSData::getSetting('analytics_enabled') ?? '1') == '1' && (!empty(CMSData::getSetting('google_analytics_id')) || !empty(CMSData::getSetting('google_tag_manager_id')))): ?>
     <script src="<?php echo $base_path; ?>assets/js/analytics-events.js" defer></script>
