@@ -4,10 +4,16 @@
  * Include this file in the <head> section of your pages
  */
 
-// Get analytics settings
-$analyticsEnabled = CMSData::getSetting('analytics_enabled') ?? '1';
-$ga4Id = CMSData::getSetting('google_analytics_id') ?? '';
-$gtmId = CMSData::getSetting('google_tag_manager_id') ?? '';
+// Get analytics settings - with fallback if CMSData is not available
+$analyticsEnabled = '1';
+$ga4Id = '';
+$gtmId = '';
+
+if (class_exists('CMSData')) {
+    $analyticsEnabled = CMSData::getSetting('analytics_enabled') ?? '1';
+    $ga4Id = CMSData::getSetting('google_analytics_id') ?? '';
+    $gtmId = CMSData::getSetting('google_tag_manager_id') ?? '';
+}
 
 // Only output tracking code if enabled and IDs are configured
 if ($analyticsEnabled != '1') {
