@@ -11,24 +11,21 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
-try {
-    require_once __DIR__ . '/config/auth.php';
-    Auth::init();
-    Auth::requireAuth();
+// Load auth and database first
+require_once __DIR__ . '/config/auth.php';
+require_once __DIR__ . '/../config/cms-data.php';
 
-    global $conn;
-    $pageTitle = 'SEO Manager';
+// Check authentication
+Auth::requireAuth();
 
-    // Check if table exists
-    if (!isset($conn) || !$conn) {
-        throw new Exception('Database connection not available');
-    }
+global $conn;
+$pageTitle = 'SEO Manager';
 
+// Check if table and connection exist
+$tableExists = false;
+if (isset($conn) && $conn && !$conn->connect_error) {
     $tableCheck = @mysqli_query($conn, "SHOW TABLES LIKE 'iz_seo_meta'");
     $tableExists = ($tableCheck && mysqli_num_rows($tableCheck) > 0);
-} catch (Exception $e) {
-    error_log('SEO Manager Error: ' . $e->getMessage());
-    die('Error loading SEO Manager. Please try again later.');
 }
 
 if (!$tableExists) {
