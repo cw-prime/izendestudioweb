@@ -280,7 +280,7 @@ if (empty($heroSlides)) {
         <p>Get in touch with us</p>
       </div>
       <div class="row gy-4">
-        <div class="col-lg-5">
+        <div class="col-lg-12">
           <div class="info">
             <div class="email">
               <i class="bi bi-envelope"></i>
@@ -293,9 +293,6 @@ if (empty($heroSlides)) {
               <p><a href="tel:314-312-6441">+1 314.312.6441</a></p>
             </div>
           </div>
-        </div>
-        <div class="col-lg-7">
-          <div id="service-area-map" role="img" aria-label="Service area map"></div>
         </div>
       </div>
     </div>
