@@ -23,13 +23,25 @@ if (function_exists('setSecurityHeaders')) {
 // Step 2: Load database configuration
 @require_once __DIR__ . '/admin/config/database.php';
 
-// Initialize empty content arrays
+// Step 3: Load CMS data layer
+@require_once __DIR__ . '/config/cms-data.php';
+
+// Initialize empty content arrays (fallback if CMS fails)
 $heroSlides = [];
 $featuredServices = [];
 $stats = [];
 $featuredPortfolio = [];
 $portfolioVideos = [];
 $testimonials = [];
+
+// Try to load CMS content if available
+if (class_exists('CMSData')) {
+    $heroSlides = @CMSData::getHeroSlides() ?: [];
+    $featuredServices = @CMSData::getFeaturedServices(6) ?: [];
+    $stats = @CMSData::getStats() ?: [];
+    $featuredPortfolio = @CMSData::getFeaturedPortfolio(6) ?: [];
+    $portfolioVideos = @CMSData::getVideos('portfolio', 6) ?: [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
