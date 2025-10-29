@@ -391,12 +391,12 @@ function setSecurityHeaders() {
     // Content Security Policy (CSP)
     // Note: Relaxed policy for development - tighten for production
     $csp = "default-src 'self'; ";
-    $csp .= "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://maps.googleapis.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://fonts.googleapis.com https://www.googletagmanager.com https://pagead2.googlesyndication.com; ";
+    $csp .= "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://fonts.googleapis.com https://www.googletagmanager.com https://pagead2.googlesyndication.com; ";
     $csp .= "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com; ";
     $csp .= "img-src 'self' data: https: http:; ";
     $csp .= "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; ";
-    $csp .= "connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 https://www.google-analytics.com https://maps.googleapis.com https://unpkg.com; ";
-    $csp .= "frame-src 'self' https://www.google.com https://maps.googleapis.com; ";
+    $csp .= "connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 https://www.google-analytics.com https://unpkg.com https://tile.openstreetmap.org; ";
+    $csp .= "frame-src 'self' https://www.google.com; ";
     $csp .= "frame-ancestors 'self'; ";
     $csp .= "form-action 'self'; ";
     $csp .= "base-uri 'self'; ";

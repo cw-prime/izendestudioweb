@@ -94,56 +94,68 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
     <script src="<?php echo $base_path; ?>assets/vendor/isotope-layout/isotope.pkgd.min.js" defer></script>
     <script src="<?php echo $base_path; ?>assets/vendor/php-email-form/validate.js" defer></script>
     <script src="https://unpkg.com/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    <!-- Google Maps - Service Area -->
+    <!-- Service Area Map with Leaflet -->
     <script>
-    let serviceAreaMap;
-
-    function initServiceMap() {
+    (function() {
         const mapContainer = document.getElementById('service-area-map');
         if (!mapContainer) {
-            console.warn('Map container not found');
             return;
         }
 
-        if (typeof google === 'undefined') {
-            console.warn('Google Maps API not loaded');
-            return;
+        const stLouis = [38.6270, -90.1994];
+        const serviceRadiusMeters = 32187; // ~20 miles
+
+        const initMap = () => {
+            if (typeof L === 'undefined') {
+                setTimeout(initMap, 100);
+                return;
+            }
+
+            // Remove any existing map instances
+            if (mapContainer._leaflet_id) {
+                mapContainer._leaflet = null;
+            }
+
+            const map = L.map(mapContainer, {
+                center: stLouis,
+                zoom: 11,
+                scrollWheelZoom: false,
+                attributionControl: true
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+                maxZoom: 18,
+                minZoom: 6
+            }).addTo(map);
+
+            // Add center marker
+            L.marker(stLouis, {
+                title: 'Izende Studio Web Service Center'
+            }).addTo(map);
+
+            // Add service radius circle
+            L.circle(stLouis, {
+                radius: serviceRadiusMeters,
+                color: '#3a6ff3',
+                weight: 2,
+                fillColor: '#3a6ff3',
+                fillOpacity: 0.15
+            }).addTo(map);
+
+            console.log('Service area map initialized with Leaflet');
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMap);
+        } else {
+            initMap();
         }
-
-        const stLouis = { lat: 38.6270, lng: -90.1994 };
-        const radiusMeters = 32187; // ~20 miles
-
-        serviceAreaMap = new google.maps.Map(mapContainer, {
-            zoom: 11,
-            center: stLouis,
-            mapTypeId: 'roadmap',
-            scrollwheel: false
-        });
-
-        // Add center marker
-        new google.maps.Marker({
-            position: stLouis,
-            map: serviceAreaMap,
-            title: 'Izende Studio Web Service Center'
-        });
-
-        // Add service radius circle
-        new google.maps.Circle({
-            map: serviceAreaMap,
-            center: stLouis,
-            radius: radiusMeters,
-            fillColor: '#3a6ff3',
-            fillOpacity: 0.15,
-            strokeColor: '#3a6ff3',
-            strokeWeight: 2
-        });
-
-        console.log('Service area map initialized');
-    }
+    })();
     </script>
-
-    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBt5KtPUIB-c6LT8GYPl_n7zDLNHb8Jjc&libraries=geometry&callback=initServiceMap"></script>
 
     <!-- Hero Carousel Script -->
     <script>
