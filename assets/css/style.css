@@ -136,13 +136,16 @@ h1, h2, h3, h4, h5, h6 {
   max-height: 58px;
   max-width: 180px;
   width: auto;
-  margin-bottom: -4px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  display: block;
 }
 #header .logo-font {
   font-size: larger;
   letter-spacing: 0.05em;
   margin-left: 0px;
-  padding-top: 2px;
+  margin-top: -3px;
+  padding-top: 0px;
   color: #2d673c;
   text-decoration: none !important;
   border: none !important;
@@ -150,6 +153,7 @@ h1, h2, h3, h4, h5, h6 {
   white-space: nowrap;
   max-width: 200px;
   text-align: center;
+  line-height: 1.2;
 }
 
 .section-separator {
