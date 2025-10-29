@@ -107,11 +107,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch all testimonials
+// Fetch all testimonials (only if table exists)
 $testimonials = [];
-$result = mysqli_query($conn, "SELECT * FROM iz_testimonials ORDER BY display_order, created_at DESC");
-while ($row = mysqli_fetch_assoc($result)) {
-    $testimonials[] = $row;
+if ($tableExists) {
+    $result = mysqli_query($conn, "SELECT * FROM iz_testimonials ORDER BY display_order, created_at DESC");
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $testimonials[] = $row;
+        }
+    }
 }
 
 include __DIR__ . '/includes/header.php';

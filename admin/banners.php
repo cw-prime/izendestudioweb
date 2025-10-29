@@ -118,11 +118,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch all banners
+// Fetch all banners (only if table exists)
 $banners = [];
-$result = mysqli_query($conn, "SELECT * FROM iz_promo_banners ORDER BY display_order, created_at DESC");
-while ($row = mysqli_fetch_assoc($result)) {
-    $banners[] = $row;
+if ($tableExists) {
+    $result = mysqli_query($conn, "SELECT * FROM iz_promo_banners ORDER BY display_order, created_at DESC");
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $banners[] = $row;
+        }
+    }
 }
 
 include __DIR__ . '/includes/header.php';

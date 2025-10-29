@@ -152,9 +152,13 @@ switch ($filter) {
 }
 
 $bookings = [];
-$result = mysqli_query($conn, "SELECT * FROM iz_bookings $where ORDER BY preferred_date ASC");
-while ($row = mysqli_fetch_assoc($result)) {
-    $bookings[] = $row;
+if ($tableExists) {
+    $result = mysqli_query($conn, "SELECT * FROM iz_bookings $where ORDER BY preferred_date ASC");
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $bookings[] = $row;
+        }
+    }
 }
 
 include __DIR__ . '/includes/header.php';
