@@ -5,15 +5,30 @@
  */
 
 define('ADMIN_PAGE', true);
-require_once __DIR__ . '/config/auth.php';
-Auth::requireAuth();
 
-global $conn;
-$pageTitle = 'SEO Manager';
+// Error handling
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
-// Check if table exists
-$tableCheck = @mysqli_query($conn, "SHOW TABLES LIKE 'iz_seo_meta'");
-$tableExists = ($tableCheck && mysqli_num_rows($tableCheck) > 0);
+try {
+    require_once __DIR__ . '/config/auth.php';
+    Auth::requireAuth();
+
+    global $conn;
+    $pageTitle = 'SEO Manager';
+
+    // Check if table exists
+    if (!isset($conn) || !$conn) {
+        throw new Exception('Database connection not available');
+    }
+
+    $tableCheck = @mysqli_query($conn, "SHOW TABLES LIKE 'iz_seo_meta'");
+    $tableExists = ($tableCheck && mysqli_num_rows($tableCheck) > 0);
+} catch (Exception $e) {
+    error_log('SEO Manager Error: ' . $e->getMessage());
+    die('Error loading SEO Manager. Please try again later.');
+}
 
 if (!$tableExists) {
     // Table doesn't exist - show disabled message
