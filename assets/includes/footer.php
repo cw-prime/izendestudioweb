@@ -94,7 +94,56 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
     <script src="<?php echo $base_path; ?>assets/vendor/isotope-layout/isotope.pkgd.min.js" defer></script>
     <script src="<?php echo $base_path; ?>assets/vendor/php-email-form/validate.js" defer></script>
     <script src="https://unpkg.com/swiper@11/swiper-bundle.min.js"></script>
-    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBt5KtPUIB-c6LT8GYPl_n7zDLNHb8Jjc&libraries=geometry"></script>
+
+    <!-- Google Maps - Service Area -->
+    <script>
+    let serviceAreaMap;
+
+    function initServiceMap() {
+        const mapContainer = document.getElementById('service-area-map');
+        if (!mapContainer) {
+            console.warn('Map container not found');
+            return;
+        }
+
+        if (typeof google === 'undefined') {
+            console.warn('Google Maps API not loaded');
+            return;
+        }
+
+        const stLouis = { lat: 38.6270, lng: -90.1994 };
+        const radiusMeters = 32187; // ~20 miles
+
+        serviceAreaMap = new google.maps.Map(mapContainer, {
+            zoom: 11,
+            center: stLouis,
+            mapTypeId: 'roadmap',
+            scrollwheel: false
+        });
+
+        // Add center marker
+        new google.maps.Marker({
+            position: stLouis,
+            map: serviceAreaMap,
+            title: 'Izende Studio Web Service Center'
+        });
+
+        // Add service radius circle
+        new google.maps.Circle({
+            map: serviceAreaMap,
+            center: stLouis,
+            radius: radiusMeters,
+            fillColor: '#3a6ff3',
+            fillOpacity: 0.15,
+            strokeColor: '#3a6ff3',
+            strokeWeight: 2
+        });
+
+        console.log('Service area map initialized');
+    }
+    </script>
+
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBt5KtPUIB-c6LT8GYPl_n7zDLNHb8Jjc&libraries=geometry&callback=initServiceMap"></script>
 
     <!-- Hero Carousel Script -->
     <script>
@@ -132,53 +181,6 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
         document.addEventListener('DOMContentLoaded', initHeroCarousel);
     } else {
         initHeroCarousel();
-    }
-    </script>
-
-    <!-- Google Maps - Service Area -->
-    <script>
-    let serviceAreaMap;
-
-    function initServiceMap() {
-        const mapContainer = document.getElementById('service-area-map');
-        if (!mapContainer) {
-            return;
-        }
-
-        const stLouis = { lat: 38.6270, lng: -90.1994 };
-        const radiusMeters = 32187; // ~20 miles
-
-        serviceAreaMap = new google.maps.Map(mapContainer, {
-            zoom: 11,
-            center: stLouis,
-            mapTypeId: 'roadmap',
-            scrollwheel: false
-        });
-
-        // Add center marker
-        new google.maps.Marker({
-            position: stLouis,
-            map: serviceAreaMap,
-            title: 'Izende Studio Web Service Center'
-        });
-
-        // Add service radius circle
-        new google.maps.Circle({
-            map: serviceAreaMap,
-            center: stLouis,
-            radius: radiusMeters,
-            fillColor: '#3a6ff3',
-            fillOpacity: 0.15,
-            strokeColor: '#3a6ff3',
-            strokeWeight: 2
-        });
-    }
-
-    // Initialize map when Google Maps API loads
-    if (document.readyState === 'loading') {
-        window.addEventListener('load', initServiceMap);
-    } else {
-        initServiceMap();
     }
     </script>
 
