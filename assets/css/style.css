@@ -140,15 +140,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 #header .logo-font {
   font-size: larger;
-  letter-spacing: 0.2em;
-  margin-left: -5px;
+  letter-spacing: 0.05em;
+  margin-left: 0px;
   padding-top: 2px;
   color: #2d673c;
   text-decoration: none !important;
   border: none !important;
   display: block;
   white-space: nowrap;
-  width: 180px;
+  max-width: 200px;
   text-align: center;
 }
 
