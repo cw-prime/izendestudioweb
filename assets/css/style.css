@@ -1185,14 +1185,14 @@ section {
 }
 
 .contact .contact-left {
-  flex: 0.8;
+  flex: 0.6;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
 }
 
 .contact .contact-map {
-  flex: 1.2;
+  flex: 1.4;
   min-width: 0;
   height: 300px;
   border-radius: 8px;
