@@ -10,6 +10,25 @@ Auth::requireAuth();
 global $conn;
 $pageTitle = 'Testimonials';
 
+// Check if table exists
+$tableCheck = @mysqli_query($conn, "SHOW TABLES LIKE 'iz_testimonials'");
+$tableExists = ($tableCheck && mysqli_num_rows($tableCheck) > 0);
+
+if (!$tableExists) {
+    // Table doesn't exist - show disabled message
+    include __DIR__ . '/includes/header.php';
+    ?>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Feature Not Available</h4>
+        <p>Testimonials are now managed through the <a href="videos.php"><strong>Videos Manager</strong></a>. Simply add videos and set the category to "Testimonials".</p>
+        <hr>
+        <p class="mb-0">This allows you to manage video testimonials with thumbnails, titles, and descriptions. <a href="videos.php">Go to Videos Manager →</a></p>
+    </div>
+    <?php
+    include __DIR__ . '/includes/footer.php';
+    exit;
+}
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
