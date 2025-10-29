@@ -221,6 +221,10 @@ if (class_exists('CMSData')) {
 
   <?php @include_once './assets/includes/footer.php'; ?>
 
+  <!-- Analytics -->
+  <?php @include_once './assets/includes/analytics.php'; ?>
+  <!-- End Analytics -->
+
 </body>
 
 </html>
