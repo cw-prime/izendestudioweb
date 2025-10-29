@@ -5,9 +5,9 @@
 
 // Database credentials (same as WordPress database)
 define('DB_HOST', 'localhost');
-define('DB_USER', 'admin');
-define('DB_PASS', 'mark');
-define('DB_NAME', 'izendestudioweb_wp');
+define('DB_USER', 'izende6_wp433');
+define('DB_PASS', 'Mw~;#vFTq.5D');
+define('DB_NAME', 'izende6_wp433');
 
 // Create connection
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
