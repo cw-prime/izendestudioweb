@@ -80,7 +80,7 @@ include __DIR__ . '/includes/header.php';
 
 <!-- Welcome Message -->
 <div class="alert alert-primary alert-dismissible fade show mb-4" role="alert">
-    <h5><i class="bi bi-house-heart"></i> Welcome back, <?php echo htmlspecialchars(Auth::getUser()['username'] ?? 'Admin'); ?>!</h5>
+    <h5><i class="bi bi-house-heart"></i> Welcome back, <?php echo htmlspecialchars(Auth::user()['username'] ?? 'Admin'); ?>!</h5>
     <p class="mb-0">Here's what's happening with your website today.</p>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
