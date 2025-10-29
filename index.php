@@ -86,7 +86,108 @@ if (class_exists('CMSData')) {
         <h2>Services</h2>
         <p>Serving St. Louis, Missouri, and Illinois businesses with professional web design, hosting, and digital marketing services.</p>
       </div>
-      <p style="text-align: center; padding: 40px; color: #666;">Services content loading...</p>
+      <?php if (!empty($featuredServices)): ?>
+        <div class="service-cards-grid">
+          <?php foreach ($featuredServices as $service): ?>
+            <div class="service-card-new">
+              <div class="service-icon-new">
+                <i class="material-icons"><?php echo htmlspecialchars($service['icon'] ?? 'build'); ?></i>
+              </div>
+              <h3 class="service-title-new"><?php echo htmlspecialchars($service['name'] ?? 'Service'); ?></h3>
+              <p class="service-desc-new"><?php echo htmlspecialchars($service['description'] ?? ''); ?></p>
+              <?php if (!empty($service['price'])): ?>
+                <p class="service-price-new">Starting at <span><?php echo htmlspecialchars($service['price']); ?></span></p>
+              <?php endif; ?>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php else: ?>
+        <p style="text-align: center; padding: 40px; color: #666;">Loading services...</p>
+      <?php endif; ?>
+    </div>
+  </section>
+
+  <!-- ======= Portfolio Section ======= -->
+  <section id="portfolio" class="portfolio">
+    <div class="container">
+      <div class="section-title">
+        <h2>Portfolio</h2>
+        <p>Showcase of our recent projects and client work</p>
+      </div>
+      <?php if (!empty($featuredPortfolio)): ?>
+        <div class="service-cards-grid">
+          <?php foreach ($featuredPortfolio as $project): ?>
+            <div class="service-card-new">
+              <?php if (!empty($project['image_url'])): ?>
+                <img src="<?php echo htmlspecialchars($project['image_url']); ?>" alt="<?php echo htmlspecialchars($project['title'] ?? 'Project'); ?>" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+              <?php endif; ?>
+              <h3 class="service-title-new"><?php echo htmlspecialchars($project['title'] ?? 'Project'); ?></h3>
+              <?php if (!empty($project['category'])): ?>
+                <p style="color: #666; font-size: 14px; margin: 8px 0;"><?php echo htmlspecialchars($project['category']); ?></p>
+              <?php endif; ?>
+              <p class="service-desc-new"><?php echo htmlspecialchars($project['description'] ?? ''); ?></p>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php else: ?>
+        <p style="text-align: center; padding: 40px; color: #666;">Loading portfolio...</p>
+      <?php endif; ?>
+    </div>
+  </section>
+
+  <!-- ======= Stats Section ======= -->
+  <section id="stats" class="stats">
+    <div class="container">
+      <div class="section-title">
+        <h2>Our Impact</h2>
+        <p>Results that speak for themselves</p>
+      </div>
+      <?php if (!empty($stats)): ?>
+        <div class="service-cards-grid">
+          <?php foreach ($stats as $stat): ?>
+            <div class="service-card-new" style="text-align: center;">
+              <div style="font-size: 36px; font-weight: bold; color: #34a853; margin: 20px 0;">
+                <?php echo htmlspecialchars($stat['value'] ?? '0'); ?>
+              </div>
+              <h3 class="service-title-new"><?php echo htmlspecialchars($stat['label'] ?? 'Stat'); ?></h3>
+              <?php if (!empty($stat['description'])): ?>
+                <p class="service-desc-new"><?php echo htmlspecialchars($stat['description']); ?></p>
+              <?php endif; ?>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php else: ?>
+        <p style="text-align: center; padding: 40px; color: #666;">Loading stats...</p>
+      <?php endif; ?>
+    </div>
+  </section>
+
+  <!-- ======= Testimonials Section ======= -->
+  <section id="testimonials" class="testimonials">
+    <div class="container">
+      <div class="section-title">
+        <h2>Client Testimonials</h2>
+        <p>What our clients say about us</p>
+      </div>
+      <?php if (!empty($testimonials)): ?>
+        <div class="testimonials-container-new">
+          <?php foreach ($testimonials as $testimonial): ?>
+            <div class="testimonial-card-new">
+              <?php if (!empty($testimonial['thumbnail_url'])): ?>
+                <div style="margin-bottom: 15px;">
+                  <img src="<?php echo htmlspecialchars($testimonial['thumbnail_url']); ?>" alt="<?php echo htmlspecialchars($testimonial['title'] ?? 'Testimonial'); ?>" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                </div>
+              <?php endif; ?>
+              <p class="testimonial-text-new"><?php echo htmlspecialchars($testimonial['description'] ?? ''); ?></p>
+              <?php if (!empty($testimonial['title'])): ?>
+                <p class="testimonial-author-new">— <?php echo htmlspecialchars($testimonial['title']); ?></p>
+              <?php endif; ?>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php else: ?>
+        <p style="text-align: center; padding: 40px; color: #666;">Loading testimonials...</p>
+      <?php endif; ?>
     </div>
   </section>
 
