@@ -252,25 +252,15 @@ if (empty($heroSlides)) {
         <div class="testimonials-container-new">
           <?php foreach ($testimonials as $testimonial): ?>
             <div class="testimonial-card-new">
-              <?php if (!empty($testimonial['client_photo'])): ?>
+              <?php if (!empty($testimonial['thumbnail_url'])): ?>
                 <div style="margin-bottom: 15px;">
-                  <img src="<?php echo htmlspecialchars($testimonial['client_photo']); ?>" alt="<?php echo htmlspecialchars($testimonial['client_name'] ?? 'Client'); ?>" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                  <img src="<?php echo htmlspecialchars($testimonial['thumbnail_url']); ?>" alt="<?php echo htmlspecialchars($testimonial['title'] ?? 'Testimonial'); ?>" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
                 </div>
               <?php endif; ?>
-              <div style="margin-bottom: 10px;">
-                <?php if (!empty($testimonial['rating'])): ?>
-                  <?php for ($i = 0; $i < 5; $i++): ?>
-                    <i class="bi bi-star<?php echo $i < $testimonial['rating'] ? '-fill' : ''; ?> text-warning" style="font-size: 14px;"></i>
-                  <?php endfor; ?>
-                <?php endif; ?>
-              </div>
-              <p class="testimonial-text-new"><?php echo htmlspecialchars($testimonial['testimonial_text'] ?? ''); ?></p>
+              <p class="testimonial-text-new"><?php echo htmlspecialchars($testimonial['description'] ?? ''); ?></p>
               <div>
-                <?php if (!empty($testimonial['client_name'])): ?>
-                  <p class="testimonial-author-new">— <?php echo htmlspecialchars($testimonial['client_name']); ?></p>
-                <?php endif; ?>
-                <?php if (!empty($testimonial['client_company'])): ?>
-                  <p style="font-size: 12px; color: #888; margin-top: -8px;"><?php echo htmlspecialchars($testimonial['client_company']); ?></p>
+                <?php if (!empty($testimonial['title'])): ?>
+                  <p class="testimonial-author-new">— <?php echo htmlspecialchars($testimonial['title']); ?></p>
                 <?php endif; ?>
               </div>
             </div>
