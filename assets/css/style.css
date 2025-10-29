@@ -4009,3 +4009,63 @@ body.theme-transition *::after {
   margin-left: 0.5rem;
   line-height: 1.5;
 }
+
+/* Service Cards Grid */
+.service-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.service-card-new {
+  background: var(--bg-elevated);
+  padding: 30px;
+  border-radius: 8px;
+  border-top: 3px solid var(--brand-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.service-card-new:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.service-icon-new {
+  font-size: 48px;
+  color: var(--brand-primary);
+  margin-bottom: 20px;
+}
+
+.service-icon-new i {
+  font-size: 48px;
+}
+
+.service-title-new {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: var(--text-primary);
+}
+
+.service-desc-new {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.service-link-new {
+  display: inline-block;
+  color: var(--brand-primary);
+  text-decoration: none;
+  font-weight: 500;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.service-link-new:hover {
+  color: var(--brand-hover);
+}
