@@ -4004,6 +4004,22 @@ body.theme-transition *::after {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  height: 100%;
+}
+
+/* Contact section column styling */
+.contact .col-lg-5 .info {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.contact .col-lg-7 {
+  display: flex;
+  align-items: stretch;
 }
 
 .map-info {
@@ -4012,6 +4028,10 @@ body.theme-transition *::after {
   align-items: stretch;
   padding: 0 !important;
   margin: 0 !important;
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Leaflet CSS fixes */
