@@ -20,8 +20,8 @@ if (file_exists($localEnvFile)) {
 if ($useLocal) {
     // Local development database
     define('DB_HOST', 'localhost');
-    define('DB_USER', 'root');
-    define('DB_PASS', '');
+    define('DB_USER', 'admin');
+    define('DB_PASS', 'mark');
     define('DB_NAME', 'izendestudioweb_wp');
 } else {
     // Production database
@@ -31,8 +31,13 @@ if ($useLocal) {
     define('DB_NAME', 'izende6_wp433');
 }
 
-// Create connection
+// Create connection with fallback to socket if password auth fails (for local dev)
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+
+// If connection fails and we're in local mode, try socket authentication
+if ($conn->connect_error && $useLocal) {
+    $conn = new mysqli('localhost:/var/run/mysqld/mysqld.sock', 'root', '', DB_NAME);
+}
 
 // Check connection
 if ($conn->connect_error) {
