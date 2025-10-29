@@ -280,7 +280,7 @@ if (empty($heroSlides)) {
         <p>Get in touch with us</p>
       </div>
       <div class="row gy-4">
-        <div class="col-lg-5">
+        <div class="col-lg-12">
           <div class="info">
             <div class="email">
               <i class="bi bi-envelope"></i>
@@ -292,22 +292,10 @@ if (empty($heroSlides)) {
               <h4>Call:</h4>
               <p><a href="tel:314-312-6441">+1 314.312.6441</a></p>
             </div>
-            <div class="service-area-summary mt-4">
-              <h4><i class="bi bi-geo-alt"></i> Greater St. Louis Service Area</h4>
-              <p class="mb-0">
-                We partner with businesses across the St. Louis metro region, within a 12-mile service radius covering Missouri and Illinois communities.
-              </p>
-            </div>
           </div>
-        </div>
-        <div class="col-lg-7">
-          <div class="info map-info">
+          <div class="info map-info" style="margin-top: 30px;">
             <div class="map-card">
-              <div class="map-card-header">
-                <h4 class="mb-0"><i class="bi bi-map"></i> 12-Mile Service Radius</h4>
-                <p class="small text-muted mb-0">Covering St. Louis metro area and nearby communities.</p>
-              </div>
-              <div id="service-area-map" class="service-area-map" role="img" aria-label="Map illustrating Izende Studio Web's service radius around the St. Louis metro area."></div>
+              <div id="service-area-map" class="service-area-map" role="img" aria-label="Service area map"></div>
             </div>
           </div>
         </div>
