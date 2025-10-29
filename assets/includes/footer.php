@@ -94,6 +94,99 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
     <script src="<?php echo $base_path; ?>assets/vendor/isotope-layout/isotope.pkgd.min.js" defer></script>
     <script src="<?php echo $base_path; ?>assets/vendor/php-email-form/validate.js" defer></script>
     <script src="https://unpkg.com/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer crossorigin=""></script>
+
+    <!-- Hero Carousel Script -->
+    <script>
+    function initHeroCarousel() {
+        if (typeof Swiper === 'undefined') {
+            // If Swiper not loaded yet, retry
+            setTimeout(initHeroCarousel, 100);
+            return;
+        }
+
+        const heroCarousel = new Swiper('.hero-carousel', {
+            loop: false,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            effect: 'fade',
+            speed: 1000,
+            fadeEffect: {
+                crossFade: true
+            }
+        });
+        console.log('Hero carousel initialized');
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHeroCarousel);
+    } else {
+        initHeroCarousel();
+    }
+    </script>
+
+    <!-- Service Area Map -->
+    <script>
+    (function() {
+        const mapContainer = document.getElementById('service-area-map');
+        if (!mapContainer) {
+            return;
+        }
+
+        const stLouis = [38.6270, -90.1994];
+        const serviceRadiusMeters = 19312; // ~12 miles
+
+        const initMap = () => {
+            if (typeof L === 'undefined') {
+                setTimeout(initMap, 120);
+                return;
+            }
+
+            const map = L.map(mapContainer, {
+                center: stLouis,
+                zoom: 11,
+                scrollWheelZoom: false
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+                maxZoom: 18,
+                minZoom: 6
+            }).addTo(map);
+
+            L.circle(stLouis, {
+                radius: serviceRadiusMeters,
+                color: '#3a6ff3',
+                weight: 2,
+                fillColor: '#3a6ff3',
+                fillOpacity: 0.18
+            }).addTo(map);
+
+         
+
+            // Improve accessibility by enabling scroll zoom only when focused
+            mapContainer.setAttribute('tabindex', '0');
+            mapContainer.addEventListener('focus', () => map.scrollWheelZoom.enable());
+            mapContainer.addEventListener('blur', () => map.scrollWheelZoom.disable());
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMap);
+        } else {
+            initMap();
+        }
+    })();
+    </script>
 
     <!-- Template Main JS File -->
     <script src="<?php echo $base_path; ?>assets/js/main.js" defer></script>
