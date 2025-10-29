@@ -120,11 +120,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch all SEO configurations
+// Fetch all SEO configurations (only if table exists)
 $seoConfigs = [];
-$result = mysqli_query($conn, "SELECT * FROM iz_seo_meta ORDER BY page_type, page_identifier");
-while ($row = mysqli_fetch_assoc($result)) {
-    $seoConfigs[] = $row;
+if ($tableExists) {
+    $result = mysqli_query($conn, "SELECT * FROM iz_seo_meta ORDER BY page_type, page_identifier");
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $seoConfigs[] = $row;
+        }
+    }
 }
 
 include __DIR__ . '/includes/header.php';
