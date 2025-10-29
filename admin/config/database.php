@@ -1,13 +1,35 @@
 <?php
 /**
  * Database Configuration for Admin Panel
+ * Supports both local development and production
  */
 
-// Database credentials (same as WordPress database)
-define('DB_HOST', 'localhost');
-define('DB_USER', 'izende6_wp433');
-define('DB_PASS', 'Mw~;#vFTq.5D');
-define('DB_NAME', 'izende6_wp433');
+// Check if we're in local development mode
+$localEnvFile = __DIR__ . '/.env.local';
+$useLocal = false;
+
+if (file_exists($localEnvFile)) {
+    $envContent = file_get_contents($localEnvFile);
+    // Check if DB_ENV=local is set (not commented out)
+    if (preg_match('/^\s*DB_ENV\s*=\s*local/m', $envContent)) {
+        $useLocal = true;
+    }
+}
+
+// Database credentials - local or production
+if ($useLocal) {
+    // Local development database
+    define('DB_HOST', 'localhost');
+    define('DB_USER', 'root');
+    define('DB_PASS', '');
+    define('DB_NAME', 'izendestudioweb_wp');
+} else {
+    // Production database
+    define('DB_HOST', 'localhost');
+    define('DB_USER', 'izende6_wp433');
+    define('DB_PASS', 'Mw~;#vFTq.5D');
+    define('DB_NAME', 'izende6_wp433');
+}
 
 // Create connection
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
