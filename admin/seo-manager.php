@@ -1,12 +1,51 @@
 <?php
 /**
  * SEO Meta Tags Manager
- * Currently disabled - redirects to admin dashboard
+ * Manage SEO settings for all pages
  */
 
-// Redirect to admin dashboard
-header('Location: index.php?notice=seo_manager_unavailable');
-exit;
+define('ADMIN_PAGE', true);
+
+// Error handling
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+
+try {
+    require_once __DIR__ . '/config/auth.php';
+    Auth::init();
+    Auth::requireAuth();
+
+    global $conn;
+    $pageTitle = 'SEO Manager';
+
+    // Check if table exists
+    if (!isset($conn) || !$conn) {
+        throw new Exception('Database connection not available');
+    }
+
+    $tableCheck = @mysqli_query($conn, "SHOW TABLES LIKE 'iz_seo_meta'");
+    $tableExists = ($tableCheck && mysqli_num_rows($tableCheck) > 0);
+} catch (Exception $e) {
+    error_log('SEO Manager Error: ' . $e->getMessage());
+    die('Error loading SEO Manager. Please try again later.');
+}
+
+if (!$tableExists) {
+    // Table doesn't exist - show disabled message
+    include __DIR__ . '/includes/header.php';
+?>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Feature Not Available</h4>
+        <p>The SEO Manager feature requires additional database setup. This feature will be available in a future update.</p>
+        <hr>
+        <p class="mb-0">For now, you can manage your content through the <a href="services.php">Services</a>, <a href="portfolio.php">Portfolio</a>, and <a href="videos.php">Videos</a> managers.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php
+    include __DIR__ . '/includes/footer.php';
+    exit;
+}
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
