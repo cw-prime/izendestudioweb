@@ -41,6 +41,7 @@ if (class_exists('CMSData')) {
     $stats = @CMSData::getStats() ?: [];
     $featuredPortfolio = @CMSData::getFeaturedPortfolio(6) ?: [];
     $portfolioVideos = @CMSData::getVideos('portfolio', 6) ?: [];
+    $testimonials = @CMSData::getTestimonials(6) ?: [];
 }
 ?>
 <!DOCTYPE html>
