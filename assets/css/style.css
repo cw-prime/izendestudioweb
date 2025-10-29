@@ -127,11 +127,7 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: none !important;
   border: none !important;
   outline: none !important;
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  min-width: 0;
-  overflow: visible;
+  display: inline-block;
 }
 #header .logo img {
   max-height: 58px;
@@ -143,10 +139,12 @@ h1, h2, h3, h4, h5, h6 {
   font-size: larger;
   letter-spacing: 0.2em;
   margin-left: -5px;
-  padding-top: 10px;
+  padding-top: 0px;
   color: #2d673c;
   text-decoration: none !important;
   border: none !important;
+  display: block;
+  width: 100%;
 }
 
 .section-separator {
