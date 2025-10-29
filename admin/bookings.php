@@ -18,14 +18,15 @@ $tableExists = ($tableCheck && mysqli_num_rows($tableCheck) > 0);
 if (!$tableExists) {
     // Table doesn't exist - show disabled message
     include __DIR__ . '/includes/header.php';
-    ?>
+?>
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
         <h4 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Feature Not Available</h4>
         <p>The Booking Management feature requires additional database setup. This feature will be available in a future update.</p>
         <hr>
         <p class="mb-0">For now, you can manage your content through the <a href="services.php">Services</a>, <a href="portfolio.php">Portfolio</a>, and <a href="videos.php">Videos</a> managers.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    <?php
+<?php
     include __DIR__ . '/includes/footer.php';
     exit;
 }
