@@ -295,11 +295,7 @@ if (empty($heroSlides)) {
           </div>
         </div>
         <div class="col-lg-7">
-          <div class="info map-info">
-            <div class="map-card">
-              <div id="service-area-map" class="service-area-map" role="img" aria-label="Service area map"></div>
-            </div>
-          </div>
+          <div id="service-area-map" role="img" aria-label="Service area map"></div>
         </div>
       </div>
     </div>

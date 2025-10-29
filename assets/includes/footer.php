@@ -172,9 +172,7 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
                 fillOpacity: 0.18
             }).addTo(map);
 
-         
-
-            // Improve accessibility by enabling scroll zoom only when focused
+            // Enable scroll zoom only when map is focused
             mapContainer.setAttribute('tabindex', '0');
             mapContainer.addEventListener('focus', () => map.scrollWheelZoom.enable());
             mapContainer.addEventListener('blur', () => map.scrollWheelZoom.disable());
