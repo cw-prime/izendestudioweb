@@ -48,5 +48,7 @@ if ($conn->connect_error) {
 // Set charset
 $conn->set_charset("utf8mb4");
 
-// Error reporting for development
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+// Error reporting - only in local development
+if ($useLocal) {
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+}
