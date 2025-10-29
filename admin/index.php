@@ -19,88 +19,60 @@ $pageTitle = 'Dashboard';
 $stats = [];
 
 // Count services
-$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_services");
-$stats['services'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+$result = @mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_services");
+$stats['services'] = ($result && $row = mysqli_fetch_assoc($result)) ? $row['count'] : 0;
 
 // Count portfolio items
-$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_portfolio");
-$stats['portfolio'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+$result = @mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_portfolio");
+$stats['portfolio'] = ($result && $row = mysqli_fetch_assoc($result)) ? $row['count'] : 0;
 
 // Count videos
-$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_videos");
-$stats['videos'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+$result = @mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_videos");
+$stats['videos'] = ($result && $row = mysqli_fetch_assoc($result)) ? $row['count'] : 0;
 
 // Count form submissions
-$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_form_submissions WHERE status = 'new'");
-$stats['new_submissions'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+$result = @mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_form_submissions WHERE status = 'new'");
+$stats['new_submissions'] = ($result && $row = mysqli_fetch_assoc($result)) ? $row['count'] : 0;
 
 // Count all submissions
-$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_form_submissions");
-$stats['total_submissions'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+$result = @mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_form_submissions");
+$stats['total_submissions'] = ($result && $row = mysqli_fetch_assoc($result)) ? $row['count'] : 0;
 
-// Count upcoming bookings
-$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_bookings WHERE preferred_date >= NOW() AND status IN ('pending', 'confirmed')");
-$stats['upcoming_bookings'] = mysqli_fetch_assoc($result)['count'] ?? 0;
+// Count active stats
+$result = @mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_stats");
+$stats['stats'] = ($result && $row = mysqli_fetch_assoc($result)) ? $row['count'] : 0;
 
-// Count newsletter subscribers
-$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_newsletter_subscribers WHERE status = 'active'");
-$stats['newsletter_subscribers'] = mysqli_fetch_assoc($result)['count'] ?? 0;
-
-// Count active testimonials
-$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_testimonials WHERE is_active = 1");
-$stats['testimonials'] = mysqli_fetch_assoc($result)['count'] ?? 0;
-
-// Count active banners
-$result = mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_promo_banners WHERE is_active = 1");
-$stats['active_banners'] = mysqli_fetch_assoc($result)['count'] ?? 0;
-
-// Get recent bookings
-$recentBookings = [];
-$result = mysqli_query($conn, "
-    SELECT id, client_name, client_email, service_type, preferred_date, status
-    FROM iz_bookings
-    ORDER BY created_at DESC
-    LIMIT 5
-");
-while ($row = mysqli_fetch_assoc($result)) {
-    $recentBookings[] = $row;
-}
-
-// Get recent newsletter signups
-$recentSubscribers = [];
-$result = mysqli_query($conn, "
-    SELECT id, email, first_name, last_name, subscribe_date
-    FROM iz_newsletter_subscribers
-    ORDER BY subscribe_date DESC
-    LIMIT 5
-");
-while ($row = mysqli_fetch_assoc($result)) {
-    $recentSubscribers[] = $row;
-}
+// Count admin users
+$result = @mysqli_query($conn, "SELECT COUNT(*) as count FROM iz_users");
+$stats['admin_users'] = ($result && $row = mysqli_fetch_assoc($result)) ? $row['count'] : 0;
 
 // Get recent submissions
 $recentSubmissions = [];
-$result = mysqli_query($conn, "
+$result = @mysqli_query($conn, "
     SELECT id, form_type, name, email, subject, status, created_at
     FROM iz_form_submissions
     ORDER BY created_at DESC
     LIMIT 5
 ");
-while ($row = mysqli_fetch_assoc($result)) {
-    $recentSubmissions[] = $row;
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $recentSubmissions[] = $row;
+    }
 }
 
 // Get recent activity
 $recentActivity = [];
-$result = mysqli_query($conn, "
+$result = @mysqli_query($conn, "
     SELECT al.*, u.username
     FROM iz_activity_log al
     LEFT JOIN iz_users u ON al.user_id = u.id
     ORDER BY al.created_at DESC
     LIMIT 10
 ");
-while ($row = mysqli_fetch_assoc($result)) {
-    $recentActivity[] = $row;
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $recentActivity[] = $row;
+    }
 }
 
 include __DIR__ . '/includes/header.php';
@@ -116,47 +88,8 @@ include __DIR__ . '/includes/header.php';
 <!-- Top Stats Row -->
 <div class="row">
     <div class="col-md-3 mb-4">
-        <div class="card stats-card" style="border-left: 4px solid #667eea;">
-            <i class="bi bi-calendar-check icon" style="color: #667eea;"></i>
-            <div class="number"><?php echo $stats['upcoming_bookings']; ?></div>
-            <div class="label">Upcoming Bookings</div>
-            <a href="bookings.php" class="stretched-link"></a>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-4">
-        <div class="card stats-card" style="border-left: 4px solid #dc3545;">
-            <i class="bi bi-inbox-fill icon" style="color: #dc3545;"></i>
-            <div class="number"><?php echo $stats['new_submissions']; ?></div>
-            <div class="label">New Form Submissions</div>
-            <a href="submissions.php" class="stretched-link"></a>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-4">
         <div class="card stats-card" style="border-left: 4px solid #28a745;">
-            <i class="bi bi-envelope-check icon" style="color: #28a745;"></i>
-            <div class="number"><?php echo $stats['newsletter_subscribers']; ?></div>
-            <div class="label">Newsletter Subscribers</div>
-            <small class="text-muted">Active</small>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-4">
-        <div class="card stats-card" style="border-left: 4px solid #ffc107;">
-            <i class="bi bi-megaphone icon" style="color: #ffc107;"></i>
-            <div class="number"><?php echo $stats['active_banners']; ?></div>
-            <div class="label">Active Banners</div>
-            <a href="banners.php" class="stretched-link"></a>
-        </div>
-    </div>
-</div>
-
-<!-- Second Stats Row -->
-<div class="row">
-    <div class="col-md-3 mb-4">
-        <div class="card stats-card primary">
-            <i class="bi bi-briefcase icon"></i>
+            <i class="bi bi-briefcase icon" style="color: #28a745;"></i>
             <div class="number"><?php echo $stats['services']; ?></div>
             <div class="label">Services</div>
             <a href="services.php" class="stretched-link"></a>
@@ -164,8 +97,8 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <div class="col-md-3 mb-4">
-        <div class="card stats-card success">
-            <i class="bi bi-collection icon"></i>
+        <div class="card stats-card" style="border-left: 4px solid #667eea;">
+            <i class="bi bi-image icon" style="color: #667eea;"></i>
             <div class="number"><?php echo $stats['portfolio']; ?></div>
             <div class="label">Portfolio Items</div>
             <a href="portfolio.php" class="stretched-link"></a>
@@ -173,20 +106,20 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <div class="col-md-3 mb-4">
-        <div class="card stats-card warning">
-            <i class="bi bi-chat-quote icon"></i>
-            <div class="number"><?php echo $stats['testimonials']; ?></div>
-            <div class="label">Testimonials</div>
-            <a href="testimonials.php" class="stretched-link"></a>
+        <div class="card stats-card" style="border-left: 4px solid #ffc107;">
+            <i class="bi bi-play-circle icon" style="color: #ffc107;"></i>
+            <div class="number"><?php echo $stats['videos']; ?></div>
+            <div class="label">Videos</div>
+            <a href="videos.php" class="stretched-link"></a>
         </div>
     </div>
 
     <div class="col-md-3 mb-4">
-        <div class="card stats-card info">
-            <i class="bi bi-play-btn icon"></i>
-            <div class="number"><?php echo $stats['videos']; ?></div>
-            <div class="label">Videos</div>
-            <a href="videos.php" class="stretched-link"></a>
+        <div class="card stats-card" style="border-left: 4px solid #dc3545;">
+            <i class="bi bi-inbox icon" style="color: #dc3545;"></i>
+            <div class="number"><?php echo $stats['total_submissions']; ?></div>
+            <div class="label">Form Submissions</div>
+            <a href="submissions.php" class="stretched-link"></a>
         </div>
     </div>
 </div>
