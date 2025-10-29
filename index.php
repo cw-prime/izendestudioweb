@@ -42,6 +42,19 @@ if (class_exists('CMSData')) {
     $featuredPortfolio = @CMSData::getFeaturedPortfolio(6) ?: [];
     $portfolioVideos = @CMSData::getVideos('portfolio', 6) ?: [];
 }
+
+// Step 4: Load testimonials from database
+if (isset($conn) && $conn && !mysqli_connect_errno()) {
+    $testimonialsResult = @mysqli_query($conn, "SELECT * FROM iz_testimonials WHERE is_active = 1 ORDER BY is_featured DESC, display_order ASC LIMIT 6");
+    if ($testimonialsResult) {
+        while ($row = @mysqli_fetch_assoc($testimonialsResult)) {
+            $testimonials[] = $row;
+        }
+    }
+}
+
+// Step 4b: Load analytics include if available
+@require_once __DIR__ . '/assets/includes/analytics.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
