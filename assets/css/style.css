@@ -1175,7 +1175,7 @@ section {
 .contact .info {
   border-top: 3px solid var(--brand-primary);
   border-bottom: 3px solid var(--brand-primary);
-  padding: 25px 30px;
+  padding: 20px 30px;
   background: var(--bg-elevated);
   width: 100%;
   box-shadow: 0 0 24px 0 rgba(0, 0, 0, 0.12);
@@ -1202,7 +1202,7 @@ section {
 }
 .contact .info p {
   padding: 0 0 10px 60px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   font-size: 14px;
   color: var(--text-secondary);
 }
