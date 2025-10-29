@@ -106,7 +106,7 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
         }
 
         const stLouis = [38.6270, -90.1994];
-        const serviceRadiusMeters = 32187; // ~20 miles
+        const serviceRadiusMeters = 24140; // ~15 miles
 
         const initMap = () => {
             if (typeof L === 'undefined') {
