@@ -73,8 +73,8 @@ if (class_exists('CMSData')) {
   <section id="hero" class="hero-modern">
     <div class="container">
       <div class="hero-content fade-in-new">
-        <h1>Professional Web Design & Hosting Solutions</h1>
-        <p>Fast, secure, and reliable services for your St. Louis business. Serving Missouri and Illinois.</p>
+        <h1>Peace of Mind for Your Digital Presence</h1>
+        <p>Harmonious web design and hosting that works seamlessly, so you can focus on what matters. Trusted by St. Louis, Missouri, and Illinois businesses.</p>
       </div>
     </div>
   </section><!-- End Hero -->
@@ -83,20 +83,20 @@ if (class_exists('CMSData')) {
   <section id="services" class="services">
     <div class="container">
       <div class="section-title">
-        <h2>Services</h2>
-        <p>Serving St. Louis, Missouri, and Illinois businesses with professional web design, hosting, and digital marketing services.</p>
+        <h2>Our Approach</h2>
+        <p>Everything in harmony. We craft digital solutions that work effortlessly, giving you peace of mind while you focus on your business.</p>
       </div>
       <?php if (!empty($featuredServices)): ?>
         <div class="service-cards-grid">
           <?php foreach ($featuredServices as $service): ?>
             <div class="service-card-new">
               <div class="service-icon-new">
-                <i class="material-icons"><?php echo htmlspecialchars($service['icon'] ?? 'build'); ?></i>
+                <i class="material-icons"><?php echo htmlspecialchars($service['icon_class'] ?? 'build'); ?></i>
               </div>
-              <h3 class="service-title-new"><?php echo htmlspecialchars($service['name'] ?? 'Service'); ?></h3>
+              <h3 class="service-title-new"><?php echo htmlspecialchars($service['title'] ?? 'Service'); ?></h3>
               <p class="service-desc-new"><?php echo htmlspecialchars($service['description'] ?? ''); ?></p>
-              <?php if (!empty($service['price'])): ?>
-                <p class="service-price-new">Starting at <span><?php echo htmlspecialchars($service['price']); ?></span></p>
+              <?php if (!empty($service['link_url'])): ?>
+                <a href="<?php echo htmlspecialchars($service['link_url']); ?>" class="service-link-new"><?php echo htmlspecialchars($service['link_text'] ?? 'Learn more'); ?></a>
               <?php endif; ?>
             </div>
           <?php endforeach; ?>
@@ -111,15 +111,17 @@ if (class_exists('CMSData')) {
   <section id="portfolio" class="portfolio">
     <div class="container">
       <div class="section-title">
-        <h2>Portfolio</h2>
-        <p>Showcase of our recent projects and client work</p>
+        <h2>Our Work</h2>
+        <p>Purposeful projects that balance beauty with function. Each solution crafted with intention.</p>
       </div>
       <?php if (!empty($featuredPortfolio)): ?>
         <div class="service-cards-grid">
           <?php foreach ($featuredPortfolio as $project): ?>
             <div class="service-card-new">
-              <?php if (!empty($project['image_url'])): ?>
-                <img src="<?php echo htmlspecialchars($project['image_url']); ?>" alt="<?php echo htmlspecialchars($project['title'] ?? 'Project'); ?>" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+              <?php if (!empty($project['featured_image'])): ?>
+                <img src="<?php echo htmlspecialchars($project['featured_image']); ?>" alt="<?php echo htmlspecialchars($project['title'] ?? 'Project'); ?>" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+              <?php elseif (!empty($project['thumbnail_image'])): ?>
+                <img src="<?php echo htmlspecialchars($project['thumbnail_image']); ?>" alt="<?php echo htmlspecialchars($project['title'] ?? 'Project'); ?>" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
               <?php endif; ?>
               <h3 class="service-title-new"><?php echo htmlspecialchars($project['title'] ?? 'Project'); ?></h3>
               <?php if (!empty($project['category'])): ?>
@@ -139,20 +141,17 @@ if (class_exists('CMSData')) {
   <section id="stats" class="stats">
     <div class="container">
       <div class="section-title">
-        <h2>Our Impact</h2>
-        <p>Results that speak for themselves</p>
+        <h2>Proven Trust</h2>
+        <p>Measured success through lasting relationships and satisfied partners</p>
       </div>
       <?php if (!empty($stats)): ?>
         <div class="service-cards-grid">
           <?php foreach ($stats as $stat): ?>
             <div class="service-card-new" style="text-align: center;">
               <div style="font-size: 36px; font-weight: bold; color: #34a853; margin: 20px 0;">
-                <?php echo htmlspecialchars($stat['value'] ?? '0'); ?>
+                <?php echo htmlspecialchars($stat['stat_value'] ?? '0'); ?><?php if (!empty($stat['stat_suffix'])): ?><span><?php echo htmlspecialchars($stat['stat_suffix']); ?></span><?php endif; ?>
               </div>
-              <h3 class="service-title-new"><?php echo htmlspecialchars($stat['label'] ?? 'Stat'); ?></h3>
-              <?php if (!empty($stat['description'])): ?>
-                <p class="service-desc-new"><?php echo htmlspecialchars($stat['description']); ?></p>
-              <?php endif; ?>
+              <h3 class="service-title-new"><?php echo htmlspecialchars($stat['stat_label'] ?? 'Stat'); ?></h3>
             </div>
           <?php endforeach; ?>
         </div>
@@ -166,8 +165,8 @@ if (class_exists('CMSData')) {
   <section id="testimonials" class="testimonials">
     <div class="container">
       <div class="section-title">
-        <h2>Client Testimonials</h2>
-        <p>What our clients say about us</p>
+        <h2>Stories of Success</h2>
+        <p>Hear how harmony and peace of mind transformed their digital journey</p>
       </div>
       <?php if (!empty($testimonials)): ?>
         <div class="testimonials-container-new">
@@ -179,9 +178,11 @@ if (class_exists('CMSData')) {
                 </div>
               <?php endif; ?>
               <p class="testimonial-text-new"><?php echo htmlspecialchars($testimonial['description'] ?? ''); ?></p>
-              <?php if (!empty($testimonial['title'])): ?>
-                <p class="testimonial-author-new">— <?php echo htmlspecialchars($testimonial['title']); ?></p>
-              <?php endif; ?>
+              <div>
+                <?php if (!empty($testimonial['title'])): ?>
+                  <p class="testimonial-author-new">— <?php echo htmlspecialchars($testimonial['title']); ?></p>
+                <?php endif; ?>
+              </div>
             </div>
           <?php endforeach; ?>
         </div>
