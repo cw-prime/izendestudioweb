@@ -13,6 +13,7 @@ ini_set('log_errors', 1);
 
 try {
     require_once __DIR__ . '/config/auth.php';
+    Auth::init();
     Auth::requireAuth();
 
     global $conn;
