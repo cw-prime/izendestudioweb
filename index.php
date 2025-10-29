@@ -20,6 +20,9 @@ if (function_exists('setSecurityHeaders')) {
     @setSecurityHeaders();
 }
 
+// Step 2: Load database configuration
+@require_once __DIR__ . '/admin/config/database.php';
+
 // Initialize empty content arrays
 $heroSlides = [];
 $featuredServices = [];
