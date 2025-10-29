@@ -121,7 +121,7 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
 
             const map = L.map(mapContainer, {
                 center: stLouis,
-                zoom: 11,
+                zoom: 9,
                 scrollWheelZoom: false,
                 attributionControl: true
             });
