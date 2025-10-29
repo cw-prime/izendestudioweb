@@ -282,16 +282,19 @@ if (empty($heroSlides)) {
       <div class="row gy-4">
         <div class="col-lg-12">
           <div class="info">
-            <div class="email">
-              <i class="bi bi-envelope"></i>
-              <h4>Email:</h4>
-              <p><a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a></p>
+            <div class="contact-left">
+              <div class="email">
+                <i class="bi bi-envelope"></i>
+                <h4>Email:</h4>
+                <p><a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a></p>
+              </div>
+              <div class="phone">
+                <i class="bi bi-phone"></i>
+                <h4>Call:</h4>
+                <p><a href="tel:314-312-6441">+1 314.312.6441</a></p>
+              </div>
             </div>
-            <div class="phone">
-              <i class="bi bi-phone"></i>
-              <h4>Call:</h4>
-              <p><a href="tel:314-312-6441">+1 314.312.6441</a></p>
-            </div>
+            <div class="contact-map" id="service-area-map"></div>
           </div>
         </div>
       </div>

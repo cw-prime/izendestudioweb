@@ -135,6 +135,52 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
     }
     </script>
 
+    <!-- Service Area Map -->
+    <script>
+    (function() {
+        const mapContainer = document.getElementById('service-area-map');
+        if (!mapContainer) {
+            return;
+        }
+
+        const stLouis = [38.6270, -90.1994];
+        const serviceRadiusMeters = 32187; // ~20 miles
+
+        const initMap = () => {
+            if (typeof L === 'undefined') {
+                setTimeout(initMap, 100);
+                return;
+            }
+
+            const map = L.map(mapContainer, {
+                center: stLouis,
+                zoom: 11,
+                scrollWheelZoom: false
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+                maxZoom: 18,
+                minZoom: 6
+            }).addTo(map);
+
+            L.circle(stLouis, {
+                radius: serviceRadiusMeters,
+                color: '#3a6ff3',
+                weight: 2,
+                fillColor: '#3a6ff3',
+                fillOpacity: 0.18
+            }).addTo(map);
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMap);
+        } else {
+            initMap();
+        }
+    })();
+    </script>
+
     <!-- Template Main JS File -->
     <script src="<?php echo $base_path; ?>assets/js/main.js" defer></script>
 
