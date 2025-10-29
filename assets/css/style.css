@@ -127,11 +127,16 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: none !important;
   border: none !important;
   outline: none !important;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+  overflow: visible;
 }
 #header .logo img {
   max-height: 58px;
-  width: 140px;
+  max-width: 180px;
+  width: auto;
   margin-bottom: -4px;
 }
 #header .logo-font {
