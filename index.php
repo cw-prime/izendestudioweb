@@ -42,16 +42,6 @@ if (class_exists('CMSData')) {
     $featuredPortfolio = @CMSData::getFeaturedPortfolio(6) ?: [];
     $portfolioVideos = @CMSData::getVideos('portfolio', 6) ?: [];
 }
-
-// Step 4: Load testimonials from database (TEST - no analytics yet)
-if (isset($conn) && $conn) {
-    $testimonialsResult = @mysqli_query($conn, "SELECT * FROM iz_testimonials WHERE is_active = 1 ORDER BY is_featured DESC, display_order ASC LIMIT 6");
-    if ($testimonialsResult) {
-        while ($row = @mysqli_fetch_assoc($testimonialsResult)) {
-            $testimonials[] = $row;
-        }
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
