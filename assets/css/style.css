@@ -1193,6 +1193,7 @@ section {
 
 .contact .contact-map {
   flex: 1;
+  min-width: 0;
   height: 300px;
   border-radius: 8px;
   overflow: hidden;
