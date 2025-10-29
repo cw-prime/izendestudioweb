@@ -170,7 +170,7 @@ class CMSData {
      * Get testimonial videos
      */
     public static function getTestimonials($limit = null) {
-        return self::getVideos('Testimonials', $limit);
+        return self::getVideos('testimonial', $limit);
     }
 
     /**
