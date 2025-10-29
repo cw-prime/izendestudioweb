@@ -167,10 +167,26 @@ class CMSData {
     }
 
     /**
-     * Get testimonial videos
+     * Get testimonials from iz_testimonials table with ratings
      */
     public static function getTestimonials($limit = null) {
-        return self::getVideos('testimonial', $limit);
+        $testimonials = [];
+
+        $query = "SELECT * FROM iz_testimonials WHERE is_active = 1";
+
+        $query .= " ORDER BY display_order ASC";
+
+        if ($limit) {
+            $query .= " LIMIT " . intval($limit);
+        }
+
+        $result = mysqli_query(self::$conn, $query);
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            $testimonials[] = $row;
+        }
+
+        return $testimonials;
     }
 
     /**
