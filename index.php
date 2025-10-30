@@ -252,9 +252,9 @@ if (empty($heroSlides)) {
         <div class="testimonials-container-new">
           <?php foreach ($testimonials as $testimonial): ?>
             <div class="testimonial-card-new">
-              <?php if (!empty($testimonial['client_photo'])): ?>
+              <?php if (!empty($testimonial['client_image'])): ?>
                 <div style="margin-bottom: 15px;">
-                  <img src="<?php echo htmlspecialchars($testimonial['client_photo']); ?>" alt="<?php echo htmlspecialchars($testimonial['client_name'] ?? 'Client'); ?>" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                  <img src="<?php echo htmlspecialchars($testimonial['client_image']); ?>" alt="<?php echo htmlspecialchars($testimonial['client_name'] ?? 'Client'); ?>" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
                 </div>
               <?php endif; ?>
               <div style="margin-bottom: 10px;">

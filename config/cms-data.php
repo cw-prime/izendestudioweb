@@ -203,7 +203,7 @@ class CMSData {
     public static function getTestimonials($limit = null) {
         $testimonials = [];
         try {
-            $query = "SELECT * FROM iz_testimonials WHERE is_active = 1 ORDER BY display_order ASC";
+            $query = "SELECT * FROM iz_testimonials WHERE is_visible = 1 ORDER BY display_order ASC";
 
             if ($limit) {
                 $limit = intval($limit);
