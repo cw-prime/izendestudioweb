@@ -4085,3 +4085,25 @@ body.theme-transition *::after {
 .service-link-new:hover {
   color: var(--brand-hover);
 }
+
+/* ======================================
+   Fix Header Overlap Issue
+   ====================================== */
+
+/* Add padding when header becomes fixed to prevent content overlap */
+#header.fixed-top ~ #main,
+body.header-scrolled #main {
+  padding-top: 80px;
+}
+
+/* Ensure breadcrumbs don't overlap with fixed header */
+#header.fixed-top ~ #main .breadcrumbs {
+  margin-top: 0;
+}
+
+/* For pages without #main wrapper */
+#header.fixed-top ~ main,
+#header.fixed-top ~ section:first-of-type {
+  margin-top: 80px;
+}
+
