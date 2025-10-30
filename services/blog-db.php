@@ -9,7 +9,34 @@ class BlogDB {
     private $table_prefix = 'wp42_';
 
     public function __construct() {
-        $this->mysqli = new mysqli('localhost', 'admin', 'mark', 'izendestudioweb_wp');
+        // Check if we're in local development mode
+        $localEnvFile = __DIR__ . '/../admin/config/.env.local';
+        $useLocal = false;
+
+        if (file_exists($localEnvFile)) {
+            $envContent = file_get_contents($localEnvFile);
+            // Check if DB_ENV=local is set (not commented out)
+            if (preg_match('/^\s*DB_ENV\s*=\s*local/m', $envContent)) {
+                $useLocal = true;
+            }
+        }
+
+        // Database credentials - local or production
+        if ($useLocal) {
+            // Local development database
+            $host = 'localhost';
+            $user = 'admin';
+            $pass = 'mark';
+            $db = 'izendestudioweb_wp';
+        } else {
+            // Production database
+            $host = 'localhost';
+            $user = 'izende6_wp433';
+            $pass = 'Mw~;#vFTq.5D';
+            $db = 'izende6_wp433';
+        }
+
+        $this->mysqli = new mysqli($host, $user, $pass, $db);
 
         if ($this->mysqli->connect_error) {
             error_log("BlogDB Connection Error: " . $this->mysqli->connect_error);
