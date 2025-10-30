@@ -86,39 +86,12 @@ setSecurityHeaders();
     <section class="blog-posts section-bg">
       <div class="container">
         <div id="blog-posts-container" class="row" aria-live="polite">
-          <!-- Loading skeletons will appear here initially -->
-          <div class="col-lg-4 col-md-6 mb-4">
-            <div class="blog-skeleton">
-              <div class="blog-skeleton-image"></div>
-              <div class="blog-skeleton-content">
-                <div class="blog-skeleton-category"></div>
-                <div class="blog-skeleton-title"></div>
-                <div class="blog-skeleton-excerpt"></div>
-                <div class="blog-skeleton-meta"></div>
-              </div>
+          <!-- Blog posts will be loaded here by JavaScript -->
+          <div class="col-12 text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
             </div>
-          </div>
-          <div class="col-lg-4 col-md-6 mb-4">
-            <div class="blog-skeleton">
-              <div class="blog-skeleton-image"></div>
-              <div class="blog-skeleton-content">
-                <div class="blog-skeleton-category"></div>
-                <div class="blog-skeleton-title"></div>
-                <div class="blog-skeleton-excerpt"></div>
-                <div class="blog-skeleton-meta"></div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 mb-4">
-            <div class="blog-skeleton">
-              <div class="blog-skeleton-image"></div>
-              <div class="blog-skeleton-content">
-                <div class="blog-skeleton-category"></div>
-                <div class="blog-skeleton-title"></div>
-                <div class="blog-skeleton-excerpt"></div>
-                <div class="blog-skeleton-meta"></div>
-              </div>
-            </div>
+            <p class="mt-3">Loading blog posts...</p>
           </div>
         </div>
 
@@ -171,6 +144,9 @@ setSecurityHeaders();
   <!-- ======= Footer ======= -->
   <?php include './assets/includes/footer.php'; ?>
   <!-- End Footer -->
+
+  <!-- Blog Page JS -->
+  <script src="./assets/js/blog.js"></script>
 
 </body>
 </html>
