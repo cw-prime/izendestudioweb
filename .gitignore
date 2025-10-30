@@ -1,9 +1,13 @@
 # Environment variables
 .env
 config/.env
+admin/config/.env.local
+.env.local
 
 # Sensitive configuration
 config/database.php
+config/database-prod.php
+admin/config/database.php
 
 # Logs
 *.log
@@ -45,6 +49,10 @@ desktop.ini
 *.tmp
 temp/
 tmp/
+
+# Debug and test files
+debug-*.php
+test-*.php
 
 # Composer
 vendor/
