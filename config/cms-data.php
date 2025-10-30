@@ -1,10 +1,4 @@
 <?php
-/**
- * CMS Data Helper
- * Provides functions to fetch CMS content from database for frontend display
- */
-
-// Database connection
 require_once __DIR__ . '/../admin/config/database.php';
 
 class CMSData {
@@ -23,17 +17,18 @@ class CMSData {
      */
     public static function getHeroSlides() {
         $slides = [];
-        $result = mysqli_query(self::$conn, "
-            SELECT * FROM iz_hero_slides
-            WHERE is_visible = 1
-            ORDER BY display_order ASC
-        ");
-
-        while ($row = mysqli_fetch_assoc($result)) {
-            $slides[] = $row;
+        try {
+            $stmt = self::$conn->prepare("
+                SELECT * FROM iz_hero_slides
+                WHERE is_visible = 1
+                ORDER BY display_order ASC
+            ");
+            $stmt->execute();
+            $slides = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("getHeroSlides error: " . $e->getMessage());
         }
-
-        return $slides;
+        return $slides ?: [];
     }
 
     /**
@@ -41,17 +36,18 @@ class CMSData {
      */
     public static function getServices() {
         $services = [];
-        $result = mysqli_query(self::$conn, "
-            SELECT * FROM iz_services
-            WHERE is_visible = 1
-            ORDER BY display_order ASC
-        ");
-
-        while ($row = mysqli_fetch_assoc($result)) {
-            $services[] = $row;
+        try {
+            $stmt = self::$conn->prepare("
+                SELECT * FROM iz_services
+                WHERE is_visible = 1
+                ORDER BY display_order ASC
+            ");
+            $stmt->execute();
+            $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("getServices error: " . $e->getMessage());
         }
-
-        return $services;
+        return $services ?: [];
     }
 
     /**
@@ -59,18 +55,19 @@ class CMSData {
      */
     public static function getFeaturedServices($limit = 6) {
         $services = [];
-        $result = mysqli_query(self::$conn, "
-            SELECT * FROM iz_services
-            WHERE is_visible = 1 AND is_featured = 1
-            ORDER BY display_order ASC
-            LIMIT " . intval($limit)
-        );
-
-        while ($row = mysqli_fetch_assoc($result)) {
-            $services[] = $row;
+        try {
+            $stmt = self::$conn->prepare("
+                SELECT * FROM iz_services
+                WHERE is_visible = 1 AND is_featured = 1
+                ORDER BY display_order ASC
+                LIMIT :limit
+            ");
+            $stmt->execute([':limit' => intval($limit)]);
+            $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("getFeaturedServices error: " . $e->getMessage());
         }
-
-        return $services;
+        return $services ?: [];
     }
 
     /**
@@ -78,17 +75,18 @@ class CMSData {
      */
     public static function getStats() {
         $stats = [];
-        $result = mysqli_query(self::$conn, "
-            SELECT * FROM iz_stats
-            WHERE is_visible = 1
-            ORDER BY display_order ASC
-        ");
-
-        while ($row = mysqli_fetch_assoc($result)) {
-            $stats[] = $row;
+        try {
+            $stmt = self::$conn->prepare("
+                SELECT * FROM iz_stats
+                WHERE is_visible = 1
+                ORDER BY display_order ASC
+            ");
+            $stmt->execute();
+            $stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("getStats error: " . $e->getMessage());
         }
-
-        return $stats;
+        return $stats ?: [];
     }
 
     /**
@@ -96,27 +94,29 @@ class CMSData {
      */
     public static function getPortfolio($category = null, $limit = null) {
         $portfolio = [];
+        try {
+            $query = "SELECT * FROM iz_portfolio WHERE is_visible = 1";
+            $params = [];
 
-        $query = "SELECT * FROM iz_portfolio WHERE is_visible = 1";
+            if ($category) {
+                $query .= " AND category = :category";
+                $params[':category'] = $category;
+            }
 
-        if ($category) {
-            $category = mysqli_real_escape_string(self::$conn, $category);
-            $query .= " AND category = '{$category}'";
+            $query .= " ORDER BY display_order ASC, created_at DESC";
+
+            if ($limit) {
+                $query .= " LIMIT :limit";
+                $params[':limit'] = intval($limit);
+            }
+
+            $stmt = self::$conn->prepare($query);
+            $stmt->execute($params);
+            $portfolio = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("getPortfolio error: " . $e->getMessage());
         }
-
-        $query .= " ORDER BY display_order ASC, created_at DESC";
-
-        if ($limit) {
-            $query .= " LIMIT " . intval($limit);
-        }
-
-        $result = mysqli_query(self::$conn, $query);
-
-        while ($row = mysqli_fetch_assoc($result)) {
-            $portfolio[] = $row;
-        }
-
-        return $portfolio;
+        return $portfolio ?: [];
     }
 
     /**
@@ -124,18 +124,19 @@ class CMSData {
      */
     public static function getFeaturedPortfolio($limit = 6) {
         $portfolio = [];
-        $result = mysqli_query(self::$conn, "
-            SELECT * FROM iz_portfolio
-            WHERE is_visible = 1 AND is_featured = 1
-            ORDER BY display_order ASC, created_at DESC
-            LIMIT " . intval($limit)
-        );
-
-        while ($row = mysqli_fetch_assoc($result)) {
-            $portfolio[] = $row;
+        try {
+            $stmt = self::$conn->prepare("
+                SELECT * FROM iz_portfolio
+                WHERE is_visible = 1 AND is_featured = 1
+                ORDER BY display_order ASC, created_at DESC
+                LIMIT :limit
+            ");
+            $stmt->execute([':limit' => intval($limit)]);
+            $portfolio = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("getFeaturedPortfolio error: " . $e->getMessage());
         }
-
-        return $portfolio;
+        return $portfolio ?: [];
     }
 
     /**
@@ -143,51 +144,70 @@ class CMSData {
      */
     public static function getVideos($category = null, $limit = null) {
         $videos = [];
+        try {
+            $query = "SELECT * FROM iz_videos WHERE is_visible = 1";
+            $params = [];
 
-        $query = "SELECT * FROM iz_videos WHERE is_visible = 1";
+            if ($category) {
+                $query .= " AND category = :category";
+                $params[':category'] = $category;
+            }
 
-        if ($category) {
-            $category = mysqli_real_escape_string(self::$conn, $category);
-            $query .= " AND category = '{$category}'";
+            $query .= " ORDER BY display_order ASC, created_at DESC";
+
+            if ($limit) {
+                $query .= " LIMIT :limit";
+                $params[':limit'] = intval($limit);
+            }
+
+            $stmt = self::$conn->prepare($query);
+            $stmt->execute($params);
+            $videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("getVideos error: " . $e->getMessage());
         }
-
-        $query .= " ORDER BY display_order ASC, created_at DESC";
-
-        if ($limit) {
-            $query .= " LIMIT " . intval($limit);
-        }
-
-        $result = mysqli_query(self::$conn, $query);
-
-        while ($row = mysqli_fetch_assoc($result)) {
-            $videos[] = $row;
-        }
-
-        return $videos;
+        return $videos ?: [];
     }
 
     /**
-     * Get testimonial videos
+     * Get testimonials from iz_testimonials table with ratings
      */
     public static function getTestimonials($limit = null) {
-        return self::getVideos('testimonial', $limit);
+        $testimonials = [];
+        try {
+            $query = "SELECT * FROM iz_testimonials WHERE is_active = 1 ORDER BY display_order ASC";
+            $params = [];
+
+            if ($limit) {
+                $query .= " LIMIT :limit";
+                $params[':limit'] = intval($limit);
+            }
+
+            $stmt = self::$conn->prepare($query);
+            $stmt->execute($params);
+            $testimonials = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("getTestimonials error: " . $e->getMessage());
+        }
+        return $testimonials ?: [];
     }
 
     /**
      * Get a single site setting by key
      */
     public static function getSetting($key) {
-        $key = mysqli_real_escape_string(self::$conn, $key);
-        $result = mysqli_query(self::$conn, "
-            SELECT setting_value FROM iz_settings
-            WHERE setting_key = '{$key}'
-            LIMIT 1
-        ");
-
-        if ($row = mysqli_fetch_assoc($result)) {
-            return $row['setting_value'];
+        try {
+            $stmt = self::$conn->prepare("
+                SELECT setting_value FROM iz_settings
+                WHERE setting_key = :key
+                LIMIT 1
+            ");
+            $stmt->execute([':key' => $key]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ? $row['setting_value'] : null;
+        } catch (Exception $e) {
+            error_log("getSetting error: " . $e->getMessage());
         }
-
         return null;
     }
 
@@ -196,12 +216,16 @@ class CMSData {
      */
     public static function getAllSettings() {
         $settings = [];
-        $result = mysqli_query(self::$conn, "SELECT setting_key, setting_value FROM iz_settings");
-
-        while ($row = mysqli_fetch_assoc($result)) {
-            $settings[$row['setting_key']] = $row['setting_value'];
+        try {
+            $stmt = self::$conn->prepare("SELECT setting_key, setting_value FROM iz_settings");
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as $row) {
+                $settings[$row['setting_key']] = $row['setting_value'];
+            }
+        } catch (Exception $e) {
+            error_log("getAllSettings error: " . $e->getMessage());
         }
-
         return $settings;
     }
 
@@ -209,29 +233,31 @@ class CMSData {
      * Save a form submission
      */
     public static function saveFormSubmission($type, $data) {
-        $name = mysqli_real_escape_string(self::$conn, $data['name'] ?? '');
-        $email = mysqli_real_escape_string(self::$conn, $data['email'] ?? '');
-        $phone = mysqli_real_escape_string(self::$conn, $data['phone'] ?? '');
-        $subject = mysqli_real_escape_string(self::$conn, $data['subject'] ?? '');
-        $message = mysqli_real_escape_string(self::$conn, $data['message'] ?? '');
-        $form_type = mysqli_real_escape_string(self::$conn, $type);
+        try {
+            $form_data = json_encode($data);
+            $ip_address = $_SERVER['REMOTE_ADDR'] ?? '';
 
-        // Store additional data as JSON
-        $form_data = json_encode($data);
-        $form_data = mysqli_real_escape_string(self::$conn, $form_data);
+            $stmt = self::$conn->prepare("
+                INSERT INTO iz_form_submissions
+                (form_type, name, email, phone, subject, message, form_data, ip_address, submitted_at)
+                VALUES
+                (:form_type, :name, :email, :phone, :subject, :message, :form_data, :ip_address, NOW())
+            ");
 
-        // Get IP address
-        $ip_address = $_SERVER['REMOTE_ADDR'] ?? '';
-        $ip_address = mysqli_real_escape_string(self::$conn, $ip_address);
-
-        $query = "
-            INSERT INTO iz_form_submissions
-            (form_type, name, email, phone, subject, message, form_data, ip_address, submitted_at)
-            VALUES
-            ('{$form_type}', '{$name}', '{$email}', '{$phone}', '{$subject}', '{$message}', '{$form_data}', '{$ip_address}', NOW())
-        ";
-
-        return mysqli_query(self::$conn, $query);
+            return $stmt->execute([
+                ':form_type' => $type,
+                ':name' => $data['name'] ?? '',
+                ':email' => $data['email'] ?? '',
+                ':phone' => $data['phone'] ?? '',
+                ':subject' => $data['subject'] ?? '',
+                ':message' => $data['message'] ?? '',
+                ':form_data' => $form_data,
+                ':ip_address' => $ip_address
+            ]);
+        } catch (Exception $e) {
+            error_log("saveFormSubmission error: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -239,17 +265,21 @@ class CMSData {
      */
     public static function getPortfolioCategories() {
         $categories = [];
-        $result = mysqli_query(self::$conn, "
-            SELECT DISTINCT category
-            FROM iz_portfolio
-            WHERE is_visible = 1 AND category IS NOT NULL AND category != ''
-            ORDER BY category ASC
-        ");
-
-        while ($row = mysqli_fetch_assoc($result)) {
-            $categories[] = $row['category'];
+        try {
+            $stmt = self::$conn->prepare("
+                SELECT DISTINCT category
+                FROM iz_portfolio
+                WHERE is_visible = 1 AND category IS NOT NULL AND category != ''
+                ORDER BY category ASC
+            ");
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as $row) {
+                $categories[] = $row['category'];
+            }
+        } catch (Exception $e) {
+            error_log("getPortfolioCategories error: " . $e->getMessage());
         }
-
         return $categories;
     }
 }
