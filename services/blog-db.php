@@ -218,11 +218,9 @@ class BlogDB {
         // Clean excerpt
         $excerpt = !empty($row['excerpt']) ? strip_tags($row['excerpt']) : $this->generateExcerpt($row['content']);
 
-        // Get featured image - first try WordPress media, then fallback to slug-based
-        $featured_image = $this->getWordPressImage($row['featured_image_id']);
-        if (!$featured_image || !$featured_image['url']) {
-            $featured_image = $this->resolveFeaturedImage($row['slug'], $row['title']);
-        }
+        // Get featured image - use slug-based images from /assets/img/blog/featured/
+        // (WordPress featured images can be added later by properly uploading to WordPress media)
+        $featured_image = $this->resolveFeaturedImage($row['slug'], $row['title']);
 
         return [
             'id' => (int)$row['id'],
