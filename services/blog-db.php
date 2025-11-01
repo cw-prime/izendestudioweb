@@ -52,7 +52,7 @@ class BlogDB {
     public function getPosts($per_page = 9, $page = 1, $category = '', $search = '') {
         $offset = ($page - 1) * $per_page;
 
-        // Build query
+        // Build query - includes featured image data from postmeta
         $sql = "SELECT
                     p.ID as id,
                     p.post_title as title,
@@ -61,9 +61,11 @@ class BlogDB {
                     p.post_content as content,
                     p.post_date as date,
                     p.post_modified as modified,
-                    u.display_name as author
+                    u.display_name as author,
+                    pm.meta_value as featured_image_id
                 FROM {$this->table_prefix}posts p
                 LEFT JOIN {$this->table_prefix}users u ON p.post_author = u.ID
+                LEFT JOIN {$this->table_prefix}postmeta pm ON p.ID = pm.post_id AND pm.meta_key = '_thumbnail_id'
                 WHERE p.post_status = 'publish'
                 AND p.post_type = 'post'";
 
@@ -216,6 +218,12 @@ class BlogDB {
         // Clean excerpt
         $excerpt = !empty($row['excerpt']) ? strip_tags($row['excerpt']) : $this->generateExcerpt($row['content']);
 
+        // Get featured image - first try WordPress media, then fallback to slug-based
+        $featured_image = $this->getWordPressImage($row['featured_image_id']);
+        if (!$featured_image || !$featured_image['url']) {
+            $featured_image = $this->resolveFeaturedImage($row['slug'], $row['title']);
+        }
+
         return [
             'id' => (int)$row['id'],
             'title' => $row['title'],
@@ -226,7 +234,7 @@ class BlogDB {
             'modified' => $row['modified'],
             'author' => $row['author'] ?: 'Izende Studio Web',
             'link' => '/blog-post.php?slug=' . $row['slug'],
-            'featured_image' => $this->resolveFeaturedImage($row['slug'], $row['title']),
+            'featured_image' => $featured_image,
             'categories' => $categories,
             'tags' => $tags,
             'reading_time' => $this->calculateReadingTime($row['content'])
@@ -254,6 +262,43 @@ class BlogDB {
         $word_count = str_word_count(strip_tags($content));
         $minutes = ceil($word_count / 200);
         return max(1, $minutes);
+    }
+
+    /**
+     * Get featured image from WordPress media library
+     */
+    private function getWordPressImage($attachment_id) {
+        if (empty($attachment_id)) {
+            return null;
+        }
+
+        // Get attachment image URL and alt text
+        $sql = "SELECT
+                    pm1.meta_value as url,
+                    pm2.meta_value as alt
+                FROM {$this->table_prefix}postmeta pm1
+                LEFT JOIN {$this->table_prefix}postmeta pm2 ON pm1.post_id = pm2.post_id AND pm2.meta_key = '_wp_attachment_image_alt'
+                WHERE pm1.post_id = " . intval($attachment_id) . "
+                AND pm1.meta_key = '_wp_attached_file'
+                LIMIT 1";
+
+        $result = $this->mysqli->query($sql);
+        if (!$result || $result->num_rows === 0) {
+            return null;
+        }
+
+        $row = $result->fetch_assoc();
+        if (empty($row['url'])) {
+            return null;
+        }
+
+        // Construct full URL from attached file path
+        $image_path = '/articles/wp-content/uploads/' . $row['url'];
+
+        return [
+            'url' => $image_path,
+            'alt' => $row['alt'] ?: 'Blog post image'
+        ];
     }
 
     /**
