@@ -272,14 +272,14 @@ class BlogDB {
             return null;
         }
 
-        // Get attachment image URL and alt text
+        // Get attachment post and its metadata
         $sql = "SELECT
-                    pm1.meta_value as url,
-                    pm2.meta_value as alt
-                FROM {$this->table_prefix}postmeta pm1
-                LEFT JOIN {$this->table_prefix}postmeta pm2 ON pm1.post_id = pm2.post_id AND pm2.meta_key = '_wp_attachment_image_alt'
-                WHERE pm1.post_id = " . intval($attachment_id) . "
-                AND pm1.meta_key = '_wp_attached_file'
+                    p.guid as url,
+                    pm.meta_value as alt
+                FROM {$this->table_prefix}posts p
+                LEFT JOIN {$this->table_prefix}postmeta pm ON p.ID = pm.post_id AND pm.meta_key = '_wp_attachment_image_alt'
+                WHERE p.ID = " . intval($attachment_id) . "
+                AND p.post_type = 'attachment'
                 LIMIT 1";
 
         $result = $this->mysqli->query($sql);
@@ -292,11 +292,8 @@ class BlogDB {
             return null;
         }
 
-        // Construct full URL from attached file path
-        $image_path = '/articles/wp-content/uploads/' . $row['url'];
-
         return [
-            'url' => $image_path,
+            'url' => $row['url'],
             'alt' => $row['alt'] ?: 'Blog post image'
         ];
     }
