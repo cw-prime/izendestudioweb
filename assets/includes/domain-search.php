@@ -221,16 +221,13 @@ document.getElementById('domainSearchForm').addEventListener('submit', async fun
   resultsDiv.style.display = 'block';
 
   try {
-    // Call check API with generic parameters to avoid ModSecurity blocking
-    const response = await fetch('./api/check.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        q: domain,
-        e: extensions
-      })
+    // Call check API with GET to avoid ModSecurity blocking POST requests
+    const params = new URLSearchParams();
+    params.append('q', domain);
+    params.append('e', extensions.join(','));
+
+    const response = await fetch('./api/check.php?' + params.toString(), {
+      method: 'GET'
     });
 
     const data = await response.json();

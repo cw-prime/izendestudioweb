@@ -12,10 +12,19 @@ error_reporting(0);
 $input = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Try POST first (JSON body)
     $raw_input = file_get_contents('php://input');
     if (!empty($raw_input)) {
         $input = json_decode($raw_input, true);
     }
+}
+
+// Fallback to GET if POST is empty
+if (!$input && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $input = [
+        'q' => $_GET['q'] ?? null,
+        'e' => isset($_GET['e']) ? explode(',', $_GET['e']) : null
+    ];
 }
 
 // Validate input
