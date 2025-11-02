@@ -11,25 +11,25 @@ $whmcs_url = 'https://izendestudioweb.com/adminIzende'; // Your WHMCS URL
 <div class="domain-search-container">
   <div class="domain-search-box">
     <h2>Find Your Perfect Domain</h2>
-    <form id="domainSearchForm" class="domain-search-form">
+    <form method="post" action="https://izendestudioweb.com/adminIzende/domainchecker.php" id="frmDomainHomepage" class="domain-search-form">
+      <input type="hidden" name="transfer" value="">
       <div class="domain-search-input-group">
         <input
           type="text"
-          id="domainInput"
           name="domain"
           placeholder="Enter domain name (e.g., yourwebsite)"
           class="domain-search-input"
           required
           autocomplete="off"
         >
-        <button type="submit" class="domain-search-btn">
+        <button type="submit" class="domain-search-btn" id="btnDomainSearch">
           <i class="bi bi-search"></i> Search
+        </button>
+        <button type="submit" class="domain-search-btn domain-transfer-btn" id="btnTransfer" data-domain-action="transfer">
+          <i class="bi bi-arrow-left-right"></i> Transfer
         </button>
       </div>
     </form>
-    <div id="domainResults" class="domain-results" style="display:none;">
-      <!-- Results will appear here -->
-    </div>
   </div>
 </div>
 
@@ -97,6 +97,14 @@ $whmcs_url = 'https://izendestudioweb.com/adminIzende'; // Your WHMCS URL
   box-shadow: 0 4px 12px rgba(92, 184, 116, 0.3);
 }
 
+.domain-transfer-btn {
+  background: linear-gradient(135deg, #17a2b8 0%, #0d6378 100%);
+}
+
+.domain-transfer-btn:hover {
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
 
 @media (max-width: 768px) {
   .domain-search-input-group {
@@ -114,18 +122,30 @@ $whmcs_url = 'https://izendestudioweb.com/adminIzende'; // Your WHMCS URL
 </style>
 
 <script>
-document.getElementById('domainSearchForm').addEventListener('submit', function(e) {
-  e.preventDefault();
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('frmDomainHomepage');
+  const transferBtn = document.getElementById('btnTransfer');
+  const transferInput = form.querySelector('input[name="transfer"]');
 
-  const domain = document.getElementById('domainInput').value.trim();
+  // Handle transfer button click
+  transferBtn.addEventListener('click', function(e) {
+    transferInput.value = '1';
+  });
 
-  if (!domain) {
-    alert('Please enter a domain name');
-    return;
-  }
+  // Handle search button click (clear transfer flag)
+  document.getElementById('btnDomainSearch').addEventListener('click', function(e) {
+    transferInput.value = '';
+  });
 
-  // Redirect to WHMCS domain search page with the domain query
-  const whmcsUrl = 'https://izendestudioweb.com/adminIzende/cart.php?a=add&domain=register&query=' + encodeURIComponent(domain);
-  window.location.href = whmcsUrl;
+  // Form validation
+  form.addEventListener('submit', function(e) {
+    const domain = form.querySelector('input[name="domain"]').value.trim();
+
+    if (!domain) {
+      alert('Please enter a domain name');
+      e.preventDefault();
+      return false;
+    }
+  });
 });
 </script>
