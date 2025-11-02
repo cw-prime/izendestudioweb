@@ -268,15 +268,13 @@ document.getElementById('domainSearchForm').addEventListener('submit', async fun
   resultsDiv.style.display = 'block';
 
   try {
-    const response = await fetch('./api/lookup.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        item: searchTerm,
-        types: types
-      })
+    // Use GET to bypass ModSecurity blocking POST requests
+    const params = new URLSearchParams();
+    params.append('i', searchTerm);
+    params.append('t', types.join(','));
+
+    const response = await fetch('./lookup.php?' + params.toString(), {
+      method: 'GET'
     });
 
     if (!response.ok) {
