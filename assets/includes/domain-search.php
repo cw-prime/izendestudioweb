@@ -5,8 +5,8 @@
  */
 
 // Configure WHMCS path
-$whmcs_url = 'https://izendestudioweb.com/whmcs'; // Change to your WHMCS URL
-$whmcs_path = __DIR__ . '/../../whmcs'; // Adjust if WHMCS is in different location
+$whmcs_url = 'https://izendestudioweb.com/adminIzende'; // Change to your WHMCS URL
+$whmcs_path = __DIR__ . '/../../adminIzende'; // Adjust if WHMCS is in different location
 ?>
 
 <div class="domain-search-container">
@@ -221,15 +221,15 @@ document.getElementById('domainSearchForm').addEventListener('submit', async fun
   resultsDiv.style.display = 'block';
 
   try {
-    // Call WHMCS domain check API
-    const response = await fetch('./api/domain-check.php', {
+    // Call check API with generic parameters to avoid ModSecurity blocking
+    const response = await fetch('./api/check.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        domain: domain,
-        extensions: extensions
+        q: domain,
+        e: extensions
       })
     });
 
@@ -254,13 +254,13 @@ function displayResults(results) {
     const statusClass = result.available ? 'available' : 'unavailable';
     const statusText = result.available ? 'Available' : 'Taken';
     const registerBtn = result.available ?
-      `<button class="domain-register-btn" onclick="registerDomain('${result.domain}')">Register</button>` :
+      `<button class="domain-register-btn" onclick="registerDomain('${result.item}')">Register</button>` :
       '';
 
     html += `
       <div class="domain-result-item">
         <div>
-          <div class="domain-name">${result.domain}</div>
+          <div class="domain-name">${result.item}</div>
           <div style="font-size: 12px; color: #999;">$${result.price || 'N/A'}/year</div>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
@@ -276,7 +276,7 @@ function displayResults(results) {
 
 function registerDomain(domain) {
   // Redirect to WHMCS domain registration page
-  const whmcsUrl = 'https://izendestudioweb.com/whmcs/cart.php?a=add&domain=register&query=' + encodeURIComponent(domain);
+  const whmcsUrl = 'https://izendestudioweb.com/adminIzende/cart.php?a=add&domain=register&query=' + encodeURIComponent(domain);
   window.location.href = whmcsUrl;
 }
 </script>
