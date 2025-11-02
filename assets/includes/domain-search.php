@@ -1,22 +1,22 @@
 <?php
 /**
  * Domain Search Form
- * Simple form that redirects to WHMCS domain search
- * No API calls = no ModSecurity blocking
+ * Redirects to WHMCS domain search page
  */
+
+// Configure WHMCS path
+$whmcs_url = 'https://izendestudioweb.com/adminIzende'; // Your WHMCS URL
 ?>
 
 <div class="domain-search-container">
   <div class="domain-search-box">
     <h2>Find Your Perfect Domain</h2>
-    <form action="https://izendestudioweb.com/adminIzende/cart.php" method="get" class="domain-search-form">
-      <input type="hidden" name="a" value="add">
-      <input type="hidden" name="domain" value="register">
-
+    <form id="domainSearchForm" class="domain-search-form">
       <div class="domain-search-input-group">
         <input
           type="text"
-          name="query"
+          id="domainInput"
+          name="domain"
           placeholder="Enter domain name (e.g., yourwebsite)"
           class="domain-search-input"
           required
@@ -27,6 +27,9 @@
         </button>
       </div>
     </form>
+    <div id="domainResults" class="domain-results" style="display:none;">
+      <!-- Results will appear here -->
+    </div>
   </div>
 </div>
 
@@ -94,6 +97,7 @@
   box-shadow: 0 4px 12px rgba(92, 184, 116, 0.3);
 }
 
+
 @media (max-width: 768px) {
   .domain-search-input-group {
     flex-direction: column;
@@ -102,5 +106,26 @@
   .domain-search-btn {
     width: 100%;
   }
+
+  .domain-extensions {
+    font-size: 12px;
+  }
 }
 </style>
+
+<script>
+document.getElementById('domainSearchForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const domain = document.getElementById('domainInput').value.trim();
+
+  if (!domain) {
+    alert('Please enter a domain name');
+    return;
+  }
+
+  // Redirect to WHMCS domain search page with the domain query
+  const whmcsUrl = 'https://izendestudioweb.com/adminIzende/cart.php?a=add&domain=register&query=' + encodeURIComponent(domain);
+  window.location.href = whmcsUrl;
+});
+</script>
