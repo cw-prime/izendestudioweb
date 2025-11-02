@@ -76,8 +76,8 @@ if (class_exists('CMSData')) {
         <p>Harmonious web design and hosting that works seamlessly, so you can focus on what matters. Trusted by St. Louis, Missouri, and Illinois businesses.</p>
       </div>
 
-      <!-- Domain Search -->
-      <?php include_once './assets/includes/domain-search.php'; ?>
+      <!-- Domain Search - Temporarily disabled due to ModSecurity restrictions -->
+      <?php // include_once './assets/includes/domain-search.php'; ?>
     </div>
   </section>
   <!-- End Hero -->

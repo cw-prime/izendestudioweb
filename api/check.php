@@ -15,11 +15,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Try POST first (JSON body)
     $raw_input = file_get_contents('php://input');
     if (!empty($raw_input)) {
-        $input = json_decode($raw_input, true);
+        // Decode if it's JSON
+        $decoded = json_decode($raw_input, true);
+        if ($decoded) {
+            $input = $decoded;
+        }
     }
 }
 
-// Fallback to GET if POST is empty
+// Fallback to standard form POST
+if (!$input && !empty($_POST['q'])) {
+    $input = [
+        'q' => $_POST['q'] ?? null,
+        'e' => isset($_POST['e']) ? (is_array($_POST['e']) ? $_POST['e'] : explode(',', $_POST['e'])) : null
+    ];
+}
+
+// Fallback to GET if still empty
 if (!$input && $_SERVER['REQUEST_METHOD'] === 'GET') {
     $input = [
         'q' => $_GET['q'] ?? null,
@@ -36,6 +48,15 @@ if (!$input || !isset($input['q']) || !isset($input['e'])) {
 
 $query = trim($input['q']); // Generic query parameter
 $extensions = $input['e']; // Extensions array
+
+// Ensure extensions is an array
+if (!is_array($extensions)) {
+    if (is_string($extensions)) {
+        $extensions = explode(',', $extensions);
+    } else {
+        $extensions = [];
+    }
+}
 
 // Validate query format
 if (empty($query) || !preg_match('/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/i', $query)) {
