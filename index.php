@@ -75,6 +75,9 @@ if (class_exists('CMSData')) {
         <h1>Peace of Mind for Your Digital Presence</h1>
         <p>Harmonious web design and hosting that works seamlessly, so you can focus on what matters. Trusted by St. Louis, Missouri, and Illinois businesses.</p>
       </div>
+
+      <!-- Domain Search -->
+      <?php include_once './assets/includes/domain-search.php'; ?>
     </div>
   </section>
   <!-- End Hero -->
