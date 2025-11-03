@@ -177,7 +177,7 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 70px;;
 }
 .scrolled-offset {
-  margin-top: 70px;
+  margin-top: 40px;
 }
 
 /*--------------------------------------------------------------
@@ -373,6 +373,69 @@ h1, h2, h3, h4, h5, h6 {
 }
 .navbar-mobile .dropdown > .dropdown-active {
   display: block;
+}
+
+@media (max-width: 991px) {
+  #header {
+    height: 64px;
+  }
+
+  #header .logo {
+    width: 155px;
+    align-items: center;
+    margin-left: 5px;
+  }
+
+  #header .logo img {
+    max-height: 48px;
+    margin-top: 12px;
+    margin-bottom: 0;
+  }
+
+  #header .logo-font {
+    margin-left: 0;
+  }
+
+  .navbar {
+    position: relative;
+  }
+
+  .navbar .getstarted {
+    margin-left: 0;
+  }
+
+  .navbar ul {
+    gap: 0;
+  }
+
+  .navbar-mobile {
+    padding: 0 0 20px;
+  }
+
+  .navbar-mobile ul {
+    top: 60px;
+    bottom: 20px;
+    left: 12px;
+    right: 12px;
+    padding: 15px 0;
+    border-radius: 8px;
+  }
+
+  .navbar-mobile li {
+    width: 100%;
+  }
+
+  .navbar-mobile a,
+  .navbar-mobile a:focus {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 16px;
+  }
+
+  .navbar-mobile .getstarted {
+    margin: 12px 24px;
+    text-align: center;
+  }
 }
 
 /*--------------------------------------------------------------
@@ -4101,7 +4164,7 @@ body.theme-transition *::after {
 /* Add padding when header becomes fixed to prevent content overlap */
 #header.fixed-top ~ #main,
 body.header-scrolled #main {
-  padding-top: 80px;
+  padding-top: 0;
 }
 
 /* Ensure breadcrumbs don't overlap with fixed header */
@@ -4112,6 +4175,5 @@ body.header-scrolled #main {
 /* For pages without #main wrapper */
 #header.fixed-top ~ main,
 #header.fixed-top ~ section:first-of-type {
-  margin-top: 80px;
+  margin-top: 60px;
 }
-

@@ -1438,8 +1438,8 @@ section {
 #hero.hero-modern {
   display: block !important;
   position: relative !important;
-  min-height: 60vh !important;
-  padding: 100px 0 80px !important;
+  min-height: 48vh !important;
+  padding: 80px 0 60px !important;
   background: var(--bg-gradient) !important;
   overflow: hidden !important;
 }
@@ -1579,8 +1579,8 @@ section {
 /* Responsive hero */
 @media (max-width: 768px) {
   #hero.hero-modern {
-    min-height: 50vh !important;
-    padding: 80px 0 60px !important;
+    min-height: 42vh !important;
+    padding: 70px 0 50px !important;
   }
 
   #hero.hero-modern h1 {
@@ -1607,6 +1607,23 @@ section {
 
   #hero.hero-modern .btn-modern {
     width: 100% !important;
+  }
+}
+
+@media (max-width: 575px) {
+  #hero.hero-modern {
+    min-height: unset !important;
+    padding: 40px 0 32px !important;
+  }
+
+  #hero.hero-modern h1 {
+    font-size: 30px !important;
+    margin-bottom: 18px !important;
+  }
+
+  #hero.hero-modern p {
+    font-size: 15px !important;
+    margin-bottom: 20px !important;
   }
 }
 
