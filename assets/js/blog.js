@@ -129,24 +129,31 @@ function displayBlogPosts(posts) {
 
 function displayPagination(totalPages, currentPage) {
   const pagination = document.getElementById('blog-pagination');
-  if (!pagination || totalPages <= 1) {
-    if (pagination) pagination.innerHTML = '';
+  if (!pagination) return;
+
+  if (totalPages <= 1) {
+    pagination.innerHTML = '';
     return;
   }
-  let html = '<nav><ul class="pagination justify-content-center">';
+
+  let html = '<nav class="blog-pagination" aria-label="Blog pagination"><ul>';
+
   if (currentPage > 1) {
-    html += '<li class="page-item"><button class="page-link" onclick="loadBlogPosts(' + (currentPage - 1) + ')">Previous</button></li>';
+    html += '<li><button type="button" class="prev" onclick="loadBlogPosts(' + (currentPage - 1) + ')">Previous</button></li>';
   }
+
   for (let i = 1; i <= totalPages; i++) {
     if (i === currentPage) {
-      html += '<li class="page-item active"><span class="page-link">' + i + '</span></li>';
+      html += '<li><span class="active" aria-current="page">' + i + '</span></li>';
     } else {
-      html += '<li class="page-item"><button class="page-link" onclick="loadBlogPosts(' + i + ')">' + i + '</button></li>';
+      html += '<li><button type="button" onclick="loadBlogPosts(' + i + ')">' + i + '</button></li>';
     }
   }
+
   if (currentPage < totalPages) {
-    html += '<li class="page-item"><button class="page-link" onclick="loadBlogPosts(' + (currentPage + 1) + ')">Next</button></li>';
+    html += '<li><button type="button" class="next" onclick="loadBlogPosts(' + (currentPage + 1) + ')">Next</button></li>';
   }
+
   html += '</ul></nav>';
   pagination.innerHTML = html;
 }

@@ -118,7 +118,8 @@
    * Mobile nav toggle
    */
   on('click', '.mobile-nav-toggle', function(e) {
-    select('#navbar').classList.toggle('navbar-mobile')
+    let navbar = select('#navbar')
+    navbar.classList.toggle('navbar-mobile')
     this.classList.toggle('bi-list')
     this.classList.toggle('bi-x')
   })
@@ -1391,21 +1392,21 @@
     renderPagination(currentPage, totalPages) {
       if (totalPages <= 1) return '';
 
-      let html = '<ul>';
+      let html = '<nav class="blog-pagination" aria-label="Blog pagination"><ul>';
 
-      html += '<li><button ' + (currentPage === 1 ? 'disabled' : '') + ' data-page="' + (currentPage - 1) + '">Previous</button></li>';
+      html += '<li><button type="button" ' + (currentPage === 1 ? 'disabled' : '') + ' data-page="' + (currentPage - 1) + '">Previous</button></li>';
 
       for (let i = 1; i <= totalPages; i++) {
         if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-          html += '<li><button class="' + (i === currentPage ? 'active' : '') + '" data-page="' + i + '">' + i + '</button></li>';
+          html += '<li><button type="button" class="' + (i === currentPage ? 'active' : '') + '" data-page="' + i + '">' + i + '</button></li>';
         } else if (i === currentPage - 3 || i === currentPage + 3) {
           html += '<li><span>...</span></li>';
         }
       }
 
-      html += '<li><button ' + (currentPage === totalPages ? 'disabled' : '') + ' data-page="' + (currentPage + 1) + '">Next</button></li>';
+      html += '<li><button type="button" ' + (currentPage === totalPages ? 'disabled' : '') + ' data-page="' + (currentPage + 1) + '">Next</button></li>';
 
-      html += '</ul>';
+      html += '</ul></nav>';
       return html;
     }
 
