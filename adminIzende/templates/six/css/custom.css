@@ -6,3 +6,74 @@
     defined here.
 
 ***************************************************** */
+.main-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.main-brand-row .back-to-site {
+  border-color: #5cb874;
+  color: #5cb874;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.main-website-link > a,
+.main-website-link > a.nav-link,
+.back-to-site-nav-link > a {
+  font-weight: 600;
+  color: #fff !important;
+  background: linear-gradient(135deg, #5cb874, #3e9456) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 1rem !important;
+  border-radius: 999px !important;
+  box-shadow: 0 4px 12px rgba(92, 184, 116, 0.25) !important;
+  transition: all 0.3s ease;
+  border: none !important;
+}
+
+.main-website-link > a:hover,
+.main-website-link > a:focus,
+.back-to-site-nav-link > a:hover,
+.back-to-site-nav-link > a:focus {
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(92, 184, 116, 0.35) !important;
+}
+
+.main-website-link > a i {
+  font-size: 0.95em;
+}
+
+.main-website-link {
+  margin-right: 16px;
+}
+
+.main-brand-row .back-to-site:hover,
+.main-brand-row .back-to-site:focus {
+  background: #5cb874;
+  border-color: #5cb874;
+  color: #fff;
+  text-decoration: none;
+}
+
+@media (max-width: 576px) {
+  .main-brand-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .main-brand-row .back-to-site {
+    width: 100%;
+    justify-content: center;
+  }
+}
+.main-website-link {
+  margin-right: 12px;
+}

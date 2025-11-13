@@ -42,7 +42,9 @@
           <div class="col-lg-12 text-center">
             <h1>E-Commerce Website Development</h1>
             <p>Launch your online store and start selling today. From WooCommerce to Shopify, we build powerful e-commerce solutions that drive sales and grow your business.</p>
-            <a href="../quote.php" class="btn-brand">Get a Free Quote</a>
+            <div class="hero-actions">
+              <a href="../quote.php" class="btn-brand">Get a Free Quote</a>
+            </div>
           </div>
         </div>
       </div>

@@ -1,3 +1,19 @@
+<?php
+// Get database connection for videos
+require_once __DIR__ . '/../admin/config/database.php';
+
+// Fetch portfolio videos from database
+$videos = [];
+if (isset($conn)) {
+    $sql = "SELECT * FROM iz_videos WHERE category = 'portfolio' AND is_visible = 1 ORDER BY display_order ASC, id DESC LIMIT 6";
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $videos[] = $row;
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -39,7 +55,9 @@
       <div class="container" data-aos="fade-up">
         <h1>Professional Video Editing Services</h1>
         <p>Transform your raw footage into captivating stories. From social media content to promotional videos, we bring your vision to life.</p>
-        <a href="../quote.php" class="btn btn-primary btn-brand btn-lg">Get a Free Quote</a>
+        <div class="hero-actions">
+          <a href="../quote.php" class="btn btn-primary btn-brand btn-lg">Get a Free Quote</a>
+        </div>
       </div>
     </section><!-- End Service Hero -->
 
@@ -209,44 +227,30 @@
         </div>
 
         <div class="row">
-          <div class="col-lg-4 col-md-6 video-item" data-aos="fade-up" data-aos-delay="100">
-            <a href="https://www.youtube.com/watch?v=jDDaplaOz7Q" class="video-lightbox" data-glightbox="type: video">
-              <img src="https://img.youtube.com/vi/jDDaplaOz7Q/maxresdefault.jpg" alt="Sample Video 1" class="img-fluid" loading="lazy">
-              <div class="video-overlay">
-                <i class="bx bx-play-circle"></i>
+          <?php if (!empty($videos)): ?>
+            <?php foreach ($videos as $index => $video):
+              $delay = ($index % 3) * 100 + 100; // Stagger animations
+              $thumbnail = $video['custom_thumbnail'] ?: $video['thumbnail_url'];
+            ?>
+              <div class="col-lg-4 col-md-6 video-item" data-aos="fade-up" data-aos-delay="<?php echo $delay; ?>">
+                <a href="<?php echo htmlspecialchars($video['youtube_url']); ?>" class="video-lightbox" data-glightbox="type: video">
+                  <img src="<?php echo htmlspecialchars($thumbnail); ?>" alt="<?php echo htmlspecialchars($video['title']); ?>" class="img-fluid" loading="lazy">
+                  <div class="video-overlay">
+                    <i class="bx bx-play-circle"></i>
+                  </div>
+                </a>
+                <div class="video-info">
+                  <h4><?php echo htmlspecialchars($video['title']); ?></h4>
+                  <p><?php echo htmlspecialchars($video['description']); ?></p>
+                </div>
               </div>
-            </a>
-            <div class="video-info">
-              <h4>Social Media Content</h4>
-              <p>Instagram Reel for local business</p>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <!-- Placeholder when no videos are in the database -->
+            <div class="col-lg-12 text-center">
+              <p class="text-muted">No videos available at the moment. Check back soon!</p>
             </div>
-          </div>
-
-          <div class="col-lg-4 col-md-6 video-item" data-aos="fade-up" data-aos-delay="200">
-            <a href="https://www.youtube.com/watch?v=jDDaplaOz7Q" class="video-lightbox" data-glightbox="type: video">
-              <img src="https://img.youtube.com/vi/jDDaplaOz7Q/maxresdefault.jpg" alt="Sample Video 2" class="img-fluid" loading="lazy">
-              <div class="video-overlay">
-                <i class="bx bx-play-circle"></i>
-              </div>
-            </a>
-            <div class="video-info">
-              <h4>YouTube Tutorial</h4>
-              <p>Educational content with graphics</p>
-            </div>
-          </div>
-
-          <div class="col-lg-4 col-md-6 video-item" data-aos="fade-up" data-aos-delay="300">
-            <a href="https://www.youtube.com/watch?v=jDDaplaOz7Q" class="video-lightbox" data-glightbox="type: video">
-              <img src="https://img.youtube.com/vi/jDDaplaOz7Q/maxresdefault.jpg" alt="Sample Video 3" class="img-fluid" loading="lazy">
-              <div class="video-overlay">
-                <i class="bx bx-play-circle"></i>
-              </div>
-            </a>
-            <div class="video-info">
-              <h4>Promotional Video</h4>
-              <p>Product launch campaign</p>
-            </div>
-          </div>
+          <?php endif; ?>
         </div>
       </div>
     </section><!-- End Video Portfolio -->

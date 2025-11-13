@@ -1,33 +1,91 @@
-# Izende Studio Web - Simplified .htaccess for Testing
-# Original complex .htaccess temporarily disabled
+# =============================================================================
+# Izende Studio Web – Main .htaccess
+# Restores HTTPS redirect, security controls, and extensionless PHP routing
+# =============================================================================
 
-# Allow directory access
 Options -Indexes +FollowSymLinks
+<IfModule mod_security.c>
+    <LocationMatch "^/articles/wp-json">
+        SecRuleRemoveById 200002 981176 981203 949110
+    </LocationMatch>
+    <LocationMatch "^/articles/\?rest_route=">
+        SecRuleRemoveById 200002 981176 981203 949110
+    </LocationMatch>
+</IfModule>
 
-# Protect sensitive files
-<FilesMatch "^(\.env|\.git.*|composer\.(json|lock)|.*\.log|.*\.bak|.*\.sql)$">
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # -------------------------------------------------------------------------
+    # Force HTTPS (supports environments with/without proxy headers)
+    # DISABLED FOR LOCAL DEVELOPMENT - Uncomment for production
+    # -------------------------------------------------------------------------
+    # RewriteCond %{HTTPS} !=on
+    # RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # -------------------------------------------------------------------------
+    # Redirect explicit .php requests to extensionless URLs (public site only)
+    # -------------------------------------------------------------------------
+    RewriteCond %{THE_REQUEST} \s/+index\.php[\s?] [NC]
+    RewriteRule ^index\.php$ / [R=301,L]
+
+    RewriteCond %{THE_REQUEST} \s/+(.+?)\.php[\s?] [NC]
+    RewriteCond %{REQUEST_URI} !^/(admin|adminIzende|api|articles|assets|config|forms|logs|scripts|services/blog-(api|db)) [NC]
+    RewriteRule ^ /%1 [R=301,L]
+
+    # -------------------------------------------------------------------------
+    # Protect root /config directory but keep /admin/config accessible
+    # (previous change mistakenly blocked /admin/config and broke includes)
+    # -------------------------------------------------------------------------
+    RewriteCond %{REQUEST_URI} !^/admin/config/ [NC]
+    RewriteRule ^config/ - [F,L]
+
+    # -------------------------------------------------------------------------
+    # Short-circuit if the request already points to a real file or directory
+    # -------------------------------------------------------------------------
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # -------------------------------------------------------------------------
+    # Clean URLs: map `/path` -> `/path.php` when the PHP file exists
+    # -------------------------------------------------------------------------
+    RewriteCond %{REQUEST_URI} !\.[^./]+$            [NC]
+    RewriteCond %{REQUEST_URI} !^/admin/config/      [NC]
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^(.+)$ $1.php [L,QSA]
+</IfModule>
+
+# -------------------------------------------------------------------------
+# Deny direct access to sensitive files
+# -------------------------------------------------------------------------
+<FilesMatch "^(\.env|\.git.*|composer\.(json|lock)|package(-lock)?\.json|README\.md|.*\.(log|bak|backup|sql))$">
     Require all denied
 </FilesMatch>
 
-# Protect WordPress config
+<Files "config.php">
+    Require all denied
+</Files>
+
 <Files "wp-config.php">
     Require all denied
 </Files>
 
-# Protect config directory (EXCEPT admin/config for CMS)
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    # Allow /admin/config/ for CMS functionality
-    RewriteCond %{REQUEST_URI} !^/admin/
-    RewriteRule ^config/ - [F,L]
-</IfModule>
-
+# -------------------------------------------------------------------------
 # Security headers
+# -------------------------------------------------------------------------
 <IfModule mod_headers.c>
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-XSS-Protection "1; mode=block"
+    Header always unset X-Powered-By
+    Header unset X-Powered-By
+    SetEnvIf Request_URI "^/articles/wp-json/?$" set_accept_json=1
+    SetEnvIf Request_URI "^/articles/\?rest_route=/?$" set_accept_json=1
+    RequestHeader set Accept "application/json" env=set_accept_json
 </IfModule>
 
-# Note: HTTPS redirect temporarily disabled for local testing
-# Original .htaccess saved as .htaccess.disabled
+<IfModule mod_dir.c>
+    DirectoryIndex index.php
+</IfModule>

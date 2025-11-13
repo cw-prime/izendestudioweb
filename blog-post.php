@@ -41,6 +41,21 @@ $meta_description = htmlspecialchars(substr($post['excerpt'], 0, 160));
 $meta_keywords = implode(', ', array_map(function($tag) { return $tag['name']; }, $post['tags']));
 $og_image = $post['featured_image']['url'];
 $canonical_url = 'https://izendestudioweb.com' . $post['link'];
+
+// Prepare sidebar markup directly from WordPress widget area
+$sidebar_id = 'sidebar-1';
+$sidebar_html = '';
+$wp_loader = __DIR__ . '/articles/wp-load.php';
+
+if (file_exists($wp_loader)) {
+    require_once $wp_loader;
+
+    if (function_exists('is_active_sidebar') && function_exists('dynamic_sidebar') && is_active_sidebar($sidebar_id)) {
+        ob_start();
+        dynamic_sidebar($sidebar_id);
+        $sidebar_html = ob_get_clean();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -253,55 +268,14 @@ $canonical_url = 'https://izendestudioweb.com' . $post['link'];
 
           <!-- Sidebar -->
           <div class="col-lg-4">
-            <aside class="blog-sidebar">
-
-              <!-- Search Widget -->
-              <div class="sidebar-widget search-widget">
-                <h3>Search Blog</h3>
-                <form action="/blog.php" method="get">
-                  <div class="search-box">
-                    <input type="text" name="search" placeholder="Search articles..." class="form-control">
-                    <button type="submit" class="btn-search"><i class="bx bx-search"></i></button>
-                  </div>
-                </form>
-              </div>
-
-              <!-- Categories Widget -->
-              <div class="sidebar-widget categories-widget">
-                <h3>Categories</h3>
-                <ul id="sidebar-categories">
-                  <li><a href="/blog.php">All Posts</a></li>
-                </ul>
-              </div>
-
-              <!-- Recent Posts Widget -->
-              <div class="sidebar-widget recent-posts-widget">
-                <h3>Recent Posts</h3>
-                <div id="sidebar-recent-posts">
-                  <!-- Populated by JavaScript -->
-                </div>
-              </div>
-
-              <!-- Newsletter Signup -->
-              <div class="sidebar-widget newsletter-widget">
-                <h3>Subscribe to Our Newsletter</h3>
-                <p>Get the latest web design tips and insights delivered to your inbox.</p>
-                <form id="sidebar-newsletter-form">
-                  <input type="email" name="email" placeholder="Your email" class="form-control" required>
-                  <button type="submit" class="btn btn-brand w-100 mt-2">Subscribe</button>
-                </form>
-              </div>
-
-              <!-- Contact Widget -->
-              <div class="sidebar-widget contact-widget">
-                <h3>Get In Touch</h3>
-                <ul>
-                  <li><i class="bx bx-phone"></i> <a href="tel:314-312-6441">+1 314.312.6441</a></li>
-                  <li><i class="bx bx-envelope"></i> <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a></li>
-                  <li><i class="bx bx-map"></i> St. Louis, MO</li>
-                </ul>
-              </div>
-
+            <aside class="blog-sidebar" aria-label="Blog sidebar widgets">
+              <?php
+                if (!empty($sidebar_html)) {
+                    echo $sidebar_html;
+                } else {
+                    echo '<!-- Sidebar has no active widgets -->';
+                }
+              ?>
             </aside>
           </div>
 
@@ -314,59 +288,6 @@ $canonical_url = 'https://izendestudioweb.com' . $post['link'];
   <!-- ======= Footer ======= -->
   <?php include './assets/includes/footer.php'; ?>
   <!-- End Footer -->
-
-  <!-- Blog Post JavaScript -->
-  <script>
-    // Load categories and recent posts for sidebar
-    document.addEventListener('DOMContentLoaded', function() {
-      // Load categories
-      fetch('/api/blog-categories.php')
-        .then(response => response.json())
-        .then(data => {
-          if (data.success && data.data.length > 0) {
-            const categoriesList = document.getElementById('sidebar-categories');
-            data.data.forEach(cat => {
-              const li = document.createElement('li');
-              li.innerHTML = `<a href="/blog.php?category=${cat.slug}">${cat.name} <span>(${cat.count})</span></a>`;
-              categoriesList.appendChild(li);
-            });
-          }
-        })
-        .catch(error => console.error('Error loading categories:', error));
-
-      // Load recent posts
-      fetch('/api/blog-posts.php?per_page=5')
-        .then(response => response.json())
-        .then(data => {
-          if (data.success && data.data.posts.length > 0) {
-            const recentContainer = document.getElementById('sidebar-recent-posts');
-            let html = '';
-
-            data.data.posts.forEach(post => {
-              const date = new Date(post.date);
-              const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-
-              html += `
-                <div class="recent-post-item">
-                  <div class="recent-post-image">
-                    <a href="${post.link}">
-                      <img src="${post.featured_image.url}" alt="${post.featured_image.alt}" class="img-fluid">
-                    </a>
-                  </div>
-                  <div class="recent-post-content">
-                    <h4><a href="${post.link}">${post.title}</a></h4>
-                    <time><i class="bx bx-calendar"></i> ${formattedDate}</time>
-                  </div>
-                </div>
-              `;
-            });
-
-            recentContainer.innerHTML = html;
-          }
-        })
-        .catch(error => console.error('Error loading recent posts:', error));
-    });
-  </script>
 
 </body>
 </html>

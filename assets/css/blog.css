@@ -54,6 +54,17 @@
   position: relative;
   overflow: hidden;
   height: 250px;
+  background: linear-gradient(135deg, rgba(244, 247, 245, 0.95), rgba(226, 237, 231, 0.95)),
+    url('/assets/img/blog-placeholder.jpg') center / cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blog-card-image-link {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .blog-card-image img {
@@ -61,10 +72,29 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  display: block;
 }
 
 .blog-card:hover .blog-card-image img {
   transform: scale(1.05);
+}
+
+.blog-card-image .blog-card-category {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: #59b36f;
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  z-index: 2;
+  margin: 0;
+  pointer-events: none;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
 }
 
 .blog-category-badge {
@@ -695,7 +725,8 @@
   top: 100px;
 }
 
-.sidebar-widget {
+.sidebar-widget,
+.blog-sidebar .widget {
   background: #fff;
   padding: 30px;
   border-radius: 8px;
@@ -703,13 +734,57 @@
   margin-bottom: 30px;
 }
 
-.sidebar-widget h3 {
+.sidebar-widget h3,
+.blog-sidebar .widget-title {
   font-size: 20px;
   font-weight: 700;
   color: #2c4d3e;
   margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 2px solid #5cb874;
+}
+
+.blog-sidebar .widget ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.blog-sidebar .widget li {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 10px 0;
+}
+
+.blog-sidebar .widget li:last-child {
+  border-bottom: none;
+}
+
+.blog-sidebar .widget li:empty {
+  display: none;
+}
+
+.blog-sidebar .widget a {
+  color: #2c4d3e;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.blog-sidebar .widget a:hover {
+  color: #5cb874;
+}
+
+.blog-sidebar .widget_recent_entries li {
+  display: block;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.blog-sidebar .widget_recent_entries li span {
+  display: block;
+  font-size: 13px;
+  color: #999;
+  font-weight: 400;
+  margin-top: 6px;
 }
 
 /* Search Widget */

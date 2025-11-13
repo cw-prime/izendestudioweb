@@ -68,6 +68,12 @@ body {
   background-attachment: fixed !important;
 }
 
+a,
+a:hover,
+a:focus {
+  text-decoration: none !important;
+}
+
 /*--------------------------------------------------------------
 # Full-Page Zen Decorations
 --------------------------------------------------------------*/
@@ -365,24 +371,41 @@ body {
   z-index: 1;
 }
 
-/* Contact Section - with mountains */
+/* Contact Section - with bonsai and bamboo */
 #contact {
   position: relative !important;
   background: linear-gradient(135deg, rgba(52, 168, 83, 0.15) 0%, rgba(15, 157, 88, 0.13) 100%) !important;
   overflow: hidden;
 }
 
+/* Contact Bamboo Left */
 #contact::before {
   content: '';
   position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 500px;
-  height: 350px;
-  background-image: url('data:image/svg+xml,<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"><path d="M0,300 L80,180 L140,220 L200,150 L260,200 L320,140 L400,300 Z" fill="%2334a853" opacity="0.25"/><path d="M0,300 L60,200 L120,240 L180,160 L240,210 L300,170 L360,220 L400,300 Z" fill="%230f9d58" opacity="0.35"/><path d="M80,300 L140,200 L180,240 L220,140 L260,180 L300,220 L340,300 Z" fill="%2334a853" opacity="0.45"/><ellipse cx="220" cy="145" rx="35" ry="18" fill="%23e4f5e8" opacity="0.6"/></svg>');
+  left: 2%;
+  bottom: 80px;
+  width: 320px;
+  height: 380px;
+  background-image: url('data:image/svg+xml,<svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg"><g id="bamboo-stems"><path d="M70,400 L68,300 L65,200 L70,100 L68,20" stroke="%2388aa88" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M120,400 L122,300 L118,200 L125,100 L120,20" stroke="%2388aa88" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M170,400 L168,300 L172,200 L165,100 L172,20" stroke="%2388aa88" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="70" cy="80" r="5" fill="%2370aa70" opacity="0.6"/><circle cx="120" cy="75" r="4" fill="%2370aa70" opacity="0.5"/><circle cx="172" cy="85" r="5" fill="%2370aa70" opacity="0.6"/></g><g id="bamboo-nodes"><rect x="65" y="180" width="10" height="6" fill="%2366aa66" opacity="0.7"/><rect x="116" y="160" width="10" height="6" fill="%2366aa66" opacity="0.7"/><rect x="167" y="175" width="10" height="6" fill="%2366aa66" opacity="0.7"/><rect x="62" y="280" width="10" height="6" fill="%2366aa66" opacity="0.65"/><rect x="118" y="290" width="10" height="6" fill="%2366aa66" opacity="0.65"/><rect x="170" y="275" width="10" height="6" fill="%2366aa66" opacity="0.65"/></g><g id="bamboo-leaves"><path d="M55,240 Q50,235 48,225" stroke="%2388aa88" stroke-width="2.5" fill="none" opacity="0.8" stroke-linecap="round"/><path d="M85,235 Q95,230 105,225" stroke="%2388aa88" stroke-width="2.5" fill="none" opacity="0.8" stroke-linecap="round"/><path d="M105,250 Q110,245 115,235" stroke="%2388aa88" stroke-width="2" fill="none" opacity="0.75" stroke-linecap="round"/><path d="M150,240 Q140,235 135,220" stroke="%2388aa88" stroke-width="2.5" fill="none" opacity="0.8" stroke-linecap="round"/><path d="M190,245 Q200,240 210,230" stroke="%2388aa88" stroke-width="2.5" fill="none" opacity="0.78" stroke-linecap="round"/><path d="M60,140 Q45,135 40,125" stroke="%2388aa88" stroke-width="2.5" fill="none" opacity="0.76" stroke-linecap="round"/><path d="M125,135 Q140,130 150,120" stroke="%2388aa88" stroke-width="2.5" fill="none" opacity="0.78" stroke-linecap="round"/><path d="M185,145 Q200,140 215,130" stroke="%2388aa88" stroke-width="2.5" fill="none" opacity="0.76" stroke-linecap="round"/></g></svg>');
   background-size: contain;
   background-repeat: no-repeat;
-  opacity: 0.3;
+  opacity: 0.4;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Contact Bonsai Right */
+#contact::after {
+  content: '';
+  position: absolute;
+  right: 2%;
+  bottom: 50px;
+  width: 300px;
+  height: 350px;
+  background-image: url('data:image/svg+xml,<svg viewBox="0 0 300 380" xmlns="http://www.w3.org/2000/svg"><g id="bonsai-pot"><path d="M95,250 L80,340 L220,340 L205,250 Z" fill="%238b7355" stroke="%235c4a3d" stroke-width="1.5" opacity="0.75"/><ellipse cx="150" cy="250" rx="55" ry="13" fill="%23a0956d" stroke="%235c4a3d" stroke-width="1" opacity="0.8"/><ellipse cx="150" cy="338" rx="70" ry="10" fill="%234a3a2d" opacity="0.5"/><line x1="110" y1="270" x2="115" y2="320" stroke="%235c4a3d" stroke-width="0.8" opacity="0.2"/><line x1="190" y1="270" x2="185" y2="320" stroke="%235c4a3d" stroke-width="0.8" opacity="0.2"/></g><g id="bonsai-trunk"><path d="M150,250 Q148,210 150,170 Q151,130 150,90 Q149,50 152,25" stroke="%238b7355" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.8"/><path d="M152,250 Q154,210 152,170 Q151,130 152,90 Q153,50 150,25" stroke="%23a0826d" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.4"/><circle cx="150" cy="25" r="5" fill="%235c4a3d" opacity="0.7"/></g><g id="bonsai-foliage"><circle cx="105" cy="85" r="48" fill="%2388aa88" opacity="0.78"/><circle cx="195" cy="90" r="52" fill="%2388aa88" opacity="0.75"/><circle cx="150" cy="50" r="45" fill="%2388aa88" opacity="0.8"/><circle cx="120" cy="145" r="42" fill="%2388aa88" opacity="0.74"/><circle cx="180" cy="150" r="44" fill="%2388aa88" opacity="0.76"/><circle cx="85" cy="115" r="35" fill="%2388aa88" opacity="0.68"/><circle cx="215" cy="120" r="38" fill="%2388aa88" opacity="0.7"/><ellipse cx="75" cy="75" rx="32" ry="40" fill="%2388aa88" opacity="0.65"/><ellipse cx="225" cy="80" rx="35" ry="42" fill="%2388aa88" opacity="0.67"/><circle cx="130" cy="65" r="28" fill="%2388aa88" opacity="0.62"/><circle cx="170" cy="68" r="30" fill="%2388aa88" opacity="0.64"/></g><ellipse cx="150" cy="355" rx="85" ry="18" fill="%2388aa88" opacity="0.2"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.4;
   z-index: 0;
   pointer-events: none;
 }
@@ -2163,6 +2186,12 @@ section {
   z-index: 1 !important;
 }
 
+#cta .row {
+  align-items: center !important;
+  display: flex !important;
+  gap: 30px !important;
+}
+
 /* CTA Heading */
 #cta h3 {
   font-size: 2.5rem !important;
@@ -2170,6 +2199,7 @@ section {
   color: var(--text-primary) !important;
   margin-bottom: 20px !important;
   font-family: 'Raleway', sans-serif !important;
+  margin-top: 0 !important;
 }
 
 /* CTA Paragraph */
@@ -2186,6 +2216,7 @@ section {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  min-height: 100px !important;
 }
 
 /* CTA Button */
@@ -2218,6 +2249,11 @@ section {
 
 /* Responsive */
 @media (max-width: 992px) {
+  #cta .row {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
   #cta h3 {
     font-size: 2rem !important;
     text-align: center !important;
@@ -2230,6 +2266,8 @@ section {
 
   #cta .cta-btn-container {
     justify-content: center !important;
+    min-height: auto !important;
+    width: 100% !important;
   }
 }
 

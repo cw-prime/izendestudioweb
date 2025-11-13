@@ -125,9 +125,11 @@ class BlogDB {
                     p.post_content as content,
                     p.post_date as date,
                     p.post_modified as modified,
-                    u.display_name as author
+                    u.display_name as author,
+                    pm.meta_value as featured_image_id
                 FROM {$this->table_prefix}posts p
                 LEFT JOIN {$this->table_prefix}users u ON p.post_author = u.ID
+                LEFT JOIN {$this->table_prefix}postmeta pm ON p.ID = pm.post_id AND pm.meta_key = '_thumbnail_id'
                 WHERE p.post_name = '$slug'
                 AND p.post_status = 'publish'
                 AND p.post_type = 'post'

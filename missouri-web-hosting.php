@@ -39,8 +39,8 @@
       <div class="container" data-aos="fade-up">
         <h1>Missouri Web Hosting Services</h1>
         <p>Fast, secure, and reliable web hosting for Missouri businesses. Based in St. Louis with local support, we provide enterprise-grade hosting solutions throughout Missouri.</p>
-        <div style="margin-top: 20px;">
-          <a href="#pricing" class="btn btn-primary btn-brand btn-lg" style="margin-right: 10px;">View Hosting Plans</a>
+        <div class="hero-actions">
+          <a href="#pricing" class="btn btn-primary btn-brand btn-lg">View Hosting Plans</a>
           <a href="./quote.php" class="btn btn-outline-primary btn-lg">Get a Free Quote</a>
         </div>
       </div>
@@ -206,14 +206,14 @@
           <div class="col-lg-4 col-md-6 mb-4" data-aos="zoom-in" data-aos-delay="100">
             <div class="pricing-table">
               <h3>Shared Hosting</h3>
-              <div class="price">$4.99<span>/month</span></div>
+              <div class="price">$5.95<span>/month</span></div>
               <ul>
                 <li><i class="bx bx-check"></i> 10GB SSD Storage</li>
                 <li><i class="bx bx-check"></i> Unlimited Bandwidth</li>
                 <li><i class="bx bx-check"></i> 1 Website</li>
-                <li><i class="bx bx-check"></i> 10 Email Accounts</li>
+                <li><i class="bx bx-check"></i> 2 Email Accounts</li>
                 <li><i class="bx bx-check"></i> Free SSL Certificate</li>
-                <li><i class="bx bx-check"></i> Free Domain (1 year)</li>
+                <li><i class="bx bx-check"></i> Domain registration available as an add-on</li>
                 <li><i class="bx bx-check"></i> cPanel Control Panel</li>
                 <li><i class="bx bx-check"></i> 99.9% Uptime Guarantee</li>
                 <li><i class="bx bx-check"></i> 24/7 Missouri Support</li>
@@ -227,21 +227,19 @@
             <div class="pricing-table featured">
               <span class="badge" style="position: absolute; top: 20px; right: 20px; background: #5cb874; color: white; padding: 5px 10px; border-radius: 4px;">Most Popular</span>
               <h3>VPS Hosting</h3>
-              <div class="price">$29.99<span>/month</span></div>
+              <div class="price">$14.99<span>/month</span></div>
+              <p style="margin: 5px 0 15px; font-size: 14px; color: #666;">Intro rate renews at $26.99/month.</p>
               <ul>
-                <li><i class="bx bx-check"></i> 50GB SSD Storage</li>
-                <li><i class="bx bx-check"></i> Unlimited Bandwidth</li>
-                <li><i class="bx bx-check"></i> 5 Websites</li>
-                <li><i class="bx bx-check"></i> 50 Email Accounts</li>
-                <li><i class="bx bx-check"></i> Free SSL Certificate</li>
-                <li><i class="bx bx-check"></i> Free Domain (1 year)</li>
+                <li><i class="bx bx-check"></i> 4 vCPU Cores</li>
+                <li><i class="bx bx-check"></i> 8GB RAM</li>
+                <li><i class="bx bx-check"></i> 160GB NVMe SSD Storage</li>
+                <li><i class="bx bx-check"></i> 5TB Bandwidth</li>
+                <li><i class="bx bx-check"></i> 2 Dedicated IPs</li>
                 <li><i class="bx bx-check"></i> cPanel/WHM Access</li>
-                <li><i class="bx bx-check"></i> 2-4 CPU Cores</li>
-                <li><i class="bx bx-check"></i> 2-8GB RAM</li>
-                <li><i class="bx bx-check"></i> Root Access</li>
-                <li><i class="bx bx-check"></i> Dedicated IP</li>
-                <li><i class="bx bx-check"></i> Daily Backups</li>
+                <li><i class="bx bx-check"></i> Free SSL Certificate</li>
+                <li><i class="bx bx-check"></i> Daily Backups & Proactive Monitoring</li>
                 <li><i class="bx bx-check"></i> Priority Missouri Support</li>
+                <li><i class="bx bx-check"></i> Professional Email Free Trial</li>
               </ul>
               <a href="/adminIzende/index.php?rp=/store/vps-hosting" class="btn btn-brand">Get Started</a>
               <p style="margin-top: 15px; font-size: 14px; color: #777;"><strong>Best for Growing Missouri Businesses</strong></p>
@@ -251,22 +249,19 @@
           <div class="col-lg-4 col-md-6 mb-4" data-aos="zoom-in" data-aos-delay="300">
             <div class="pricing-table">
               <h3>Dedicated Server</h3>
-              <div class="price">$99.99<span>/month</span></div>
+              <div class="price">$89.99<span>/month</span></div>
+              <p style="margin: 5px 0 15px; font-size: 14px; color: #666;">Intro pricing renews at $199.99/month.</p>
               <ul>
-                <li><i class="bx bx-check"></i> 500GB SSD Storage</li>
-                <li><i class="bx bx-check"></i> Unlimited Bandwidth</li>
-                <li><i class="bx bx-check"></i> Unlimited Websites</li>
-                <li><i class="bx bx-check"></i> Unlimited Email Accounts</li>
-                <li><i class="bx bx-check"></i> Free SSL Certificate</li>
-                <li><i class="bx bx-check"></i> Free Domain (1 year)</li>
-                <li><i class="bx bx-check"></i> Full Root Access</li>
-                <li><i class="bx bx-check"></i> 8-16 CPU Cores</li>
-                <li><i class="bx bx-check"></i> 16-64GB RAM</li>
-                <li><i class="bx bx-check"></i> Multiple Dedicated IPs</li>
-                <li><i class="bx bx-check"></i> Daily Backups</li>
-                <li><i class="bx bx-check"></i> Managed Services Available</li>
-                <li><i class="bx bx-check"></i> Priority Missouri Support</li>
-                <li><i class="bx bx-check"></i> 99.99% Uptime SLA</li>
+                <li><i class="bx bx-check"></i> Intel Xeon E-2136 (6 Cores / 12 Threads)</li>
+                <li><i class="bx bx-check"></i> 16GB DDR4 ECC RAM</li>
+                <li><i class="bx bx-check"></i> 1TB NVMe SSD Storage</li>
+                <li><i class="bx bx-check"></i> 10TB Bandwidth on 1 Gbps Port</li>
+                <li><i class="bx bx-check"></i> 5 Dedicated IPv4 Addresses</li>
+                <li><i class="bx bx-check"></i> cPanel/WHM with Root Access</li>
+                <li><i class="bx bx-check"></i> Free SSL Certificates</li>
+                <li><i class="bx bx-check"></i> Advanced DDoS Protection & Security Hardening</li>
+                <li><i class="bx bx-check"></i> Daily Backups & Proactive Monitoring</li>
+                <li><i class="bx bx-check"></i> Launch Assist Onboarding + Priority Missouri Support</li>
               </ul>
               <a href="/adminIzende/index.php?rp=/store/dedicated-servers" class="btn btn-brand">Get Started</a>
               <p style="margin-top: 15px; font-size: 14px; color: #777;"><strong>For Large Missouri Enterprises</strong></p>

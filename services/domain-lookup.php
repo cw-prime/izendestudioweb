@@ -39,7 +39,9 @@
       <div class="container" data-aos="fade-up">
         <h1>Find Your Perfect Domain Name</h1>
         <p>Search and register your ideal domain name. Secure your online identity with the perfect web address for your business or project.</p>
-        <a href="https://izendestudioweb.com/adminIzende/cart.php?a=add&domain=register" class="btn btn-primary btn-brand btn-lg">Search Domains Now</a>
+        <div class="hero-actions">
+          <a href="https://izendestudioweb.com/adminIzende/cart.php?a=add&domain=register" class="btn btn-primary btn-brand btn-lg">Search Domains Now</a>
+        </div>
       </div>
     </section><!-- End Service Hero -->
 
@@ -173,7 +175,7 @@
           <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="100">
             <div class="pricing-table">
               <h3>.com Domain</h3>
-              <div class="price">$14.99<span>/year</span></div>
+              <div class="price">$19.78<span>/year</span></div>
               <ul>
                 <li><i class="bx bx-check"></i> 1 Year Registration</li>
                 <li><i class="bx bx-check"></i> Free DNS Management</li>
@@ -189,7 +191,7 @@
           <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="200">
             <div class="pricing-table featured">
               <h3>.net Domain</h3>
-              <div class="price">$16.99<span>/year</span></div>
+              <div class="price">$26.33<span>/year</span></div>
               <ul>
                 <li><i class="bx bx-check"></i> 1 Year Registration</li>
                 <li><i class="bx bx-check"></i> Free DNS Management</li>
@@ -205,7 +207,7 @@
           <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="300">
             <div class="pricing-table">
               <h3>.org Domain</h3>
-              <div class="price">$15.99<span>/year</span></div>
+              <div class="price">$25.66<span>/year</span></div>
               <ul>
                 <li><i class="bx bx-check"></i> 1 Year Registration</li>
                 <li><i class="bx bx-check"></i> Free DNS Management</li>

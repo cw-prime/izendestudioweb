@@ -65,6 +65,36 @@ body {
   margin-right: 0.25rem;
 }
 
+.main-website-link > a,
+.main-website-link > a.nav-link {
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, var(--izende-brand), var(--izende-brand-dark)) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 1rem !important;
+  border-radius: 999px !important;
+  box-shadow: 0 4px 12px rgba(92, 184, 116, 0.25) !important;
+  transition: all 0.3s ease;
+  border: none !important;
+}
+
+.main-website-link > a:hover,
+.main-website-link > a:focus {
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(92, 184, 116, 0.35) !important;
+}
+
+.main-website-link > a i {
+  font-size: 0.95em;
+}
+
+.main-website-link {
+  margin-right: 16px;
+}
+
 /* Navbar Brand Logo */
 .navbar-izende .navbar-brand {
   display: flex;
@@ -1145,4 +1175,7 @@ button[type="submit"].btn-primary:hover {
     color: #000;
     background: #fff;
   }
+}
+.main-website-link {
+  margin-right: 12px;
 }

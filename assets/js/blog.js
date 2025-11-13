@@ -26,6 +26,7 @@ function getBasePath() {
 }
 
 const basePath = getBasePath();
+const BLOG_IMAGE_FALLBACK = '/assets/img/blog-placeholder.jpg';
 
 // Prevent multiple initializations
 let blogInitialized = false;
@@ -99,13 +100,27 @@ function displayBlogPosts(posts) {
   }
   console.log('Mapping posts to HTML...');
   const html = posts.map(post => {
-    const imageUrl = post.featured_image && post.featured_image.url ? post.featured_image.url : null;
-    const imageAlt = post.featured_image && post.featured_image.alt ? post.featured_image.alt : post.title;
+    const imageData = post.featured_image || {};
+    let imageUrl = BLOG_IMAGE_FALLBACK;
+    if (typeof imageData === 'string' && imageData.trim() !== '') {
+      imageUrl = imageData.trim();
+    } else if (typeof imageData.url === 'string' && imageData.url.trim() !== '') {
+      imageUrl = imageData.url.trim();
+    }
+
+    const fallbackAlt = post.title || 'Blog post image';
+    let imageAlt = fallbackAlt;
+    if (typeof imageData.alt === 'string' && imageData.alt.trim() !== '') {
+      imageAlt = imageData.alt;
+    } else if (imageData.alt && typeof imageData.alt.rendered === 'string' && imageData.alt.rendered.trim() !== '') {
+      imageAlt = imageData.alt.rendered;
+    }
+
     const categoryName = post.categories && post.categories.length > 0 ? post.categories[0].name : '';
 
     return '<div class="col-lg-4 col-md-6 mb-4"><article class="blog-card">' +
-      (imageUrl ? '<div class="blog-card-image"><img src="' + escapeHtml(imageUrl) + '" alt="' + escapeHtml(imageAlt) + '" class="img-fluid">' +
-      (categoryName ? '<span class="blog-card-category">' + escapeHtml(categoryName) + '</span>' : '') + '</div>' : '') +
+      '<div class="blog-card-image"><img src="' + escapeHtml(imageUrl) + '" alt="' + escapeHtml(imageAlt) + '" class="img-fluid" loading="lazy" data-fallback-src="' + BLOG_IMAGE_FALLBACK + '">' +
+      (categoryName ? '<span class="blog-card-category">' + escapeHtml(categoryName) + '</span>' : '') + '</div>' +
       '<div class="blog-card-content"><h3 class="blog-card-title"><a href="' + escapeHtml(post.link) + '">' + escapeHtml(post.title) + '</a></h3>' +
       '<p class="blog-card-excerpt">' + escapeHtml(post.excerpt || post.content.substring(0, 150)) + '</p>' +
       '<div class="blog-card-meta"><span class="blog-card-author">' + escapeHtml(post.author || 'Izende Studio') + '</span>' +
@@ -115,6 +130,7 @@ function displayBlogPosts(posts) {
 
   console.log('HTML length:', html.length);
   container.innerHTML = html;
+  markBlogImagesLoaded(container);
   console.log('HTML inserted into container');
 
   // Check if it's still there after a brief delay
@@ -125,6 +141,36 @@ function displayBlogPosts(posts) {
       container.innerHTML = html;
     }
   }, 100);
+}
+
+function markBlogImagesLoaded(scope) {
+  if (!scope) return;
+  const images = scope.querySelectorAll('img[loading="lazy"]');
+  images.forEach((img) => {
+    const markLoaded = () => {
+      img.classList.add('loaded');
+      img.removeEventListener('error', handleError);
+    };
+
+    const handleError = () => {
+      if (!img.dataset.fallbackApplied) {
+        img.dataset.fallbackApplied = '1';
+        const fallbackSrc = img.dataset.fallbackSrc || BLOG_IMAGE_FALLBACK;
+        if (img.src !== fallbackSrc) {
+          img.src = fallbackSrc;
+          return;
+        }
+      }
+      markLoaded();
+    };
+
+    if (img.complete && img.naturalWidth > 0) {
+      markLoaded();
+    } else {
+      img.addEventListener('load', markLoaded, { once: true });
+      img.addEventListener('error', handleError);
+    }
+  });
 }
 
 function displayPagination(totalPages, currentPage) {
@@ -204,6 +250,7 @@ function formatDate(dateString) {
 }
 
 function escapeHtml(text) {
+  if (text === null || text === undefined) return '';
   const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
-  return text.replace(/[&<>"']/g, m => map[m]);
+  return String(text).replace(/[&<>"']/g, m => map[m]);
 }

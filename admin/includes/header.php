@@ -49,6 +49,18 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                             View Site
                         </a>
                     </li>
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link text-danger" href="logout.php">
+                            <i class="bi bi-box-arrow-right"></i>
+                            Logout
+                        </a>
+                    </li>
+                    <li class="nav-item d-none d-lg-flex align-items-center ms-2">
+                        <a class="btn btn-outline-light btn-sm" href="logout.php">
+                            <i class="bi bi-box-arrow-right"></i>
+                            Logout
+                        </a>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle me-1"></i>

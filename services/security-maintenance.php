@@ -42,7 +42,9 @@
           <div class="col-lg-12 text-center">
             <h1>Website Security & Maintenance Services</h1>
             <p>Protect your website from threats and keep it running at peak performance. Our comprehensive security and maintenance plans give you peace of mind.</p>
-            <a href="../quote.php" class="btn-brand">Get a Free Quote</a>
+            <div class="hero-actions">
+              <a href="../quote.php" class="btn-brand">Get a Free Quote</a>
+            </div>
           </div>
         </div>
       </div>

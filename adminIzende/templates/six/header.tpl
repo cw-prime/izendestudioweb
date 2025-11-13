@@ -90,11 +90,17 @@
             {/if}
         </ul>
 
-        {if $assetLogoPath}
-            <a href="{$WEB_ROOT}/index.php" class="logo"><img src="{$assetLogoPath}" alt="{$companyname}"></a>
-        {else}
-            <a href="{$WEB_ROOT}/index.php" class="logo logo-text">{$companyname}</a>
-        {/if}
+        <div class="d-flex align-items-center justify-content-between main-brand-row">
+            {if $assetLogoPath}
+                <a href="{$WEB_ROOT}/index.php" class="logo"><img src="{$assetLogoPath}" alt="{$companyname}"></a>
+            {else}
+                <a href="{$WEB_ROOT}/index.php" class="logo logo-text">{$companyname}</a>
+            {/if}
+            <a href="https://izendestudioweb.com" class="btn btn-outline-primary btn-sm back-to-site">
+                <i class="fas fa-home"></i>
+                Back to Izende Studio Web
+            </a>
+        </div>
 
     </div>
 </section>
@@ -117,6 +123,12 @@
             <div class="collapse navbar-collapse" id="primary-nav">
 
                 <ul class="nav navbar-nav">
+
+                    <li class="back-to-site-nav-link">
+                        <a href="https://izendestudioweb.com">
+                            <i class="fas fa-home"></i> Main Site
+                        </a>
+                    </li>
 
                     {include file="$template/includes/navbar.tpl" navbar=$primaryNavbar}
 

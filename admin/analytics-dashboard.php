@@ -38,7 +38,15 @@ $dashboardEnabled = $settings['ga_dashboard_enabled'] ?? '1';
 $cacheDuration = (int)($settings['ga_cache_duration'] ?? 3600);
 
 // Check if dashboard is enabled and configured
-$isConfigured = !empty($propertyId) && !empty($serviceAccountJson);
+$missingConfig = [];
+if (empty($propertyId)) {
+    $missingConfig[] = 'Property ID';
+}
+if (empty($serviceAccountJson)) {
+    $missingConfig[] = 'Service account credentials';
+}
+
+$isConfigured = empty($missingConfig);
 
 $analyticsData = null;
 $error = null;
@@ -92,7 +100,12 @@ include __DIR__ . '/includes/header.php';
 <?php elseif (!$isConfigured): ?>
 <div class="alert alert-info">
     <h5><i class="bi bi-info-circle"></i> Analytics Dashboard Not Configured</h5>
-    <p>To view analytics data, you need to configure Google Analytics API access.</p>
+    <p>To view analytics data, make sure the following items are saved on the <a href="analytics.php">Analytics Settings</a> page:</p>
+    <ul class="mb-3">
+        <?php foreach ($missingConfig as $item): ?>
+            <li><?php echo htmlspecialchars($item); ?></li>
+        <?php endforeach; ?>
+    </ul>
     <a href="analytics.php" class="btn btn-primary">Go to Analytics Settings</a>
 </div>
 <?php elseif ($error): ?>

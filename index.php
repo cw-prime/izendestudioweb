@@ -215,19 +215,36 @@ if (class_exists('CMSData')) {
       <div class="row gy-4">
         <div class="col-lg-12">
           <div class="info">
-            <div class="contact-left">
-              <div class="email">
-                <i class="bi bi-envelope"></i>
-                <h4>Email:</h4>
-                <p><a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a></p>
-              </div>
-              <div class="phone">
-                <i class="bi bi-phone"></i>
-                <h4>Call:</h4>
-                <p><a href="tel:314-312-6441">+1 314.312.6441</a></p>
+            <div class="contact-map" id="service-area-map"></div>
+            <div class="contact-right">
+              <div class="contact-details">
+                <h3>Speak with Our Team</h3>
+                <p>We’re happy to talk through your next project or provide quick support.</p>
+                <ul class="contact-list">
+                  <li>
+                    <i class="bx bx-phone"></i>
+                    <div>
+                      <span class="label">Call</span>
+                      <a href="tel:314-312-6441">+1 (314) 312-6441</a>
+                    </div>
+                  </li>
+                  <li>
+                    <i class="bx bx-envelope"></i>
+                    <div>
+                      <span class="label">Email</span>
+                      <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a>
+                    </div>
+                  </li>
+                  <li>
+                    <i class="bx bx-time"></i>
+                    <div>
+                      <span class="label">Hours</span>
+                      Mon–Fri, 9AM–6PM CST
+                    </div>
+                  </li>
+                </ul>
               </div>
             </div>
-            <div class="contact-map" id="service-area-map"></div>
           </div>
         </div>
       </div>

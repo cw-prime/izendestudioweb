@@ -4,6 +4,12 @@
  */
 
 require_once __DIR__ . '/config/auth.php';
+require_once __DIR__ . '/includes/login-throttle.php';
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+global $conn;
 
 // Redirect if already logged in
 if (Auth::check()) {
@@ -19,14 +25,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     $remember = isset($_POST['remember']);
+    $ip = $_SERVER['REMOTE_ADDR'];
 
-    $result = Auth::login($username, $password, $remember);
-
-    if ($result['success']) {
-        header('Location: index.php');
-        exit;
+    if (tooManyFailures($conn, $ip, $username)) {
+        $error = 'Too many failed attempts. Please wait 15 minutes before trying again.';
     } else {
-        $error = $result['message'];
+        $result = Auth::login($username, $password, $remember);
+        recordLoginAttempt($conn, $ip, $username, $result['success']);
+
+        if ($result['success']) {
+            clearLoginAttempts($conn, $ip, $username);
+            header('Location: index.php');
+            exit;
+        } else {
+            $error = $result['message'];
+        }
     }
 }
 

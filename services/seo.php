@@ -39,7 +39,9 @@
       <div class="container" data-aos="fade-up">
         <h1>Local & National SEO Services</h1>
         <p>Get found on Google and drive more traffic to your website. Expert SEO services for St. Louis businesses and beyond.</p>
-        <a href="../quote.php" class="btn btn-primary btn-brand btn-lg">Get a Free SEO Audit</a>
+        <div class="hero-actions">
+          <a href="../quote.php" class="btn btn-primary btn-brand btn-lg">Get a Free SEO Audit</a>
+        </div>
       </div>
     </section><!-- End Service Hero -->
 
@@ -319,7 +321,7 @@
         </div>
 
         <div class="row align-items-center">
-          <div class="col-lg-6" data-aos="fade-right">
+          <div class="col-12" data-aos="fade-right">
             <h3>Why Choose Local SEO?</h3>
             <p>If you're a St. Louis business serving local customers, local SEO is essential. We help you:</p>
             <ul style="list-style: none; padding-left: 0;">
@@ -331,9 +333,6 @@
               <li><i class="bx bx-check" style="color: #5cb874;"></i> <strong>Mobile Optimization</strong> - Capture mobile searchers on-the-go</li>
             </ul>
             <p><strong>Serving:</strong> St. Louis, Clayton, University City, Webster Groves, Kirkwood, Creve Coeur, Chesterfield, O'Fallon, St. Charles, and all surrounding areas.</p>
-          </div>
-          <div class="col-lg-6" data-aos="fade-left">
-            <img src="../assets/img/team/mark_a.jpg" class="img-fluid" alt="St. Louis SEO" style="border-radius: 8px;">
           </div>
         </div>
       </div>

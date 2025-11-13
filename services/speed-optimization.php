@@ -42,7 +42,9 @@
           <div class="col-lg-12 text-center">
             <h1>Website Speed Optimization Services</h1>
             <p>Make your website lightning fast. Improve user experience, boost SEO rankings, and increase conversions with professional speed optimization.</p>
-            <a href="../quote.php" class="btn-brand">Get a Free Speed Audit</a>
+            <div class="hero-actions">
+              <a href="../quote.php" class="btn-brand">Get a Free Speed Audit</a>
+            </div>
           </div>
         </div>
       </div>

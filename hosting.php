@@ -18,7 +18,7 @@ setSecurityHeaders();
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
   <title>Web Hosting Services - Shared, VPS & Dedicated Hosting | Izende Studio Web</title>
-  <meta name="description" content="Professional web hosting in St. Louis with 99.9% uptime guarantee. Shared, VPS, and Dedicated hosting plans starting at $4.99/month. 24/7 support and free SSL included.">
+  <meta name="description" content="Professional web hosting in St. Louis with 99.9% uptime guarantee. Shared, VPS, and Dedicated hosting plans starting at $5.95/month. 24/7 support and free SSL included.">
   <meta name="keywords" content="web hosting, shared hosting, vps hosting, dedicated server, st louis hosting, managed hosting">
 
   <?php include 'assets/includes/header-links.php'; ?>
@@ -52,8 +52,8 @@ setSecurityHeaders();
           <div class="col-lg-8 mx-auto text-center">
             <h1>Professional Web Hosting Solutions</h1>
             <p>Fast, secure, and reliable hosting with 99.9% uptime guarantee. Powered by enterprise-grade infrastructure.</p>
-            <div class="mt-4">
-              <a href="#pricing" class="btn btn-brand me-3">View Hosting Plans</a>
+            <div class="hero-actions">
+              <a href="#pricing" class="btn btn-brand">View Hosting Plans</a>
               <a href="quote.php" class="btn btn-outline-light">Get Free Quote</a>
             </div>
           </div>
@@ -194,25 +194,25 @@ setSecurityHeaders();
               <tr>
                 <td class="feature-name">Storage</td>
                 <td>10GB SSD</td>
-                <td class="recommended-col">50GB SSD</td>
-                <td>500GB SSD</td>
+                <td class="recommended-col">160GB NVMe SSD</td>
+                <td>1TB NVMe SSD</td>
               </tr>
               <tr>
                 <td class="feature-name">Bandwidth</td>
                 <td>Unlimited</td>
-                <td class="recommended-col">Unlimited</td>
-                <td>Unlimited</td>
+                <td class="recommended-col">5TB Transfer</td>
+                <td>10TB Transfer</td>
               </tr>
               <tr>
                 <td class="feature-name">Websites</td>
                 <td>1</td>
-                <td class="recommended-col">5</td>
+                <td class="recommended-col">Unlimited</td>
                 <td>Unlimited</td>
               </tr>
               <tr>
                 <td class="feature-name">Email Accounts</td>
-                <td>10</td>
-                <td class="recommended-col">50</td>
+                <td>2</td>
+                <td class="recommended-col">Unlimited + Pro Email Trial</td>
                 <td>Unlimited</td>
               </tr>
               <tr>
@@ -223,9 +223,9 @@ setSecurityHeaders();
               </tr>
               <tr>
                 <td class="feature-name">Free Domain (1 year)</td>
-                <td><i class="bx bx-check check-icon"></i></td>
+                <td>Not included</td>
                 <td class="recommended-col"><i class="bx bx-check check-icon"></i></td>
-                <td><i class="bx bx-check check-icon"></i></td>
+                <td>Available as add-on</td>
               </tr>
               <tr>
                 <td class="feature-name">cPanel Access</td>
@@ -254,14 +254,14 @@ setSecurityHeaders();
               <tr>
                 <td class="feature-name">CPU Cores</td>
                 <td>Shared</td>
-                <td class="recommended-col">2-4</td>
-                <td>8-16</td>
+                <td class="recommended-col">4 dedicated cores</td>
+                <td>6 dedicated cores (Intel Xeon E-2136)</td>
               </tr>
               <tr>
                 <td class="feature-name">RAM</td>
                 <td>Shared</td>
-                <td class="recommended-col">2-8GB</td>
-                <td>16-64GB</td>
+                <td class="recommended-col">8GB</td>
+                <td>16GB DDR4 ECC</td>
               </tr>
               <tr>
                 <td class="feature-name">Root Access</td>
@@ -272,8 +272,8 @@ setSecurityHeaders();
               <tr>
                 <td class="feature-name">Dedicated IP</td>
                 <td><i class="bx bx-x x-icon"></i></td>
-                <td class="recommended-col"><i class="bx bx-check check-icon"></i></td>
-                <td><i class="bx bx-check check-icon"></i></td>
+                <td class="recommended-col"><i class="bx bx-check check-icon"></i> <span style="margin-left: 4px;">2 included</span></td>
+                <td><i class="bx bx-check check-icon"></i> <span style="margin-left: 4px;">5 included</span></td>
               </tr>
               <tr>
                 <td class="feature-name">Priority Support</td>
@@ -317,14 +317,14 @@ setSecurityHeaders();
           <div class="col-lg-4 col-md-6 mb-4" data-aos="zoom-in" data-aos-delay="100">
             <div class="pricing-table">
               <h3>Shared Hosting</h3>
-              <div class="price">$4.99<span>/month</span></div>
+              <div class="price">$5.95<span>/month</span></div>
               <ul>
                 <li><i class="bx bx-check"></i> 10GB SSD Storage</li>
                 <li><i class="bx bx-check"></i> Unlimited Bandwidth</li>
                 <li><i class="bx bx-check"></i> 1 Website</li>
-                <li><i class="bx bx-check"></i> 10 Email Accounts</li>
+                <li><i class="bx bx-check"></i> 2 Email Accounts</li>
                 <li><i class="bx bx-check"></i> Free SSL Certificate</li>
-                <li><i class="bx bx-check"></i> Free Domain (1 year)</li>
+                <li><i class="bx bx-check"></i> Domain registration available as an add-on</li>
                 <li><i class="bx bx-check"></i> cPanel Control Panel</li>
                 <li><i class="bx bx-check"></i> 99.9% Uptime Guarantee</li>
                 <li><i class="bx bx-check"></i> 24/7 Support</li>
@@ -337,21 +337,19 @@ setSecurityHeaders();
             <div class="pricing-table featured">
               <span class="badge-popular">Most Popular</span>
               <h3>VPS Hosting</h3>
-              <div class="price">$29.99<span>/month</span></div>
+              <div class="price">$14.99<span>/month</span></div>
+              <p style="margin: 5px 0 15px; font-size: 14px; color: #666;">Intro price renews at $26.99/month.</p>
               <ul>
-                <li><i class="bx bx-check"></i> 50GB SSD Storage</li>
-                <li><i class="bx bx-check"></i> Unlimited Bandwidth</li>
-                <li><i class="bx bx-check"></i> 5 Websites</li>
-                <li><i class="bx bx-check"></i> 50 Email Accounts</li>
-                <li><i class="bx bx-check"></i> Free SSL Certificate</li>
-                <li><i class="bx bx-check"></i> Free Domain (1 year)</li>
+                <li><i class="bx bx-check"></i> 4 vCPU Cores</li>
+                <li><i class="bx bx-check"></i> 8GB RAM</li>
+                <li><i class="bx bx-check"></i> 160GB NVMe SSD Storage</li>
+                <li><i class="bx bx-check"></i> 5TB Bandwidth</li>
+                <li><i class="bx bx-check"></i> 2 Dedicated IPs</li>
                 <li><i class="bx bx-check"></i> cPanel/WHM Access</li>
-                <li><i class="bx bx-check"></i> 2-4 CPU Cores</li>
-                <li><i class="bx bx-check"></i> 2-8GB RAM</li>
-                <li><i class="bx bx-check"></i> Root Access</li>
-                <li><i class="bx bx-check"></i> Dedicated IP</li>
-                <li><i class="bx bx-check"></i> Daily Backups</li>
+                <li><i class="bx bx-check"></i> Free SSL Certificate</li>
+                <li><i class="bx bx-check"></i> Daily Backups & Proactive Monitoring</li>
                 <li><i class="bx bx-check"></i> Priority Support</li>
+                <li><i class="bx bx-check"></i> Professional Email Free Trial</li>
               </ul>
               <a href="/adminIzende/index.php?rp=/store/vps-hosting" class="btn btn-brand">Get Started</a>
             </div>
@@ -360,22 +358,19 @@ setSecurityHeaders();
           <div class="col-lg-4 col-md-6 mb-4" data-aos="zoom-in" data-aos-delay="300">
             <div class="pricing-table">
               <h3>Dedicated Server</h3>
-              <div class="price">$99.99<span>/month</span></div>
+              <div class="price">$89.99<span>/month</span></div>
+              <p style="margin: 5px 0 15px; font-size: 14px; color: #666;">Intro pricing renews at $199.99/month.</p>
               <ul>
-                <li><i class="bx bx-check"></i> 500GB SSD Storage</li>
-                <li><i class="bx bx-check"></i> Unlimited Bandwidth</li>
-                <li><i class="bx bx-check"></i> Unlimited Websites</li>
-                <li><i class="bx bx-check"></i> Unlimited Email Accounts</li>
-                <li><i class="bx bx-check"></i> Free SSL Certificate</li>
-                <li><i class="bx bx-check"></i> Free Domain (1 year)</li>
-                <li><i class="bx bx-check"></i> Full Root Access</li>
-                <li><i class="bx bx-check"></i> 8-16 CPU Cores</li>
-                <li><i class="bx bx-check"></i> 16-64GB RAM</li>
-                <li><i class="bx bx-check"></i> Multiple Dedicated IPs</li>
-                <li><i class="bx bx-check"></i> Daily Backups</li>
-                <li><i class="bx bx-check"></i> Managed Services Available</li>
-                <li><i class="bx bx-check"></i> Priority Support</li>
-                <li><i class="bx bx-check"></i> 99.99% Uptime SLA</li>
+                <li><i class="bx bx-check"></i> Intel Xeon E-2136 (6 Cores / 12 Threads)</li>
+                <li><i class="bx bx-check"></i> 16GB DDR4 ECC RAM</li>
+                <li><i class="bx bx-check"></i> 1TB NVMe SSD Storage</li>
+                <li><i class="bx bx-check"></i> 10TB Bandwidth on 1 Gbps Port</li>
+                <li><i class="bx bx-check"></i> 5 Dedicated IPv4 Addresses</li>
+                <li><i class="bx bx-check"></i> cPanel/WHM with Root Access</li>
+                <li><i class="bx bx-check"></i> Free SSL Certificates</li>
+                <li><i class="bx bx-check"></i> Advanced DDoS Protection & Security Hardening</li>
+                <li><i class="bx bx-check"></i> Daily Backups & Proactive Monitoring</li>
+                <li><i class="bx bx-check"></i> Launch Assist Onboarding + 24/7 Priority Support</li>
               </ul>
               <a href="/adminIzende/index.php?rp=/store/dedicated-servers" class="btn btn-brand">Get Started</a>
             </div>

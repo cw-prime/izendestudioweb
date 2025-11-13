@@ -39,7 +39,9 @@
       <div class="container" data-aos="fade-up">
         <h1>WordPress Website Development</h1>
         <p>Affordable, professional WordPress websites for small businesses and professionals. Get online fast with a powerful, easy-to-manage website starting at just $499.</p>
-        <a href="../quote.php" class="btn btn-primary btn-brand btn-lg">Get Started Today</a>
+        <div class="hero-actions">
+          <a href="../quote.php" class="btn btn-primary btn-brand btn-lg">Get Started Today</a>
+        </div>
       </div>
     </section><!-- End Service Hero -->
 
@@ -266,7 +268,7 @@
           <div class="col-lg-4 text-center" data-aos="fade-left">
             <div style="background: #f8f9fa; padding: 30px; border-radius: 8px; margin-top: 20px;">
               <h4 style="margin-bottom: 20px;">WordPress Hosting Bundles</h4>
-              <p style="font-size: 14px; color: #666; margin-bottom: 20px;">Starting at just $4.99/month</p>
+              <p style="font-size: 14px; color: #666; margin-bottom: 20px;">Starting at just $5.95/month</p>
               <a href="https://izendestudioweb.com/adminIzende/index.php/store/wordpress-starters" class="btn btn-brand btn-lg">View Hosting Bundles</a>
             </div>
           </div>

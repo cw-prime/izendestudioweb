@@ -7,7 +7,6 @@
         <a href="https://twitter.com/IzendeWeb" class="twitter"><i class="bx bxl-twitter"></i></a>
         <a href="https://www.facebook.com/Izende-Studio-Web-109880234906868" class="facebook"><i class="bx bxl-facebook"></i></a>
         <!-- <a href="#" class="instagram"><i class="bx bxl-instagram"></i></a> -->
-        <!-- <a href="https://web.whatsapp.com" target="_blank" class="google-plus"><i class="bx bxl-whatsapp"></i></a> -->
         <a href="https://www.linkedin.com/company/izende-studio-web" class="linkedin"><i class="bx bxl-linkedin"></i></a>
       </div>
       <div class="copyright">

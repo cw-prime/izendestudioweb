@@ -39,7 +39,9 @@
       <div class="container" data-aos="fade-up">
         <h1>Custom Web Development Services</h1>
         <p>Build powerful, scalable web applications with modern technologies. From concept to deployment, we bring your ideas to life.</p>
-        <a href="../quote.php" class="btn btn-primary btn-brand btn-lg">Start Your Project</a>
+        <div class="hero-actions">
+          <a href="../quote.php" class="btn btn-primary btn-brand btn-lg">Start Your Project</a>
+        </div>
       </div>
     </section><!-- End Service Hero -->
 

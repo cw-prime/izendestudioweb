@@ -42,7 +42,9 @@
           <div class="col-lg-12 text-center">
             <h1>Email Marketing Automation Services</h1>
             <p>Turn subscribers into customers with strategic email marketing. We design, automate, and optimize email campaigns that drive engagement and revenue.</p>
-            <a href="../quote.php" class="btn-brand">Get a Free Quote</a>
+            <div class="hero-actions">
+              <a href="../quote.php" class="btn-brand">Get a Free Quote</a>
+            </div>
           </div>
         </div>
       </div>

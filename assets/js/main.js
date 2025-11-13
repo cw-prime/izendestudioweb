@@ -1380,13 +1380,20 @@
         day: 'numeric'
       }) : '';
       const imageData = post.featured_image || {};
-      const featuredImage = (imageData.url || imageData) || '/assets/img/blog-placeholder.jpg';
+      let featuredImage = '/assets/img/blog-placeholder.jpg';
+
+      if (typeof imageData === 'string' && imageData.trim() !== '') {
+        featuredImage = imageData.trim();
+      } else if (typeof imageData.url === 'string' && imageData.url.trim() !== '') {
+        featuredImage = imageData.url.trim();
+      }
+
       const imageAlt = imageData.alt ? escapeHtml(imageData.alt) : title;
       const categories = Array.isArray(post.categories) ? post.categories : [];
       const categoryName = categories.length > 0 && categories[0].name ? categories[0].name : 'Uncategorized';
       const postUrl = post.link || (`/articles/${post.slug}`);
 
-      return '<div class="col-lg-4 col-md-6 mb-4"><article class="blog-card"><div class="blog-card-image"><a href="' + postUrl + '"><img src="' + featuredImage + '" alt="' + imageAlt + '" class="img-fluid" loading="lazy"></a><span class="blog-card-category">' + categoryName + '</span></div><div class="blog-card-content"><div class="blog-card-meta"><span><i class="bx bx-calendar"></i> ' + date + '</span><span><i class="bx bx-time-five"></i> ' + (post.reading_time || 1) + ' min read</span></div><h3 class="blog-card-title"><a href="' + postUrl + '">' + title + '</a></h3><p class="blog-card-excerpt">' + excerpt + '</p><a href="' + postUrl + '" class="blog-card-link">Read More <i class="bx bx-right-arrow-alt"></i></a></div></article></div>';
+      return '<div class="col-lg-4 col-md-6 mb-4"><article class="blog-card"><div class="blog-card-image"><a href="' + postUrl + '" class="blog-card-image-link"><img src="' + featuredImage + '" alt="' + imageAlt + '" class="img-fluid" loading="lazy"></a><span class="blog-card-category">' + categoryName + '</span></div><div class="blog-card-content"><div class="blog-card-meta"><span><i class="bx bx-calendar"></i> ' + date + '</span><span><i class="bx bx-time-five"></i> ' + (post.reading_time || 1) + ' min read</span></div><h3 class="blog-card-title"><a href="' + postUrl + '">' + title + '</a></h3><p class="blog-card-excerpt">' + excerpt + '</p><a href="' + postUrl + '" class="blog-card-link">Read More <i class="bx bx-right-arrow-alt"></i></a></div></article></div>';
     }
 
     renderPagination(currentPage, totalPages) {
@@ -2011,15 +2018,33 @@
     return div.innerHTML;
   }
 
+  const BLOG_IMAGE_FALLBACK = '/assets/img/blog-placeholder.jpg';
+
   function markLazyImagesLoaded(scope = document) {
     const images = scope.querySelectorAll('img[loading="lazy"]');
     images.forEach((img) => {
-      const markLoaded = () => img.classList.add('loaded');
+      const markLoaded = () => {
+        img.classList.add('loaded');
+        img.removeEventListener('error', handleError);
+      };
+
+      const handleError = () => {
+        if (!img.dataset.fallbackApplied) {
+          img.dataset.fallbackApplied = '1';
+          const fallbackSrc = img.dataset.fallbackSrc || BLOG_IMAGE_FALLBACK;
+          if (img.src !== fallbackSrc) {
+            img.src = fallbackSrc;
+            return;
+          }
+        }
+        markLoaded();
+      };
+
       if (img.complete && img.naturalWidth > 0) {
         markLoaded();
       } else {
         img.addEventListener('load', markLoaded, { once: true });
-        img.addEventListener('error', () => img.classList.add('loaded'), { once: true });
+        img.addEventListener('error', handleError);
       }
     });
   }

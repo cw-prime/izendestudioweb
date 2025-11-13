@@ -38,15 +38,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     $success = true;
-    foreach ($settings as $key => $value) {
-        $key_escaped = mysqli_real_escape_string($conn, $key);
-        $value_escaped = mysqli_real_escape_string($conn, $value);
+    $insertQuery = "
+        INSERT INTO iz_settings (setting_key, setting_value)
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+    ";
+    $stmt = mysqli_prepare($conn, $insertQuery);
 
-        $query = "UPDATE iz_settings SET setting_value = '{$value_escaped}' WHERE setting_key = '{$key_escaped}'";
-        if (!mysqli_query($conn, $query)) {
-            $success = false;
-            break;
+    if ($stmt) {
+        foreach ($settings as $key => $value) {
+            mysqli_stmt_bind_param($stmt, 'ss', $key, $value);
+            if (!mysqli_stmt_execute($stmt)) {
+                $success = false;
+                break;
+            }
         }
+        mysqli_stmt_close($stmt);
+    } else {
+        $success = false;
     }
 
     if ($success) {

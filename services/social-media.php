@@ -42,7 +42,9 @@
           <div class="col-lg-12 text-center">
             <h1>Social Media Management & Content Creation</h1>
             <p>Build your brand and engage your audience with professional social media management. We create compelling content, manage your presence, and drive real results.</p>
-            <a href="../quote.php" class="btn-brand">Get a Free Quote</a>
+            <div class="hero-actions">
+              <a href="../quote.php" class="btn-brand">Get a Free Quote</a>
+            </div>
           </div>
         </div>
       </div>
