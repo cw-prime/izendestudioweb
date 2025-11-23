@@ -62,6 +62,8 @@ class BlogDB {
                     p.post_date as date,
                     p.post_modified as modified,
                     u.display_name as author,
+                    u.ID as author_id,
+                    u.user_email as author_email,
                     pm.meta_value as featured_image_id
                 FROM {$this->table_prefix}posts p
                 LEFT JOIN {$this->table_prefix}users u ON p.post_author = u.ID
@@ -126,6 +128,8 @@ class BlogDB {
                     p.post_date as date,
                     p.post_modified as modified,
                     u.display_name as author,
+                    u.ID as author_id,
+                    u.user_email as author_email,
                     pm.meta_value as featured_image_id
                 FROM {$this->table_prefix}posts p
                 LEFT JOIN {$this->table_prefix}users u ON p.post_author = u.ID
@@ -235,6 +239,8 @@ class BlogDB {
             'date' => $row['date'],
             'modified' => $row['modified'],
             'author' => $row['author'] ?: 'Izende Studio Web',
+            'author_id' => isset($row['author_id']) ? (int)$row['author_id'] : null,
+            'author_email' => $row['author_email'] ?? null,
             'link' => '/blog-post.php?slug=' . $row['slug'],
             'featured_image' => $featured_image,
             'categories' => $categories,

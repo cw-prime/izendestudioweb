@@ -1461,8 +1461,8 @@ section {
 #hero.hero-modern {
   display: block !important;
   position: relative !important;
-  min-height: 48vh !important;
-  padding: 80px 0 60px !important;
+  min-height: 42vh !important;
+  padding: 60px 0 30px !important;
   background: var(--bg-gradient) !important;
   overflow: hidden !important;
 }

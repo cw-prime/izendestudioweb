@@ -46,15 +46,32 @@ $canonical_url = 'https://izendestudioweb.com' . $post['link'];
 $sidebar_id = 'sidebar-1';
 $sidebar_html = '';
 $wp_loader = __DIR__ . '/articles/wp-load.php';
+$wordpress_loaded = false;
 
 if (file_exists($wp_loader)) {
     require_once $wp_loader;
+    $wordpress_loaded = true;
+}
 
-    if (function_exists('is_active_sidebar') && function_exists('dynamic_sidebar') && is_active_sidebar($sidebar_id)) {
-        ob_start();
-        dynamic_sidebar($sidebar_id);
-        $sidebar_html = ob_get_clean();
+$default_author_avatar = '/assets/img/izende-T.png';
+$author_avatar = $default_author_avatar;
+
+if ($wordpress_loaded && function_exists('get_avatar_url')) {
+    if (!empty($post['author_id'])) {
+        $author_avatar = get_avatar_url($post['author_id'], array('size' => 320));
+    } elseif (!empty($post['author_email'])) {
+        $author_avatar = get_avatar_url($post['author_email'], array('size' => 320));
     }
+
+    if (empty($author_avatar)) {
+        $author_avatar = $default_author_avatar;
+    }
+}
+
+if ($wordpress_loaded && function_exists('is_active_sidebar') && function_exists('dynamic_sidebar') && is_active_sidebar($sidebar_id)) {
+    ob_start();
+    dynamic_sidebar($sidebar_id);
+    $sidebar_html = ob_get_clean();
 }
 ?>
 <!DOCTYPE html>
@@ -241,7 +258,7 @@ if (file_exists($wp_loader)) {
               <!-- Author Bio -->
               <div class="blog-author-bio">
                 <div class="author-image">
-                  <img src="/assets/img/izende-T.png" alt="Izende Studio Web" class="img-fluid">
+                  <img src="<?php echo htmlspecialchars($author_avatar); ?>" alt="<?php echo htmlspecialchars($post['author']); ?>" class="img-fluid">
                 </div>
                 <div class="author-info">
                   <h4>About <?php echo htmlspecialchars($post['author']); ?></h4>
