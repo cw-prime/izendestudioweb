@@ -251,7 +251,19 @@ include __DIR__ . '/includes/header.php';
                             </td>
                             <td>
                                 <button type="button" class="btn btn-sm btn-primary view-booking-btn"
-                                        data-booking='<?php echo json_encode($b); ?>'>
+                                        data-id="<?php echo $b['id']; ?>"
+                                        data-name="<?php echo htmlspecialchars($b['client_name'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-email="<?php echo htmlspecialchars($b['client_email'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-phone="<?php echo htmlspecialchars($b['client_phone'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-service="<?php echo htmlspecialchars($b['service_type'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-date="<?php echo htmlspecialchars($b['preferred_date'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-duration="<?php echo htmlspecialchars($b['duration'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-status="<?php echo htmlspecialchars($b['status'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-message="<?php echo htmlspecialchars($b['message'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-created="<?php echo htmlspecialchars($b['created_at'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-meet="<?php echo htmlspecialchars($b['google_meet_link'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-event="<?php echo htmlspecialchars($b['google_event_id'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-notes="<?php echo htmlspecialchars($b['notes'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                                     <i class="bi bi-eye"></i> View
                                 </button>
                                 <button type="button" class="btn btn-sm btn-danger delete-booking-btn"
@@ -318,11 +330,26 @@ include __DIR__ . '/includes/header.php';
 // View booking
 document.querySelectorAll('.view-booking-btn').forEach(btn => {
     btn.addEventListener('click', function() {
-        const booking = JSON.parse(this.dataset.booking);
+        const d = this.dataset;
+        const booking = {
+            id: d.id,
+            client_name: d.name || '',
+            client_email: d.email || '',
+            client_phone: d.phone || '',
+            service_type: d.service || '',
+            preferred_date: d.date || '',
+            duration: d.duration || '',
+            status: d.status || 'pending',
+            message: d.message || '',
+            created_at: d.created || '',
+            google_meet_link: d.meet || '',
+            google_event_id: d.event || '',
+            notes: d.notes || ''
+        };
 
         document.getElementById('booking_id').value = booking.id;
         document.getElementById('booking_status').value = booking.status;
-        document.getElementById('booking_notes').value = booking.notes || '';
+        document.getElementById('booking_notes').value = booking.notes;
 
         // Build Google Meet link section if available
         let meetLinkSection = '';
@@ -347,6 +374,7 @@ document.querySelectorAll('.view-booking-btn').forEach(btn => {
             `;
         }
 
+        const createdAt = booking.created_at ? new Date(booking.created_at) : new Date(booking.preferred_date);
         const details = `
             <h6>Client Information</h6>
             <p><strong>Name:</strong> ${booking.client_name}<br>
@@ -363,7 +391,7 @@ document.querySelectorAll('.view-booking-btn').forEach(btn => {
 
             ${booking.message ? `<h6>Client Message</h6><p>${booking.message}</p>` : ''}
 
-            <p><small class="text-muted">Booked on: ${new Date(booking.created_at).toLocaleString()}</small></p>
+            <p><small class="text-muted">Booked on: ${createdAt.toLocaleString()}</small></p>
         `;
 
         document.getElementById('bookingDetails').innerHTML = details;

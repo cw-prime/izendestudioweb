@@ -112,11 +112,11 @@ SEOHelper::outputMetaTags('book-consultation', [
                     <textarea class="form-control" name="message" rows="4" placeholder="Brief description of what you're looking for..."></textarea>
                   </div>
 
-                  <div id="bookingMessage" class="mb-3"></div>
-
                   <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
                     <i class="bi bi-calendar-check"></i> Book Consultation
                   </button>
+
+                  <div id="bookingMessage" class="mt-3"></div>
                 </form>
               </div>
             </div>
@@ -191,7 +191,7 @@ SEOHelper::outputMetaTags('book-consultation', [
       messageDiv.textContent = '';
 
       try {
-          const response = await fetch('api/book-consultation.php', {
+          const response = await fetch('api/booking.php', {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json'
@@ -199,11 +199,18 @@ SEOHelper::outputMetaTags('book-consultation', [
               body: JSON.stringify(data)
           });
 
-          const result = await response.json();
+          const rawText = await response.text();
+          let result = {};
+          try {
+              result = JSON.parse(rawText);
+          } catch (parseErr) {
+              result = { success: false, message: rawText || 'Unexpected response from server.' };
+          }
 
-          if (result.success) {
+          if (response.ok && result.success) {
               messageDiv.innerHTML = `<div class="alert alert-success"><i class="bi bi-check-circle"></i> ${result.message}</div>`;
               form.reset();
+              setTimeout(() => { messageDiv.innerHTML = ''; }, 6000);
 
               // Track in analytics
               if (typeof gtag !== 'undefined') {
@@ -212,10 +219,11 @@ SEOHelper::outputMetaTags('book-consultation', [
                   });
               }
           } else {
-              messageDiv.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> ${result.message}</div>`;
+              const msg = result.message || `Error ${response.status}: ${rawText || 'Unable to submit right now. Please call us directly.'}`;
+              messageDiv.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> ${msg}</div>`;
           }
       } catch (error) {
-          messageDiv.innerHTML = '<div class="alert alert-danger">An error occurred. Please try again or call us directly.</div>';
+          messageDiv.innerHTML = `<div class="alert alert-danger">An error occurred: ${error.message}. Please try again or call us directly.</div>`;
       } finally {
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<i class="bi bi-calendar-check"></i> Book Consultation';
