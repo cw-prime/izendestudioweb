@@ -212,6 +212,13 @@ function getEnvInt($key, $default = 0) {
 // Auto-load .env file when this file is included
 loadEnvFile();
 
+// Optionally load local overrides (useful for local dev / per-environment secrets).
+// This merges on top of the already-loaded env vars.
+$localOverride = dirname(__DIR__) . '/.env.local';
+if (file_exists($localOverride) && is_readable($localOverride)) {
+    loadEnvFile($localOverride);
+}
+
 // Verify critical variables are set
 $criticalVars = ['RECAPTCHA_SECRET_KEY', 'RECAPTCHA_SITE_KEY'];
 $missingVars = checkRequiredEnvVars($criticalVars);
