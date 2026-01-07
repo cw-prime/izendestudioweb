@@ -36,7 +36,7 @@ setSecurityHeaders();
         <p>Under the California Consumer Privacy Act (CCPA) and the California Privacy Rights Act (CPRA), California residents have the right to opt out of the sale or sharing of their personal information. We do not sell personal information; however, we provide this mechanism to record and honor opt-out choices.</p>
 
         <h2>Our Data Practices</h2>
-        <p>We use service providers for hosting, analytics, and payment processing. We do not sell personal information. We may share data with service providers acting on our behalf under contract and only for limited purposes.</p>
+        <p>We use service providers for hosting, analytics, and payment processing. If enabled, we may also use advertising partners (for example, Google AdSense) to serve and measure ads, which may involve the collection or sharing of certain identifiers and event data. We do not sell personal information. You can opt out of “sharing” for cross-context behavioral advertising as described below.</p>
 
         <h2>Global Privacy Control (GPC)</h2>
         <p>If your browser supports Global Privacy Control (GPC), enable it and our site will honor the signal as an opt-out of sale/sharing and non-essential cookie placement. For assistance enabling GPC, see your browser settings or privacy extensions.</p>
@@ -45,9 +45,10 @@ setSecurityHeaders();
         <p>You may exercise your opt-out by any of the following methods:</p>
         <ul>
           <li>Enabling GPC in your browser (we will honor the signal)</li>
+          <li>Using Cookie Settings on the site to opt out of non-essential cookies</li>
           <li>Submitting the form below (we will verify identity as necessary)</li>
           <li>Emailing <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a></li>
-          <li>Calling +1 314-312-6441</li>
+          <li>Calling +1 314-886-6356</li>
         </ul>
         <p>We may require reasonable identity verification to process opt-out requests. We will acknowledge receipt within 15 business days and will process the request consistent with applicable law.</p>
 
@@ -55,7 +56,7 @@ setSecurityHeaders();
         <p>For a full description of California resident rights (access, deletion, correction, nondiscrimination), see our <a href="/privacy-policy.php">Privacy Policy</a>.</p>
 
         <h2>Contact</h2>
-        <p>Contact us at <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a> or call +1 314-312-6441 for assistance.</p>
+        <p>Contact us at <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a> or call +1 314-886-6356 for assistance.</p>
 
         <h3>Submit an Opt-Out Request</h3>
         <form method="post" action="/forms/data-subject-request.php">

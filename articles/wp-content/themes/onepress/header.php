@@ -29,7 +29,7 @@
 		<div class="row">
 			<section id="topbar">
 				<div class="col contact-info">
-					<a href="mailto:support@izendestudioweb.com"><i class="bi bi-envelope-fill"></i>support@izendestudioweb.com</a> <i class="bi bi-phone-fill phone-icon"></i><a href="tel:314-312-6441"><span class="phone-num">+1 314.312.6441 </span></a>
+					<a href="mailto:support@izendestudioweb.com"><i class="bi bi-envelope-fill"></i>support@izendestudioweb.com</a> <i class="bi bi-phone-fill phone-icon"></i><a href="tel:314-886-6356"><span class="phone-num">+1 314.886.6356 </span></a>
 				</div>
 			</section>
 			<div class="col-4">

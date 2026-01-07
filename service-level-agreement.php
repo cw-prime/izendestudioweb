@@ -174,7 +174,7 @@ setSecurityHeaders();
         <p>Planned infrastructure changes and upgrades will be communicated in advance. For major platform changes we will provide migration guidance and timelines.</p>
 
         <h2 id="contact-escalation">10. Contact and Escalation</h2>
-        <p>To report incidents, open a support ticket in your client area or email <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a>. For urgent incidents call +1 314-312-6441. For SLA disputes or escalation, include "SLA Escalation" in the subject line and provide incident references.</p>
+        <p>To report incidents, open a support ticket in your client area or email <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a>. For urgent incidents call +1 314-886-6356. For SLA disputes or escalation, include "SLA Escalation" in the subject line and provide incident references.</p>
       </div>
     </section>
 

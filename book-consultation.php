@@ -177,7 +177,7 @@ SEOHelper::outputMetaTags('book-consultation', [
                 <h5>Need immediate assistance?</h5>
                 <p class="mb-2">
                   <i class="bi bi-telephone"></i>
-                  <a href="tel:314-312-6441">+1 (314) 312-6441</a>
+                  <a href="tel:314-886-6356">+1 (314) 886-6356</a>
                 </p>
                 <p>
                   <i class="bi bi-envelope"></i>

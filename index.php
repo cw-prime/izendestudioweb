@@ -225,7 +225,7 @@ if (class_exists('CMSData')) {
                     <i class="bx bx-phone"></i>
                     <div>
                       <span class="label">Call</span>
-                      <a href="tel:314-312-6441">+1 (314) 312-6441</a>
+                      <a href="tel:314-886-6356">+1 (314) 886-6356</a>
                     </div>
                   </li>
                   <li>

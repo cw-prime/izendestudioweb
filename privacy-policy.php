@@ -34,7 +34,7 @@ setSecurityHeaders();
 
     <section class="legal-content section-bg">
       <div class="container">
-        <div class="legal-last-updated">Last Updated: October 15, 2025 — Effective Date: October 15, 2025</div>
+        <div class="legal-last-updated">Last Updated: December 25, 2025 — Effective Date: December 25, 2025</div>
         <div class="legal-toc">
           <h3>Contents</h3>
           <ul>
@@ -56,7 +56,7 @@ setSecurityHeaders();
         </div>
 
         <h2 id="who-we-are">1. Who We Are</h2>
-        <p>Izende Studio Web is a Professional Service based in St. Louis, Missouri. Email: support@izendestudioweb.com. Phone: +1 314-312-6441. We are the data controller for personal information collected through our website and services.</p>
+        <p>Izende Studio Web is a Professional Service based in St. Louis, Missouri. Email: support@izendestudioweb.com. Phone: +1 314-886-6356. We are the data controller for personal information collected through our website and services.</p>
 
         <h2 id="services">2. Our Services</h2>
         <p>We provide web design, web hosting, domain registration, SEO, e-commerce development, video editing, social media management, email marketing, website maintenance and speed optimization. We act as controller for our website and marketing operations and as a processor for some hosting customers under a separate DPA.</p>
@@ -74,7 +74,7 @@ setSecurityHeaders();
         <h3>3.2 Information Automatically Collected</h3>
         <ul>
           <li>Server logs: IP address, timestamps, user agent, requested URLs</li>
-          <li>Cookies: session cookies (essential), reCAPTCHA cookies, Google Fonts cookies</li>
+          <li>Cookies and similar identifiers: session cookies (essential), reCAPTCHA cookies, and (if enabled) analytics and advertising cookies/IDs</li>
           <li>Hosting metrics and security logs</li>
         </ul>
 
@@ -130,10 +130,18 @@ setSecurityHeaders();
                 </div>
 
         <h2 id="cookies">5. Cookies and Tracking</h2>
-        <p>We use essential cookies for session management. We use reCAPTCHA and Google Fonts which may set cookies; these are treated as functional cookies and require consent in the EU/UK. See our <a href="/cookie-policy.php">Cookie Policy</a> for details and preference controls.</p>
+        <p>We use essential cookies for session management. We may also use analytics and advertising cookies (including Google AdSense) to measure performance and show ads. Where required by law (for example, in the EU/UK), we will request consent before placing non-essential cookies. See our <a href="/cookie-policy.php">Cookie Policy</a> for details and preference controls.</p>
+
+        <h3>5.1 Advertising (Google AdSense)</h3>
+        <p>If enabled, Google AdSense may use cookies or similar identifiers to serve and measure ads, including to limit the number of times you see an ad and to help measure the effectiveness of ads. Depending on your settings and location, this may include personalized advertising.</p>
+        <ul>
+          <li>Google may use cookies to serve ads based on your prior visits to this and/or other websites.</li>
+          <li>You can manage ad personalization in your Google account: <a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google Ads Settings</a>.</li>
+          <li>You can also opt out of some third-party vendors’ uses of cookies for personalized advertising by visiting <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener">aboutads.info</a>.</li>
+        </ul>
 
         <h2 id="sharing">6. How We Share Your Information</h2>
-        <p>We share data with service providers such as hosting infrastructure, CDNs, payment processors and email delivery providers under contract. We do not sell personal information.</p>
+        <p>We share data with service providers such as hosting infrastructure, CDNs, payment processors and email delivery providers under contract. If enabled, we also use advertising partners (such as Google AdSense) that may collect or receive certain identifiers and event data to serve and measure ads. We do not sell personal information.</p>
 
         <h2 id="international">7. International Data Transfers</h2>
         <p>We operate US-based servers. For EU/UK customers we rely on Standard Contractual Clauses (SCCs) for transfers where applicable.</p>
@@ -145,7 +153,7 @@ setSecurityHeaders();
         <p>You have rights including access, rectification, erasure, restriction of processing, data portability, objection, and withdrawal of consent. To exercise rights, email <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a> or submit a request at <a href="/data-subject-request.php">Data Subject Request</a>.</p>
 
         <h2 id="california">10. Your Privacy Rights (California Residents)</h2>
-        <p>California residents have rights under the CCPA/CPRA. We do not sell or share personal information. To opt-out, visit our <a href="/do-not-sell.php">Do Not Sell or Share</a> page or enable Global Privacy Control (GPC) in your browser.</p>
+        <p>California residents have rights under the CCPA/CPRA. We do not sell personal information. If we use advertising/analytics technologies that constitute “sharing” for cross-context behavioral advertising under the CPRA, you may opt out by visiting our <a href="/do-not-sell.php">Do Not Sell or Share</a> page, using Cookie Settings, or enabling Global Privacy Control (GPC) in your browser.</p>
 
         <h2 id="security">11. How We Protect Your Information</h2>
         <p>We implement technical and organizational measures such as TLS encryption, access controls, monitoring, backups and patching. No transmission over the internet is perfectly secure.</p>
@@ -157,7 +165,7 @@ setSecurityHeaders();
         <p>We may update this policy when necessary. We will post the revised policy with a new effective date.</p>
 
         <h2 id="contact">14. Contact Information</h2>
-        <p>For privacy requests: <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a> | Phone: +1 314-312-6441</p>
+        <p>For privacy requests: <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a> | Phone: +1 314-886-6356</p>
 
       </div>
     </section>

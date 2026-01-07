@@ -1,6 +1,6 @@
 <section id="topbar" class="d-flex align-items-center">
   <div class="contact-info d-flex align-items-center">
-    <a href="mailto:support@izendestudioweb.com"><i class="bi bi-envelope-fill"></i>support@izendestudioweb.com</a> <i class="bi bi-phone-fill phone-icon"></i><a href="tel:314-312-6441"><span class="phone-num">+1 314.312.6441 </span></a>  </div>
+    <a href="mailto:support@izendestudioweb.com"><i class="bi bi-envelope-fill"></i>support@izendestudioweb.com</a> <i class="bi bi-phone-fill phone-icon"></i><a href="tel:314-886-6356"><span class="phone-num">+1 314.886.6356 </span></a>  </div>
 </section>  
 <section style="margin-top: -20px;">
   <div class="social-links d-none d-md-block">

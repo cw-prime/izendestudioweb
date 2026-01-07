@@ -67,7 +67,7 @@ setSecurityHeaders();
           <li>Assistive technology used (if any)</li>
           <li>Preferred method of contact and contact details</li>
         </ul>
-        <p>Contact: <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a> | Phone: +1 314-312-6441</p>
+        <p>Contact: <a href="mailto:support@izendestudioweb.com">support@izendestudioweb.com</a> | Phone: +1 314-886-6356</p>
         <p>We aim to respond to accessibility inquiries within 5 business days and to provide a resolution timeline or workaround when possible.</p>
 
         <h2 id="assessment-testing">Assessment and Testing</h2>

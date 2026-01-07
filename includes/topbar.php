@@ -4,7 +4,7 @@
     <div class="container d-flex justify-content-center justify-content-md-between">
       <div class="contact-info d-flex align-items-center">
         <i class="bi bi-envelope-fill"></i><a href="mailto:support@izendewebstudio.com">support@izendewebstudio.com</a>
-        <i class="bi bi-phone-fill phone-icon"></i> <span class=" phone-num"> <a href="tel:314-312-6441">+1 314.312.6441 </a></span>
+        <i class="bi bi-phone-fill phone-icon"></i> <span class=" phone-num"> <a href="tel:314-886-6356">+1 314.886.6356 </a></span>
       </div>      
       <div class="social-links d-none d-md-block" style="margin-right: 63px;">
         <a href="https://twitter.com/IzendeWeb" target="_blank" class="twitter"><i class="bi bi-twitter"></i></a>

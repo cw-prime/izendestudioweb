@@ -55,7 +55,7 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
           </div>
           <div>
             <i class="bx bx-phone" style="margin-right: 5px; color: #5cb874;"></i>
-            <a href="tel:314-312-6441" style="color: rgba(255,255,255,0.8);">+1 314.312.6441</a>
+            <a href="tel:314-886-6356" style="color: rgba(255,255,255,0.8);">+1 314.886.6356</a>
           </div>
           <div>
             <i class="bx bx-envelope" style="margin-right: 5px; color: #5cb874;"></i>
@@ -74,6 +74,7 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
           <a href="<?php echo $base_path; ?>service-level-agreement.php" class="text-white me-3" aria-label="Service Level Agreement">SLA</a>
           <a href="<?php echo $base_path; ?>accessibility-statement.php" class="text-white me-3" aria-label="Accessibility Statement">Accessibility</a>
           <a href="<?php echo $base_path; ?>do-not-sell.php" class="text-white me-3" aria-label="Do Not Sell or Share">Do Not Sell</a>
+          <a href="<?php echo $base_path; ?>sitemap" class="text-white me-3" aria-label="Sitemap">Sitemap</a>
           <a href="#" id="cookie-settings-link" class="text-white" aria-label="Cookie Settings">Cookie Settings</a>
         </nav>
       </div>
@@ -259,7 +260,7 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
     <?php endif; ?>
 
     <!-- Analytics Event Tracking -->
-    <?php if ((CMSData::getSetting('analytics_enabled') ?? '1') == '1' && (!empty(CMSData::getSetting('google_analytics_id')) || !empty(CMSData::getSetting('google_tag_manager_id')))): ?>
+    <?php if (class_exists('CMSData') && (CMSData::getSetting('analytics_enabled') ?? '1') == '1' && (!empty(CMSData::getSetting('google_analytics_id')) || !empty(CMSData::getSetting('google_tag_manager_id')))): ?>
     <script src="<?php echo $base_path; ?>assets/js/analytics-events.js" defer></script>
     <?php endif; ?>
 
