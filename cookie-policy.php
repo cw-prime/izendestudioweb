@@ -31,7 +31,7 @@ setSecurityHeaders();
 
     <section class="legal-content section-bg">
       <div class="container">
-        <div class="legal-last-updated">Last Updated: October 15, 2025 — Effective Date: October 15, 2025</div>
+        <div class="legal-last-updated">Last Updated: December 25, 2025 — Effective Date: December 25, 2025</div>
 
         <h2>Our Use of Cookies</h2>
         <p>We use cookies and similar technologies to operate the site, provide services, secure accounts, and analyze usage. Cookies fall into the following categories:</p>
@@ -78,10 +78,18 @@ setSecurityHeaders();
                 <td>Analytics (consent required in EU/UK)</td>
                 <td>2 years / 24 hours</td>
               </tr>
-              <!-- Add marketing cookies if/when used -->
+              <tr>
+                <td>Google AdSense / Google Ads cookies (example: __gads, __gpi, IDE)</td>
+                <td>Advertising: serve and measure ads, cap frequency, and (if enabled) personalize ads</td>
+                <td>Marketing / Advertising (consent required in EU/UK)</td>
+                <td>Varies (often days to ~13 months)</td>
+              </tr>
             </tbody>
           </table>
         </div>
+
+        <h3>Advertising Cookies (Google AdSense)</h3>
+        <p>If enabled, Google AdSense may set cookies or use similar identifiers to serve and measure ads. Depending on your location and settings, this may include personalized advertising. Where required by law (for example, in the EU/UK), we will request consent before placing advertising cookies.</p>
 
         <h3>Managing Cookies</h3>
         <p>Use the <a id="cookie-settings-link" href="#">Cookie Settings</a> to change preferences for analytics and marketing cookies. To manage cookies in your browser, follow the vendor instructions below (links open in new tabs):</p>
@@ -93,10 +101,12 @@ setSecurityHeaders();
         </ul>
 
         <h3>Third Party Cookies</h3>
-        <p>We may use third-party providers such as Google for analytics and reCAPTCHA. These providers have their own privacy policies:</p>
+        <p>We may use third-party providers such as Google for analytics, reCAPTCHA, and advertising (Google AdSense). These providers have their own privacy policies and controls:</p>
         <ul>
           <li><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a></li>
           <li><a href="https://developers.google.com/recaptcha/intro" target="_blank" rel="noopener">Google reCAPTCHA</a></li>
+          <li><a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google Ads Settings (ad personalization)</a></li>
+          <li><a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener">Digital Advertising Alliance opt-out</a></li>
         </ul>
 
         <h3>Global Privacy Control (GPC) & Do Not Track (DNT)</h3>

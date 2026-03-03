@@ -42,6 +42,11 @@ Options -Indexes +FollowSymLinks
     RewriteRule ^config/ - [F,L]
 
     # -------------------------------------------------------------------------
+    # XML sitemap
+    # -------------------------------------------------------------------------
+    RewriteRule ^sitemap\.xml$ sitemap.xml.php [L]
+
+    # -------------------------------------------------------------------------
     # Short-circuit if the request already points to a real file or directory
     # -------------------------------------------------------------------------
     RewriteCond %{REQUEST_FILENAME} -f [OR]

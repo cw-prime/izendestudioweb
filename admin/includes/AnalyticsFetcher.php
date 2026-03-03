@@ -24,6 +24,41 @@ class AnalyticsFetcher {
     }
 
     /**
+     * Determine whether a GA4 pagePath should be treated as "blog content".
+     * Supports both the custom PHP blog pages and the WordPress blog under /articles.
+     */
+    private function isBlogPath($pagePath) {
+        if (empty($pagePath)) {
+            return false;
+        }
+
+        // Normalize to reduce edge cases.
+        $path = strtolower((string)$pagePath);
+
+        // Custom blog pages (supports .php and extensionless routes)
+        if (
+            strpos($path, 'blog.php') !== false ||
+            strpos($path, 'blog-post.php') !== false ||
+            preg_match('~^/blog(/|$)~', $path) ||
+            preg_match('~^/blog-post(/|$)~', $path)
+        ) {
+            return true;
+        }
+
+        // Pretty-permalink style paths
+        if (strpos($path, '/blog/') !== false) {
+            return true;
+        }
+
+        // WordPress blog lives under /articles (e.g. /articles/my-post/ or /articles/?p=123)
+        if (strpos($path, '/articles') === 0 || strpos($path, '/articles/') !== false) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Get access token using service account
      */
     private function getAccessToken() {
@@ -252,7 +287,7 @@ class AnalyticsFetcher {
 
     /**
      * Get blog-specific analytics
-     * Filters for pages containing 'blog-post.php' or '/blog/'
+     * Supports custom blog pages and WordPress blog under /articles
      */
     public function getBlogStats($days = 30) {
         $dateRange = [
@@ -260,10 +295,10 @@ class AnalyticsFetcher {
             'endDate' => 'today'
         ];
 
-        // Get blog page views over time
+        // Get blog page views by page (keep metrics event-scoped for compatibility)
         $result = $this->runReport(
             [['name' => 'pageTitle'], ['name' => 'pagePath']],
-            [['name' => 'screenPageViews'], ['name' => 'averageSessionDuration']],
+            [['name' => 'screenPageViews']],
             $dateRange
         );
 
@@ -281,7 +316,7 @@ class AnalyticsFetcher {
 
         $result = $this->runReport(
             [['name' => 'pageTitle'], ['name' => 'pagePath']],
-            [['name' => 'screenPageViews'], ['name' => 'averageSessionDuration']],
+            [['name' => 'screenPageViews']],
             $dateRange
         );
 
@@ -431,23 +466,22 @@ class AnalyticsFetcher {
         }
 
         $totalViews = 0;
-        $totalDuration = 0;
         $blogPosts = 0;
 
         foreach ($data['rows'] as $row) {
             $pagePath = $row['dimensionValues'][1]['value'] ?? '';
 
-            // Filter for blog posts (blog-post.php or /blog/ paths)
-            if (strpos($pagePath, 'blog-post.php') !== false || strpos($pagePath, '/blog/') !== false) {
+            // Filter for blog content only
+            if ($this->isBlogPath($pagePath)) {
                 $totalViews += (int)$row['metricValues'][0]['value'];
-                $totalDuration += (float)$row['metricValues'][1]['value'];
                 $blogPosts++;
             }
         }
 
         return [
             'totalViews' => $totalViews,
-            'avgDuration' => $blogPosts > 0 ? round($totalDuration / $blogPosts) : 0,
+            // Duration per-page can be incompatible depending on GA4 schema; keep 0 unless computed separately.
+            'avgDuration' => 0,
             'postCount' => $blogPosts
         ];
     }
@@ -470,12 +504,12 @@ class AnalyticsFetcher {
             $pagePath = $row['dimensionValues'][1]['value'] ?? '';
 
             // Filter for blog posts only
-            if (strpos($pagePath, 'blog-post.php') !== false || strpos($pagePath, '/blog/') !== false) {
+            if ($this->isBlogPath($pagePath)) {
                 $posts[] = [
                     'title' => $row['dimensionValues'][0]['value'],
                     'path' => $pagePath,
                     'views' => (int)$row['metricValues'][0]['value'],
-                    'avgDuration' => round((float)$row['metricValues'][1]['value'])
+                    'avgDuration' => 0
                 ];
             }
         }
@@ -506,7 +540,7 @@ class AnalyticsFetcher {
             $pagePath = $row['dimensionValues'][1]['value'] ?? '';
 
             // Filter for blog posts only
-            if (strpos($pagePath, 'blog-post.php') !== false || strpos($pagePath, '/blog/') !== false) {
+            if ($this->isBlogPath($pagePath)) {
                 $source = $row['dimensionValues'][0]['value'];
                 $sessions = (int)$row['metricValues'][0]['value'];
 

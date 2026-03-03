@@ -47,6 +47,33 @@ class BlogDB {
     }
 
     /**
+     * Get shared CMS setting from iz_settings table (used by main site admin).
+     */
+    public function getSetting($key) {
+        $key = (string)$key;
+        if ($key === '') {
+            return null;
+        }
+
+        $stmt = $this->mysqli->prepare("SELECT setting_value FROM iz_settings WHERE setting_key = ? LIMIT 1");
+        if (!$stmt) {
+            return null;
+        }
+
+        $stmt->bind_param('s', $key);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return null;
+        }
+
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        $stmt->close();
+
+        return isset($row['setting_value']) ? (string)$row['setting_value'] : null;
+    }
+
+    /**
      * Get posts from database
      */
     public function getPosts($per_page = 9, $page = 1, $category = '', $search = '') {
@@ -181,6 +208,38 @@ class BlogDB {
         }
 
         return $categories;
+    }
+
+    /**
+     * Lightweight list of published posts for sitemap generation.
+     *
+     * @param int $limit Max number of posts to return.
+     * @return array<int, array{slug:string, modified:string|null}>
+     */
+    public function getSitemapPosts($limit = 5000) {
+        $limit = max(1, (int)$limit);
+
+        $sql = "SELECT post_name AS slug, post_modified AS modified
+                FROM {$this->table_prefix}posts
+                WHERE post_status = 'publish'
+                  AND post_type = 'post'
+                  AND post_name <> ''
+                ORDER BY post_modified DESC
+                LIMIT {$limit}";
+
+        $result = $this->mysqli->query($sql);
+        if (!$result) {
+            return [];
+        }
+
+        $posts = [];
+        while ($row = $result->fetch_assoc()) {
+            $posts[] = [
+                'slug' => (string)($row['slug'] ?? ''),
+                'modified' => isset($row['modified']) ? (string)$row['modified'] : null,
+            ];
+        }
+        return $posts;
     }
 
     /**

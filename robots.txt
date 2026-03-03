@@ -1,3 +1,2 @@
 User-agent: *
-Crawl-delay: 30
-
+Sitemap: https://izendestudioweb.com/sitemap.xml

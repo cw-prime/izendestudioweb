@@ -33,6 +33,13 @@ function generateCSRFToken() {
         initSecureSession();
     }
 
+    // Reuse the current valid token to avoid mismatches across wizard steps/reloads.
+    if (!empty($_SESSION['csrf_token']) && !empty($_SESSION['csrf_token_time'])) {
+        if ((time() - $_SESSION['csrf_token_time']) <= 3600) {
+            return $_SESSION['csrf_token'];
+        }
+    }
+
     $token = bin2hex(random_bytes(32));
     $_SESSION['csrf_token'] = $token;
     $_SESSION['csrf_token_time'] = time();
@@ -307,11 +314,24 @@ function initSecureSession() {
         return; // Session already started
     }
 
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    $host = preg_replace('/:\d+$/', '', $host); // strip port if present
+    $isLocalHost = in_array($host, ['localhost', '127.0.0.1'], true);
+    $cookieDomain = '';
+
+    // Share session across www/non-www for the production domain.
+    if (preg_match('/(?:^|\.)izendestudioweb\.com$/i', $host)) {
+        $cookieDomain = '.izendestudioweb.com';
+    } elseif (!$isLocalHost && strpos($host, '.') !== false) {
+        // Generic fallback for other real domains.
+        $cookieDomain = '.' . ltrim($host, '.');
+    }
+
     // Configure session security settings
     ini_set('session.cookie_httponly', 1);
     ini_set('session.use_only_cookies', 1);
     ini_set('session.cookie_secure', 1); // HTTPS only
-    ini_set('session.cookie_samesite', 'Strict');
+    ini_set('session.cookie_samesite', 'Lax');
     ini_set('session.use_strict_mode', 1);
     ini_set('session.use_trans_sid', 0);
 
@@ -322,10 +342,10 @@ function initSecureSession() {
     session_set_cookie_params([
         'lifetime' => 3600, // 1 hour
         'path' => '/',
-        'domain' => $_SERVER['HTTP_HOST'] ?? '',
+        'domain' => $cookieDomain,
         'secure' => true, // HTTPS only
         'httponly' => true, // No JavaScript access
-        'samesite' => 'Strict' // CSRF protection
+        'samesite' => 'Lax'
     ]);
 
     session_start();
@@ -446,7 +466,7 @@ function getCSPNonce() {
  * @param string $severity Severity level (INFO, WARNING, CRITICAL)
  */
 function logSecurityEvent($event, $details = [], $severity = 'INFO') {
-    $logDir = '/var/www/html/izendestudioweb/logs';
+    $logDir = dirname(__DIR__) . '/logs';
 
     // Create log directory if it doesn't exist
     if (!is_dir($logDir)) {
@@ -476,8 +496,11 @@ function logSecurityEvent($event, $details = [], $severity = 'INFO') {
         json_encode($logEntry['details'])
     );
 
-    // Write to log file
-    error_log($logLine, 3, $logFile);
+    // Write to log file (fallback to PHP default error log if direct file write fails)
+    $written = @error_log($logLine, 3, $logFile);
+    if ($written === false) {
+        error_log($logLine);
+    }
 
     // If critical event, consider sending email alert
     if ($severity === 'CRITICAL') {

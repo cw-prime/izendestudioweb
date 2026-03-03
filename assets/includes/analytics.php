@@ -13,6 +13,21 @@ if (class_exists('CMSData')) {
     $analyticsEnabled = CMSData::getSetting('analytics_enabled') ?? '1';
     $ga4Id = CMSData::getSetting('google_analytics_id') ?? '';
     $gtmId = CMSData::getSetting('google_tag_manager_id') ?? '';
+} elseif (isset($blog_db) && is_object($blog_db) && method_exists($blog_db, 'getSetting')) {
+    // Blog pages use BlogDB; reuse its connection to read the shared settings.
+    $analyticsEnabled = $blog_db->getSetting('analytics_enabled') ?? '1';
+    $ga4Id = $blog_db->getSetting('google_analytics_id') ?? '';
+    $gtmId = $blog_db->getSetting('google_tag_manager_id') ?? '';
+} elseif (class_exists('BlogDB')) {
+    // Last-resort fallback: attempt to read settings via BlogDB (wrapped to avoid breaking the page).
+    try {
+        $tmpBlogDb = new BlogDB();
+        $analyticsEnabled = $tmpBlogDb->getSetting('analytics_enabled') ?? '1';
+        $ga4Id = $tmpBlogDb->getSetting('google_analytics_id') ?? '';
+        $gtmId = $tmpBlogDb->getSetting('google_tag_manager_id') ?? '';
+    } catch (Throwable $e) {
+        // Leave defaults; do not break page rendering.
+    }
 }
 
 // Only output tracking code if enabled and IDs are configured

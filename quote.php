@@ -29,7 +29,12 @@ $errors = [];
 $success = false;
 
 // Process form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sendMailbtn'])) {
+// Note: JS wizard uses form.submit(), which does not include clicked button fields.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['csrf_token'])) {
+    logSecurityEvent('quote_submit_received', [
+        'has_csrf' => isset($_POST['csrf_token']),
+        'has_recaptcha_response' => !empty($_POST['g-recaptcha-response'])
+    ], 'INFO');
 
     // 1. CSRF Token Validation
     if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
@@ -102,11 +107,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sendMailbtn'])) {
                 $errors[] = 'Company name must not exceed 100 characters.';
             }
 
-            // Website
-            $website = sanitizeInput($_POST['website'] ?? '', 'url');
-            if (empty($website)) {
-                $errors[] = 'Website URL is required.';
-            } elseif (!filter_var($website, FILTER_VALIDATE_URL)) {
+            // Website (optional)
+            $websiteRaw = trim((string)($_POST['website'] ?? ''));
+            $website = $websiteRaw === '' ? '' : sanitizeInput($websiteRaw, 'url');
+            if ($websiteRaw !== '' && !filter_var($website, FILTER_VALIDATE_URL)) {
                 $errors[] = 'Please enter a valid website URL.';
             }
 
@@ -245,7 +249,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sendMailbtn'])) {
                 if (!empty($company)) {
                     $messageHTML .= "<p><b>Company Name:</b> " . sanitizeHTML($company) . "</p>";
                 }
-                $messageHTML .= "<p><b>Website:</b> <a href=\"" . sanitizeHTML($website) . "\">" . sanitizeHTML($website) . "</a></p>";
+                if (!empty($website)) {
+                    $messageHTML .= "<p><b>Website:</b> <a href=\"" . sanitizeHTML($website) . "\">" . sanitizeHTML($website) . "</a></p>";
+                }
                 $messageHTML .= "<p><b>Company Size:</b> $companySizeEmp</p>";
                 $messageHTML .= "<p><b>Budget:</b> $companyBudgetAmt</p>";
                 $messageHTML .= "<p><b>Industry:</b> " . sanitizeHTML($industry) . "</p>";
@@ -258,21 +264,142 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sendMailbtn'])) {
                 $messageHTML .= "<p><strong>IP Address:</strong> " . getClientIP() . "</p>";
                 $messageHTML .= "</body></html>";
 
-                // Email headers
+                // Email routing
                 $to = getEnv('MAIL_TO', 'support@izendestudioweb.com');
                 $fromEmail = getEnv('MAIL_FROM', 'noreply@izendestudioweb.com');
                 $fromName = 'Izende Studio Web - Quote Form';
+                $mailSent = false;
+                $mailTransport = 'php-mail';
+                $mailError = '';
+                $mailErrors = [];
 
-                $headers = [];
-                $headers[] = 'MIME-Version: 1.0';
-                $headers[] = 'Content-type: text/html; charset=UTF-8';
-                $headers[] = 'From: ' . $fromName . ' <' . $fromEmail . '>';
-                $headers[] = 'Reply-To: ' . sanitizeHTML($name) . ' <' . $email . '>';
-                $headers[] = 'X-Mailer: PHP/' . phpversion();
-                $headers[] = 'X-Form-Source: quote.php';
+                // Prefer the same mail library used by contact form (supports SMTP and clearer errors)
+                $phpEmailFormPath = __DIR__ . '/assets/vendor/php-email-form/php-email-form.php';
+                if (file_exists($phpEmailFormPath)) {
+                    include_once $phpEmailFormPath;
+                }
 
-                // Send email
-                $mailSent = mail($to, $subject, $messageHTML, implode("\r\n", $headers));
+                if (class_exists('PHP_Email_Form')) {
+                    $smtpHost = trim((string) getEnv('SMTP_HOST', ''));
+                    $smtpUsername = trim((string) getEnv('SMTP_USERNAME', ''));
+                    $smtpPassword = trim((string) getEnv('SMTP_PASSWORD', ''));
+                    $smtpPort = (int) getEnv('SMTP_PORT', 587);
+                    $hasSmtp = ($smtpHost !== '' && $smtpUsername !== '' && $smtpPassword !== '' && $smtpPort > 0);
+
+                    $sendViaPhpEmailForm = function ($useSmtp) use (
+                        $to,
+                        $name,
+                        $email,
+                        $fromEmail,
+                        $subject,
+                        $phone,
+                        $company,
+                        $website,
+                        $companySizeEmp,
+                        $companyBudgetAmt,
+                        $industry,
+                        $comment,
+                        $marketing_consent,
+                        $smtpHost,
+                        $smtpUsername,
+                        $smtpPassword,
+                        $smtpPort
+                    ) {
+                        $quoteMail = new PHP_Email_Form;
+                        $quoteMail->to = $to;
+                        $quoteMail->from_name = $name;
+                        $quoteMail->from_email = $email;
+                        $quoteMail->mailer = $fromEmail;
+                        $quoteMail->subject = 'Quote Request - ' . $subject;
+                        $quoteMail->content_type = 'text/html';
+
+                        $quoteMail->add_message($name, 'Customer');
+                        $quoteMail->add_message($email, 'Email');
+                        $quoteMail->add_message($phone, 'Phone');
+                        if (!empty($company)) {
+                            $quoteMail->add_message($company, 'Company Name');
+                        }
+                        if (!empty($website)) {
+                            $quoteMail->add_message($website, 'Website');
+                        }
+                        $quoteMail->add_message($companySizeEmp, 'Company Size');
+                        $quoteMail->add_message($companyBudgetAmt, 'Budget');
+                        $quoteMail->add_message($industry, 'Industry');
+                        $quoteMail->add_message($comment, 'Comments', 1);
+                        $quoteMail->add_message('Yes', 'Privacy Policy Consent');
+                        $quoteMail->add_message($marketing_consent ? 'Yes' : 'No', 'Marketing Consent');
+                        $quoteMail->add_message(date('c'), 'Consent Timestamp');
+                        $quoteMail->add_message(getClientIP(), 'IP Address');
+
+                        if ($useSmtp) {
+                            $quoteMail->smtp = [
+                                'host' => $smtpHost,
+                                'username' => $smtpUsername,
+                                'password' => $smtpPassword,
+                                'port' => $smtpPort,
+                                'encryption' => ($smtpPort === 465) ? 'ssl' : 'tls',
+                                'mailer' => $fromEmail
+                            ];
+                        }
+
+                        return $quoteMail->send();
+                    };
+
+                    // Attempt 1: SMTP (if configured)
+                    if ($hasSmtp) {
+                        $mailTransport = 'smtp';
+                        $mailResult = $sendViaPhpEmailForm(true);
+                        $mailSent = ($mailResult === 'OK' || strpos((string)$mailResult, 'OK') !== false);
+                        if (!$mailSent) {
+                            $mailErrors[] = 'smtp: ' . (string)$mailResult;
+                        }
+                    }
+
+                    // Attempt 2: same library without SMTP (server mail transport)
+                    if (!$mailSent) {
+                        $mailTransport = 'php-email-form';
+                        $mailResult = $sendViaPhpEmailForm(false);
+                        $mailSent = ($mailResult === 'OK' || strpos((string)$mailResult, 'OK') !== false);
+                        if (!$mailSent) {
+                            $mailErrors[] = 'php-email-form: ' . (string)$mailResult;
+                        }
+                    }
+                } else {
+                    // Fallback to native mail() if the library is unavailable
+                    $headers = [];
+                    $headers[] = 'MIME-Version: 1.0';
+                    $headers[] = 'Content-type: text/html; charset=UTF-8';
+                    $headers[] = 'From: ' . $fromName . ' <' . $fromEmail . '>';
+                    $headers[] = 'Reply-To: ' . sanitizeHTML($name) . ' <' . $email . '>';
+                    $headers[] = 'X-Mailer: PHP/' . phpversion();
+                    $headers[] = 'X-Form-Source: quote.php';
+
+                    $mailSent = mail($to, $subject, $messageHTML, implode("\r\n", $headers), '-f' . $fromEmail);
+                    if (!$mailSent) {
+                        $mailErrors[] = 'native_mail_returned_false';
+                    }
+                }
+
+                // Final fallback to native mail() if all library attempts fail
+                if (!$mailSent) {
+                    $mailTransport = 'php-mail';
+                    $headers = [];
+                    $headers[] = 'MIME-Version: 1.0';
+                    $headers[] = 'Content-type: text/html; charset=UTF-8';
+                    $headers[] = 'From: ' . $fromName . ' <' . $fromEmail . '>';
+                    $headers[] = 'Reply-To: ' . sanitizeHTML($name) . ' <' . $email . '>';
+                    $headers[] = 'X-Mailer: PHP/' . phpversion();
+                    $headers[] = 'X-Form-Source: quote.php';
+
+                    $mailSent = mail($to, 'Quote Request - ' . $subject, $messageHTML, implode("\r\n", $headers), '-f' . $fromEmail);
+                    if (!$mailSent) {
+                        $mailErrors[] = 'php_mail_fallback_returned_false';
+                    }
+                }
+
+                if (!empty($mailErrors)) {
+                    $mailError = implode(' | ', $mailErrors);
+                }
 
                 if ($mailSent) {
                     $success = true;
@@ -282,7 +409,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sendMailbtn'])) {
                         'name' => $name,
                         'email' => $email,
                         'service' => $subject,
-                        'marketing_consent' => $marketing_consent
+                        'marketing_consent' => $marketing_consent,
+                        'mail_transport' => $mailTransport
                     ], 'INFO');
 
                     // Append a lightweight consent audit to logs/form-consent.log
@@ -316,7 +444,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sendMailbtn'])) {
                 } else {
                     $errors[] = 'Failed to send email. Please try again or contact us directly.';
                     logSecurityEvent('quote_email_send_failed', [
-                        'to' => $to
+                        'to' => $to,
+                        'mail_transport' => $mailTransport,
+                        'mail_error' => $mailError
                     ], 'CRITICAL');
                 }
             }
@@ -461,7 +591,7 @@ if (empty($recaptchaSiteKey)) {
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-floating">
-                                        <input type="url" class="form-control" name="website" value="<?php echo sanitizeHTML($website); ?>" placeholder=" " id="website" required aria-describedby="website-error">
+                                        <input type="url" class="form-control" name="website" value="<?php echo sanitizeHTML($website); ?>" placeholder=" " id="website" aria-describedby="website-error">
                                         <label for="website">Website URL</label>
                                     </div>
                                     <div class="invalid-feedback" id="website-error" role="alert"></div>

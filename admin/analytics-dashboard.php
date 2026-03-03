@@ -70,6 +70,15 @@ if ($isConfigured && $dashboardEnabled == '1') {
             'blogTrafficSources' => $fetcher->getBlogTrafficSources(30)
         ];
 
+        // Surface per-section API errors (runReport returns error arrays, not exceptions)
+        $sectionsToCheck = ['summary', 'pageViews', 'topPages', 'trafficSources', 'blogStats', 'topBlogPosts', 'blogTrafficSources'];
+        foreach ($sectionsToCheck as $sectionKey) {
+            if (isset($analyticsData[$sectionKey]) && is_array($analyticsData[$sectionKey]) && isset($analyticsData[$sectionKey]['error'])) {
+                $error = $analyticsData[$sectionKey]['error'];
+                break;
+            }
+        }
+
     } catch (Exception $e) {
         $error = $e->getMessage();
     }

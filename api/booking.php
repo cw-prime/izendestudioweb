@@ -26,149 +26,6 @@ function bookingLog($message, $context = []) {
     @file_put_contents($tmp, $entry . PHP_EOL, FILE_APPEND | LOCK_EX);
 }
 
-/**
- * Best-effort: send booking details to a GoHighLevel Workflow Webhook trigger.
- *
- * Configure in `.env`:
- * - GHL_WORKFLOW_WEBHOOK_URL=https://... (from the workflow trigger)
- */
-function sendGhlWorkflowWebhook(array $booking) {
-    $webhookUrl = getEnv('GHL_WORKFLOW_WEBHOOK_URL');
-    if (!$webhookUrl) {
-        return;
-    }
-
-    $timezoneName = (string)getEnv('BOOKING_TIMEZONE', (string)getEnv('GOOGLE_CALENDAR_TIMEZONE', 'America/Chicago'));
-    $bookingPreferred = (string)($booking['preferred_date'] ?? '');
-    $bookingPreferredTime = (string)($booking['preferred_time'] ?? '');
-    $preferredIso = $bookingPreferred;
-    $preferredGhl = $bookingPreferred;
-    try {
-        if ($bookingPreferred !== '') {
-            $tz = new DateTimeZone($timezoneName ?: 'America/Chicago');
-            // Treat stored preferred_date as local time in $timezoneName
-            $dt = new DateTime($bookingPreferred, $tz);
-            $preferredIso = $dt->format(DateTimeInterface::ATOM); // ISO8601 w/ offset
-            $preferredGhl = $dt->format('m-d-Y g:i A'); // GHL "Book Appointment" friendly
-            if ($bookingPreferredTime === '') {
-                $bookingPreferredTime = $dt->format('g:i A');
-            }
-        }
-    } catch (Throwable $e) {
-        // Fall back to raw string if parsing fails
-    }
-
-    $payload = [
-        'event' => 'booking_created',
-        'source' => 'izendestudioweb',
-        'booking' => [
-            'id' => (int)($booking['id'] ?? 0),
-            'client_name' => (string)($booking['client_name'] ?? ''),
-            'client_email' => (string)($booking['client_email'] ?? ''),
-            'client_phone' => (string)($booking['client_phone'] ?? ''),
-            'service_type' => (string)($booking['service_type'] ?? ''),
-            'preferred_date' => $bookingPreferred,
-            'preferred_time' => $bookingPreferredTime,
-            // Use this for HighLevel "Book Appointment" action input
-            'preferred_date_ghl' => $preferredGhl,
-            // ISO8601 w/ offset (useful for logs, integrations, and debugging)
-            'preferred_date_iso' => $preferredIso,
-            'duration' => (int)($booking['duration'] ?? 0),
-            'message' => (string)($booking['message'] ?? ''),
-            'status' => (string)($booking['status'] ?? ''),
-        ],
-        'meta' => [
-            'submitted_at' => gmdate('c'),
-            'ip' => (string)($_SERVER['REMOTE_ADDR'] ?? ''),
-            'user_agent' => (string)($_SERVER['HTTP_USER_AGENT'] ?? ''),
-            'page_url' => (string)($_SERVER['HTTP_REFERER'] ?? ''),
-            'timezone' => $timezoneName,
-        ],
-    ];
-
-    $timeoutSeconds = (int)getEnv('GHL_WEBHOOK_TIMEOUT_SECONDS', 4);
-    $timeoutSeconds = max(1, min(15, $timeoutSeconds));
-
-    try {
-        $json = json_encode($payload);
-        if ($json === false) {
-            bookingLog('GHL webhook payload json_encode failed', ['error' => json_last_error_msg()]);
-            return;
-        }
-
-        // Prefer cURL when available.
-        if (function_exists('curl_init')) {
-            $ch = curl_init($webhookUrl);
-            curl_setopt_array($ch, [
-                CURLOPT_POST => true,
-                CURLOPT_HTTPHEADER => [
-                    'Content-Type: application/json',
-                    'Accept: application/json',
-                ],
-                CURLOPT_POSTFIELDS => $json,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_CONNECTTIMEOUT => $timeoutSeconds,
-                CURLOPT_TIMEOUT => $timeoutSeconds,
-            ]);
-
-            $responseBody = curl_exec($ch);
-            $curlErr = curl_error($ch);
-            $status = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-            curl_close($ch);
-
-            if ($responseBody === false) {
-                bookingLog('GHL webhook cURL failed', ['error' => $curlErr ?: 'unknown']);
-                return;
-            }
-
-            if ($status < 200 || $status >= 300) {
-                bookingLog('GHL webhook non-2xx response', ['status' => $status, 'body' => substr((string)$responseBody, 0, 500)]);
-                return;
-            }
-
-            bookingLog('GHL webhook delivered', ['status' => $status]);
-            return;
-        }
-
-        // Fallback to stream context if cURL isn't installed.
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'POST',
-                'header' => "Content-Type: application/json\r\nAccept: application/json\r\n",
-                'content' => $json,
-                'timeout' => $timeoutSeconds,
-                'ignore_errors' => true,
-            ],
-        ]);
-
-        $responseBody = @file_get_contents($webhookUrl, false, $context);
-        $status = 0;
-        if (isset($http_response_header) && is_array($http_response_header)) {
-            foreach ($http_response_header as $headerLine) {
-                if (preg_match('/^HTTP\\/\\S+\\s+(\\d{3})\\b/', $headerLine, $m)) {
-                    $status = (int)$m[1];
-                    break;
-                }
-            }
-        }
-
-        if ($responseBody === false) {
-            bookingLog('GHL webhook HTTP request failed', ['status' => $status]);
-            return;
-        }
-
-        if ($status && ($status < 200 || $status >= 300)) {
-            bookingLog('GHL webhook non-2xx response', ['status' => $status, 'body' => substr((string)$responseBody, 0, 500)]);
-            return;
-        }
-
-        bookingLog('GHL webhook delivered', ['status' => $status ?: null]);
-
-    } catch (Throwable $e) {
-        bookingLog('GHL webhook exception', ['error' => $e->getMessage()]);
-    }
-}
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
@@ -263,7 +120,7 @@ if ($preferredTs < (time() + 300)) {
 }
 
 $preferredDate = date('Y-m-d H:i:s', $preferredTs);
-// Keep the user's time selection for downstream systems (HighLevel custom fields, etc.)
+// Keep a readable local-time slot string for internal notifications.
 $preferredTime = '';
 try {
     $preferredTime = date('g:i A', $preferredTs);
@@ -312,7 +169,6 @@ if ($stmt->execute()) {
     ];
 
     sendBookingNotification($bookingPayload);
-    sendGhlWorkflowWebhook($bookingPayload);
 
     http_response_code(201);
     echo json_encode([

@@ -118,33 +118,6 @@ SEOHelper::outputMetaTags('book-consultation', [
 
                   <div id="bookingMessage" class="mt-3"></div>
                 </form>
-                <!--
-                =====================================================================
-                HighLevel Embed (DISABLED)
-
-                If you ever want to switch back to the GoHighLevel embedded form:
-                - Replace this <form> with the iframe snippet, and enable form_embed.js below.
-                =====================================================================
-
-                <iframe
-                    src="https://api.leadconnectorhq.com/widget/form/vEkDBuByDt5Bh2nNGo3I"
-                    style="width:100%;height:741px;border:none;border-radius:3px"
-                    id="inline-vEkDBuByDt5Bh2nNGo3I"
-                    data-layout="{'id':'INLINE'}"
-                    data-trigger-type="alwaysShow"
-                    data-trigger-value=""
-                    data-activation-type="alwaysActivated"
-                    data-activation-value=""
-                    data-deactivation-type="neverDeactivate"
-                    data-deactivation-value=""
-                    data-form-name="Form 0"
-                    data-height="741"
-                    data-layout-iframe-id="inline-vEkDBuByDt5Bh2nNGo3I"
-                    data-form-id="vEkDBuByDt5Bh2nNGo3I"
-                    title="Form 0"
-                    loading="lazy"
-                ></iframe>
-                -->
               </div>
             </div>
           </div>
@@ -192,9 +165,6 @@ SEOHelper::outputMetaTags('book-consultation', [
   </main>
 
   <?php include './assets/includes/footer.php'; ?>
-
-  <!-- HighLevel embed script (only needed if using the iframe snippet above) -->
-  <!-- <script src="https://link.msgsndr.com/js/form_embed.js" defer></script> -->
 
   <script>
   document.getElementById('bookingForm').addEventListener('submit', async function(e) {
