@@ -193,6 +193,7 @@ Accuracy & editability (CRITICAL — this is a preview the owner will personaliz
 - Any testimonials must read as obvious sample placeholders (e.g. attributed to
   "— Sample Client") so no real review is faked.
 - Use the provided email and phone for contact links; do not invent other contact info.
+- Never render legal suffixes (LLC, Inc., Corp., Ltd., Co.) in the brand name shown on the site — use the plain business name.
 PROMPT;
 
     $user = 'Business name: ' . $lead['business_name'] . "\n"

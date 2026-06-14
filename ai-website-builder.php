@@ -155,6 +155,33 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     .zeno-trust{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
     .zeno-trust div{display:flex;gap:8px;align-items:flex-start;font-size:.82rem;color:#475569}
     .zeno-trust i{color:#16a34a;font-size:1rem;line-height:1.2}
+
+    /* ===== Multi-step wizard ===== */
+    .wiz-progress{margin-bottom:22px}
+    .wiz-steps{display:flex;align-items:flex-start;justify-content:space-between;position:relative;gap:6px}
+    .wiz-node{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:0;text-align:center;position:relative;z-index:1}
+    .wiz-dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;background:#fff;color:#94a3b8;border:2px solid #e2e8f0;transition:background-color .3s,border-color .3s,color .3s,transform .3s}
+    .wiz-name{font-size:.8rem;font-weight:600;color:#94a3b8;transition:color .3s;line-height:1.2}
+    .wiz-node.is-active .wiz-dot{background:#2563eb;border-color:#2563eb;color:#fff;transform:scale(1.06);box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+    .wiz-node.is-active .wiz-name{color:#1e293b}
+    .wiz-node.is-done .wiz-dot{background:#2563eb;border-color:#2563eb;color:#fff}
+    .wiz-node.is-done .wiz-dot::after{content:"\2713";font-size:.95rem}
+    .wiz-node.is-done .wiz-dot{font-size:0}
+    .wiz-node.is-done .wiz-name{color:#475569}
+    .wiz-bar{height:6px;border-radius:999px;background:#e2e8f0;margin:14px 0 6px;overflow:hidden}
+    .wiz-bar span{display:block;height:100%;width:33.33%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#38bdf8);transition:width .35s ease}
+    .wiz-count{font-size:.82rem;color:#64748b;text-align:center;margin:0;font-weight:600}
+    .wiz-step{display:none}
+    .wiz-step.active{display:block;animation:wizIn .28s ease both}
+    .wiz-step.active.back{animation:wizInBack .28s ease both}
+    @keyframes wizIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+    @keyframes wizInBack{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+    .wiz-nav{display:flex;gap:10px;align-items:center;margin-top:18px}
+    .wiz-nav .wiz-next,.wiz-nav .wiz-build{margin-left:auto}
+    .wiz-build.ready{animation:wizReady 1.8s ease-in-out infinite}
+    @keyframes wizReady{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.45)}50%{box-shadow:0 0 0 7px rgba(37,99,235,0)}}
+    @media (max-width:420px){.wiz-name{font-size:0}.wiz-node.is-active .wiz-name{font-size:.78rem}}
+    @media (prefers-reduced-motion: reduce){.wiz-step.active,.wiz-step.active.back{animation:none!important}.wiz-dot,.wiz-bar span,.wiz-name{transition:none!important}.wiz-build.ready{animation:none!important}}
   </style>
 </head>
 
@@ -246,23 +273,41 @@ SEOHelper::outputMetaTags('ai-website-builder', [
 
             <div class="card shadow-sm">
               <div class="card-body p-4">
-                <form id="aiBuilderForm">
+                <form id="aiBuilderForm" novalidate>
                   <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES); ?>">
                   <?php echo SpamProtection::generateHoneypot('site_builder'); ?>
                   <?php echo SpamProtection::generateTimestamp('site_builder'); ?>
 
-                  <div class="mb-3">
-                    <label class="form-label">Business Name <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="business_name" maxlength="120" required>
+                  <div class="wiz-progress">
+                    <div class="wiz-steps">
+                      <div class="wiz-node is-active" data-node="1"><span class="wiz-dot">1</span><span class="wiz-name">Business</span></div>
+                      <div class="wiz-node" data-node="2"><span class="wiz-dot">2</span><span class="wiz-name">Style</span></div>
+                      <div class="wiz-node" data-node="3"><span class="wiz-dot">3</span><span class="wiz-name">Send it</span></div>
+                    </div>
+                    <div class="wiz-bar"><span id="wizBarFill"></span></div>
+                    <p class="wiz-count" id="wizCount" aria-live="polite">Step 1 of 3 — tell us who you are</p>
                   </div>
 
-                  <div class="mb-3">
-                    <label class="form-label">Tell us about your business <span class="text-danger">*</span></label>
-                    <textarea class="form-control" name="business_description" rows="7" style="min-height:160px;resize:vertical" maxlength="2000"
-                      placeholder="e.g. We're a [type of business] in [city] offering [your main services or products]. Tell the AI anything you want on the site — services, hours, pricing, photos, online booking, contact info — plus the look or tone you're going for." required></textarea>
-                    <small class="text-muted">Describe your business and tell the AI exactly what to include — the more detail, the better your preview.</small>
+                  <div class="wiz-step active" data-step="1">
+                    <div class="mb-3">
+                      <label class="form-label">Business Name <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" name="business_name" maxlength="120" required>
+                      <small class="text-muted">Just the name customers know — no LLC/Inc needed.</small>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Tell us about your business <span class="text-danger">*</span></label>
+                      <textarea class="form-control" name="business_description" rows="7" style="min-height:160px;resize:vertical" maxlength="2000"
+                        placeholder="e.g. We're a [type of business] in [city] offering [your main services or products]. Tell the AI anything you want on the site — services, hours, pricing, photos, online booking, contact info — plus the look or tone you're going for." required></textarea>
+                      <small class="text-muted">Describe your business and tell the AI exactly what to include — the more detail, the better your preview.</small>
+                    </div>
+
+                    <div class="wiz-nav">
+                      <button type="button" class="btn btn-primary btn-lg wiz-next" data-target="2">Next <i class="bi bi-arrow-right"></i></button>
+                    </div>
                   </div>
 
+                  <div class="wiz-step" data-step="2">
                   <div class="mb-3">
                     <label class="form-label d-block">Style / Vibe <small class="text-muted fw-normal">(a direction — your real preview may vary)</small></label>
                     <div class="row g-2">
@@ -329,6 +374,13 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                     </div>
                   </div>
 
+                    <div class="wiz-nav">
+                      <button type="button" class="btn btn-outline-secondary btn-lg wiz-back" data-target="1"><i class="bi bi-arrow-left"></i> Back</button>
+                      <button type="button" class="btn btn-primary btn-lg wiz-next" data-target="3">Next <i class="bi bi-arrow-right"></i></button>
+                    </div>
+                  </div>
+
+                  <div class="wiz-step" data-step="3">
                   <div class="row mb-3">
                     <div class="col-md-6">
                       <label class="form-label">Email <span class="text-danger">*</span></label>
@@ -353,11 +405,15 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                   </div>
                   <?php endif; ?>
 
-                  <button type="submit" class="btn btn-primary btn-lg" id="aiBuilderSubmit">
-                    <i class="bi bi-magic"></i> Build My Free Preview
-                  </button>
+                  <div class="wiz-nav">
+                    <button type="button" class="btn btn-outline-secondary btn-lg wiz-back" data-target="2"><i class="bi bi-arrow-left"></i> Back</button>
+                    <button type="submit" class="btn btn-primary btn-lg wiz-build" id="aiBuilderSubmit">
+                      <i class="bi bi-magic"></i> Build My Free Preview
+                    </button>
+                  </div>
 
                   <div id="aiBuilderMessage" class="mt-3"></div>
+                  </div>
                 </form>
               </div>
             </div>
@@ -441,10 +497,95 @@ SEOHelper::outputMetaTags('ai-website-builder', [
   <?php include './assets/includes/footer.php'; ?>
 
   <script nonce="<?= htmlspecialchars($nonce, ENT_QUOTES) ?>">
+  /* ---- Multi-step wizard nav ---- */
+  (function(){
+      var form = document.getElementById('aiBuilderForm');
+      if (!form) return;
+      var steps  = Array.prototype.slice.call(form.querySelectorAll('.wiz-step'));
+      var nodes  = Array.prototype.slice.call(form.querySelectorAll('.wiz-node'));
+      var fill   = document.getElementById('wizBarFill');
+      var count  = document.getElementById('wizCount');
+      var labels = ['tell us who you are', 'pick a look', 'where do we send it'];
+      var total  = steps.length;
+      var current = 1;
+
+      function showStep(n, isBack, doFocus){
+          n = Math.max(1, Math.min(total, n));
+          steps.forEach(function(s){
+              var sn = parseInt(s.getAttribute('data-step'), 10);
+              var on = (sn === n);
+              s.classList.toggle('active', on);
+              s.classList.toggle('back', on && !!isBack);
+          });
+          nodes.forEach(function(nd){
+              var nn = parseInt(nd.getAttribute('data-node'), 10);
+              nd.classList.toggle('is-active', nn === n);
+              nd.classList.toggle('is-done', nn < n);
+          });
+          if (fill)  fill.style.width = Math.round((n / total) * 100) + '%';
+          if (count) count.textContent = 'Step ' + n + ' of ' + total + ' — ' + labels[n - 1];
+          var build = form.querySelector('.wiz-build');
+          if (build) build.classList.toggle('ready', n === total);
+          current = n;
+          if (doFocus !== false){
+              var first = steps[n - 1].querySelector('input,textarea,select');
+              if (first) { try { first.focus({ preventScroll: true }); } catch(_){} }
+          }
+      }
+
+      function validateStep(n){
+          var step = steps[n - 1];
+          if (!step) return true;
+          var fields = step.querySelectorAll('input,textarea,select');
+          for (var i = 0; i < fields.length; i++){
+              if (!fields[i].checkValidity()){ fields[i].reportValidity(); return false; }
+          }
+          return true;
+      }
+
+      // Used by the submit handler: validate every step up to n, jumping to the first invalid one.
+      form.wizValidateThrough = function(n){
+          for (var s = 1; s <= n; s++){
+              var fields = steps[s - 1].querySelectorAll('input,textarea,select');
+              for (var i = 0; i < fields.length; i++){
+                  if (!fields[i].checkValidity()){ showStep(s, false); fields[i].reportValidity(); return false; }
+              }
+          }
+          return true;
+      };
+
+      form.addEventListener('click', function(e){
+          var next = e.target.closest ? e.target.closest('.wiz-next') : null;
+          var back = e.target.closest ? e.target.closest('.wiz-back') : null;
+          if (next){ e.preventDefault(); if (validateStep(current)) showStep(parseInt(next.getAttribute('data-target'), 10), false); }
+          else if (back){ e.preventDefault(); showStep(parseInt(back.getAttribute('data-target'), 10), true); }
+      });
+
+      // Enter on a single-line input advances instead of submitting early.
+      form.addEventListener('keydown', function(e){
+          if (e.key === 'Enter' && e.target.tagName === 'INPUT' && current < total){
+              e.preventDefault();
+              if (validateStep(current)) showStep(current + 1, false);
+          }
+      });
+
+      // Drop legal suffixes from the business name (LLC, Inc., Corp., Ltd., etc.) on blur.
+      var bn = form.querySelector('[name="business_name"]');
+      if (bn){
+          bn.addEventListener('blur', function(){
+              var v = bn.value.replace(/[\s,]+(?:LLC|L\.L\.C\.?|Inc\.?|Incorporated|Corp\.?|Corporation|Co\.|Ltd\.?|LLP|PLLC)\.?\s*$/i, '').trim();
+              if (v !== bn.value) bn.value = v;
+          });
+      }
+
+      showStep(1, false, false);
+  })();
+
   document.getElementById('aiBuilderForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const form = this;
+      if (typeof form.wizValidateThrough === 'function' && !form.wizValidateThrough(3)) { return; }
       const submitBtn = document.getElementById('aiBuilderSubmit');
       const messageDiv = document.getElementById('aiBuilderMessage');
       const formData = new FormData(form);
@@ -519,6 +660,16 @@ SEOHelper::outputMetaTags('ai-website-builder', [
 
     let pollTimer = null, stepTimer = null, progressTimer = null, elapsed = 0, progress = 4;
     let currentLeadId = null, currentBiz = '';
+    let building = false;
+
+    // While we're actively generating, warn before leaving (they'd still get the email, but
+    // closing mid-build means they miss the live reveal + one-click claim).
+    window.addEventListener('beforeunload', function (e) {
+      if (!building) { return; }
+      e.preventDefault();
+      e.returnValue = '';
+      return '';
+    });
 
     closeBtn.addEventListener('click', stopAndClose);
 
@@ -552,6 +703,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     });
 
     function stopAndClose() {
+      building = false;
       clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer);
       overlay.classList.remove('show');
       reveal.classList.remove('show');
@@ -561,6 +713,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     }
 
     window.startBuildExperience = function (leadId, biz, email) {
+      building = true;
       currentLeadId = leadId;
       currentBiz = biz || 'your website';
       bizEl.textContent = currentBiz;
@@ -611,6 +764,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     }
 
     function revealSite(url) {
+      building = false;
       clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer);
       barFill.style.width = '100%';
       stepEl.textContent = 'Done! Here it is…';
@@ -621,6 +775,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     }
 
     function fallbackToEmail(failed) {
+      building = false;
       clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer);
       panel.querySelector('h2').textContent = failed ? 'Almost there' : 'Still polishing…';
       stepEl.textContent = "I'll email your preview the moment it's ready — check your inbox shortly. — Zeno";
