@@ -161,8 +161,14 @@ $websiteLaunchChecklistUrl = $downloadBaseUrl . '/downloads/website-launch-check
 $seoAuditTemplateUrl = $downloadBaseUrl . '/downloads/seo-audit-template.xlsx';
 $hostingComparisonGuideUrl = $downloadBaseUrl . '/downloads/hosting-comparison-guide.pdf';
 
-// Send notification email to admin
-$adminEmail = getEnv('MAIL_TO', 'support@izendestudioweb.com');
+// Send notification email to admin.
+// MAIL_TO must come from env — no hardcoded fallback to prevent misconfiguration.
+$adminEmail = getEnv('MAIL_TO');
+if (empty($adminEmail)) {
+    // Log and skip admin notification — don't block the user experience
+    logSecurityEvent('lead_capture_admin_email_missing', ['env_var' => 'MAIL_TO'], 'WARNING');
+    $adminEmail = null;
+}
 $adminSubject = 'New Lead Magnet Download Request';
 
 $adminMessage = "New lead magnet download request:\n\n";
@@ -180,7 +186,9 @@ $adminHeaders = [
     'Content-Type: text/plain; charset=UTF-8'
 ];
 
-mail($adminEmail, $adminSubject, $adminMessage, implode("\r\n", $adminHeaders));
+if ($adminEmail !== null) {
+    mail($adminEmail, $adminSubject, $adminMessage, implode("\r\n", $adminHeaders));
+}
 
 // Send welcome email to subscriber with download links
 $welcomeSubject = 'Your Free Resources from Izende Studio Web';
@@ -195,7 +203,7 @@ $welcomeMessage .= "   {$hostingComparisonGuideUrl}\n\n";
 $welcomeMessage .= "These resources will help you plan and launch a successful website.\n\n";
 $welcomeMessage .= "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
 $welcomeMessage .= "Need help with your website project? We're here for you!\n\n";
-$welcomeMessage .= "📞 Call us: 314-886-6356\n";
+$welcomeMessage .= "📞 Call us: 314-312-6441\n";
 $welcomeMessage .= "📧 Email: support@izendestudioweb.com\n";
 $welcomeMessage .= "🌐 Website: https://izendestudioweb.com\n\n";
 $welcomeMessage .= "Schedule a FREE consultation: https://izendestudioweb.com/quote.php\n\n";
