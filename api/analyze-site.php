@@ -107,10 +107,23 @@ function iz_page_text($html) {
 /** Pull real contact details (phone + address) from a page: tel: links, JSON-LD, <address>. */
 function iz_contact_details($html) {
     $html = (string) $html;
-    $phones = []; $addresses = [];
+    $phones = []; $addresses = []; $emails = [];
     // tel: links — most reliable phone source
     if (preg_match_all('~href=["\']tel:([^"\']+)["\']~i', $html, $m)) {
         foreach ($m[1] as $p) { $p = trim($p); if ($p !== '') { $phones[] = $p; } }
+    }
+    // mailto: links — most reliable email source
+    if (preg_match_all('~href=["\']mailto:([^"\'?]+)~i', $html, $m)) {
+        foreach ($m[1] as $e) { $e = trim(rawurldecode($e)); if (strpos($e, '@') !== false) { $emails[] = $e; } }
+    }
+    // visible email addresses (guarded against asset/3rd-party noise)
+    if (preg_match_all('~[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}~', $html, $m)) {
+        foreach ($m[0] as $e) {
+            $el = strtolower($e);
+            if (preg_match('~\.(png|jpe?g|gif|svg|webp)$~', $el)) { continue; }
+            if (preg_match('~(sentry|wixpress|example\.|\.local|@2x|sentry\.io)~', $el)) { continue; }
+            $emails[] = $e;
+        }
     }
     // JSON-LD structured data (telephone + postalAddress)
     if (preg_match_all('~<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>~is', $html, $mm)) {
@@ -121,6 +134,7 @@ function iz_contact_details($html) {
             foreach ($nodes as $node) {
                 if (!is_array($node)) { continue; }
                 if (!empty($node['telephone']) && is_string($node['telephone'])) { $phones[] = trim($node['telephone']); }
+                if (!empty($node['email']) && is_string($node['email'])) { $emails[] = trim(preg_replace('~^mailto:~i', '', $node['email'])); }
                 if (!empty($node['address'])) {
                     $a = $node['address'];
                     if (is_array($a)) {
@@ -138,8 +152,10 @@ function iz_contact_details($html) {
     }
     $phones    = array_slice(array_values(array_unique(array_filter($phones))), 0, 3);
     $addresses = array_slice(array_values(array_unique(array_filter($addresses))), 0, 2);
+    $emails    = array_slice(array_values(array_unique(array_map('strtolower', array_filter($emails)))), 0, 3);
     $lines = [];
     if ($phones)    { $lines[] = 'Phone: ' . implode(', ', $phones); }
+    if ($emails)    { $lines[] = 'Email: ' . implode(', ', $emails); }
     if ($addresses) { $lines[] = 'Address: ' . implode(' | ', $addresses); }
     return $lines ? "\nCONTACT DETAILS FOUND ON SITE:\n" . implode("\n", $lines) : '';
 }
@@ -221,7 +237,7 @@ if (mb_strlen($bizName) > 80) { $bizName = ''; }
 $glmKey = trim((string) getEnv('GLM_API_KEY', ''));
 if ($glmKey === '') { echo json_encode(['success' => false, 'message' => 'Analyzer is unavailable right now — please type your description.']); exit; }
 
-$sys = "You read text gathered from a small business's CURRENT website (home page plus a few inner pages such as services/about) and write a clear description to brief building them a brand-new site. Write 3-6 sentences as the business owner. You MUST include: what the business does; a concrete list of their main services or products by name (pull the actual service names found in the text — e.g. \"We offer X, Y, and Z\"); who they serve; their city/service area if stated; and the overall tone. If the text shows the business's real phone number or street address (e.g. a 'CONTACT DETAILS FOUND' section, footer, or contact page), include them accurately so the new site can reuse the real contact info. Use ONLY facts present in the text — never invent services, prices, addresses, phone numbers, awards, or statistics; omit anything not present. Refer to the business by its plain name without legal suffixes like LLC, Inc., or Corp. Plain text only, no preamble, no markdown, no bullet characters.";
+$sys = "You read text gathered from a small business's CURRENT website (home page plus a few inner pages such as services/about) and write a clear description to brief building them a brand-new site. Write 3-6 sentences as the business owner. You MUST include: what the business does; a concrete list of their main services or products by name (pull the actual service names found in the text — e.g. \"We offer X, Y, and Z\"); who they serve; their city/service area if stated; and the overall tone. If the text shows the business's real phone number, email address, or street address (e.g. a 'CONTACT DETAILS FOUND' section, footer, or contact page), include them accurately so the new site can reuse the real contact info. Use ONLY facts present in the text — never invent services, prices, addresses, phone numbers, awards, or statistics; omit anything not present. Refer to the business by its plain name without legal suffixes like LLC, Inc., or Corp. Plain text only, no preamble, no markdown, no bullet characters.";
 $usr = "Website: " . $url . "\n" . ($bizName !== '' ? "Business name: $bizName\n" : '') . "\nPAGE TEXT (multiple pages, separated by '--- url ---'):\n" . $textBlob;
 $payload = json_encode(['model' => 'glm-5', 'max_tokens' => 900, 'messages' => [
     ['role' => 'system', 'content' => $sys], ['role' => 'user', 'content' => $usr],
