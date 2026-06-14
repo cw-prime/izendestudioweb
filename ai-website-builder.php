@@ -620,7 +620,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
           if (url.length < 4){ setNote('Enter your website address first.', 'err'); urlEl.focus(); return; }
           var lbl = btn.innerHTML;
           btn.disabled = true; btn.innerHTML = 'Analyzing…';
-          setNote('<span class="iz-spin"></span>Reading your site… about 10 seconds.', '');
+          setNote('<span class="iz-spin"></span>Reading your site and its pages… up to ~20 seconds.', '');
           fetch('api/analyze-site.php', {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ url: url, csrf_token: csrfEl ? csrfEl.value : '' })

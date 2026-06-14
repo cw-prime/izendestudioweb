@@ -13,6 +13,7 @@ require_once __DIR__ . '/../config/security.php';
 
 header('Content-Type: application/json');
 header('Cache-Control: no-store');
+@set_time_limit(120); // multi-page fetch + GLM can exceed the default 30s
 initSecureSession();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -90,6 +91,95 @@ function iz_safe_fetch($url, $depth = 0) {
     return $body;
 }
 
+/** Pull readable text (headings, paragraphs, list items) out of a page. */
+function iz_page_text($html) {
+    $clean = preg_replace('~<(script|style|noscript)\b[^>]*>.*?</\1>~is', ' ', (string) $html);
+    $out = [];
+    if (preg_match_all('~<(h1|h2|h3|h4|p|li|address)\b[^>]*>(.*?)</\1>~is', (string) $clean, $mm)) {
+        foreach ($mm[2] as $frag) {
+            $t = trim(preg_replace('~\s+~', ' ', html_entity_decode(strip_tags($frag), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+            if (mb_strlen($t) >= 3) { $out[] = $t; }
+        }
+    }
+    return implode("\n", $out);
+}
+
+/** Pull real contact details (phone + address) from a page: tel: links, JSON-LD, <address>. */
+function iz_contact_details($html) {
+    $html = (string) $html;
+    $phones = []; $addresses = [];
+    // tel: links — most reliable phone source
+    if (preg_match_all('~href=["\']tel:([^"\']+)["\']~i', $html, $m)) {
+        foreach ($m[1] as $p) { $p = trim($p); if ($p !== '') { $phones[] = $p; } }
+    }
+    // JSON-LD structured data (telephone + postalAddress)
+    if (preg_match_all('~<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>~is', $html, $mm)) {
+        foreach ($mm[1] as $json) {
+            $d = json_decode(trim($json), true);
+            if (!is_array($d)) { continue; }
+            $nodes = (isset($d['@graph']) && is_array($d['@graph'])) ? $d['@graph'] : [$d];
+            foreach ($nodes as $node) {
+                if (!is_array($node)) { continue; }
+                if (!empty($node['telephone']) && is_string($node['telephone'])) { $phones[] = trim($node['telephone']); }
+                if (!empty($node['address'])) {
+                    $a = $node['address'];
+                    if (is_array($a)) {
+                        $parts = array_filter([$a['streetAddress'] ?? '', $a['addressLocality'] ?? '', $a['addressRegion'] ?? '', $a['postalCode'] ?? '']);
+                        if ($parts) { $addresses[] = implode(', ', $parts); }
+                    } elseif (is_string($a)) { $addresses[] = trim($a); }
+                }
+            }
+        }
+    }
+    // <address> tag
+    if (preg_match('~<address\b[^>]*>(.*?)</address>~is', $html, $m)) {
+        $a = trim(preg_replace('~\s+~', ' ', html_entity_decode(strip_tags($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+        if ($a !== '' && mb_strlen($a) < 220) { $addresses[] = $a; }
+    }
+    $phones    = array_slice(array_values(array_unique(array_filter($phones))), 0, 3);
+    $addresses = array_slice(array_values(array_unique(array_filter($addresses))), 0, 2);
+    $lines = [];
+    if ($phones)    { $lines[] = 'Phone: ' . implode(', ', $phones); }
+    if ($addresses) { $lines[] = 'Address: ' . implode(' | ', $addresses); }
+    return $lines ? "\nCONTACT DETAILS FOUND ON SITE:\n" . implode("\n", $lines) : '';
+}
+
+/** Same-host internal links from a page, ranked toward services/about pages. Returns up to $max absolute URLs. */
+function iz_internal_links($html, $baseUrl, $max = 3) {
+    $pb = parse_url($baseUrl);
+    $bhost = strtolower($pb['host'] ?? '');
+    $scheme = $pb['scheme'] ?? 'https';
+    if ($bhost === '') { return []; }
+    $scored = [];
+    if (preg_match_all('~<a\b[^>]*href=["\']([^"\'#]+)["\'][^>]*>(.*?)</a>~is', (string) $html, $mm)) {
+        foreach ($mm[1] as $i => $href) {
+            $href = trim($href);
+            if ($href === '' || preg_match('~^(mailto:|tel:|javascript:)~i', $href)) { continue; }
+            if (preg_match('~^https?://~i', $href))      { $abs = $href; }
+            elseif (strpos($href, '//') === 0)           { $abs = $scheme . ':' . $href; }
+            elseif ($href[0] === '/')                    { $abs = $scheme . '://' . $bhost . $href; }
+            else                                          { $abs = $scheme . '://' . $bhost . '/' . ltrim($href, './'); }
+            $pa = parse_url($abs);
+            if (!$pa || strtolower($pa['host'] ?? '') !== $bhost) { continue; } // same host only
+            $path = strtolower($pa['path'] ?? '/');
+            if ($path === '' || $path === '/') { continue; }
+            if (preg_match('~\.(jpg|jpeg|png|gif|svg|webp|pdf|zip|mp4|css|js|ico|xml|docx?)$~', $path)) { continue; }
+            $norm = $scheme . '://' . $bhost . $path;
+            $hay = $path . ' ' . strtolower(trim(strip_tags($mm[2][$i])));
+            $score = 0;
+            foreach (['service','what-we','offer','program','treatment','solution','care','menu','pricing','plans','specialt','about','our-','product'] as $kw) {
+                if (strpos($hay, $kw) !== false) { $score += 2; }
+            }
+            if (preg_match('~(contact|privacy|terms|login|signin|cart|account|career|faq|blog|news)~', $path)) { $score -= 1; }
+            if (!isset($scored[$norm]) || $score > $scored[$norm]) { $scored[$norm] = $score; }
+        }
+    }
+    arsort($scored);
+    $picked = [];
+    foreach ($scored as $u => $s) { if ($s > 0) { $picked[] = $u; } if (count($picked) >= $max) { break; } }
+    return $picked;
+}
+
 $html = iz_safe_fetch($url);
 if ($html === null || strlen(trim($html)) < 80) {
     echo json_encode(['success' => false, 'message' => "We couldn't read that site. Just tell us about your business below."]); exit;
@@ -101,17 +191,22 @@ $metaDesc = ''; if (preg_match('~<meta[^>]+name=["\']description["\'][^>]*conten
 $ogSite = ''; if (preg_match('~<meta[^>]+property=["\']og:site_name["\'][^>]*content=["\']([^"\']*)~i', $html, $m)) { $ogSite = trim(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')); }
 $ogDesc = ''; if (preg_match('~<meta[^>]+property=["\']og:description["\'][^>]*content=["\']([^"\']*)~i', $html, $m)) { $ogDesc = trim(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')); }
 
-$clean = preg_replace('~<(script|style|noscript)\b[^>]*>.*?</\1>~is', ' ', $html);
-$chunks = [];
-if (preg_match_all('~<(h1|h2|h3|p|li)\b[^>]*>(.*?)</\1>~is', (string) $clean, $mm)) {
-    foreach ($mm[2] as $frag) {
-        $t = trim(preg_replace('~\s+~', ' ', html_entity_decode(strip_tags($frag), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
-        if (mb_strlen($t) >= 3) { $chunks[] = $t; }
+// Home page text, then crawl a few key inner pages (services/about/...) on the SAME host so
+// the AI sees the actual offerings, not just the marketing home page.
+$blocks = [$title . "\n" . $metaDesc . "\n" . $ogDesc . "\n" . iz_page_text($html)];
+$crawled = [$url];
+foreach (iz_internal_links($html, $url, 3) as $link) {
+    if (in_array($link, $crawled, true)) { continue; }
+    $sub = iz_safe_fetch($link);
+    if ($sub !== null && strlen($sub) > 80) {
+        $blocks[] = "\n--- " . $link . " ---\n" . iz_page_text($sub);
+        $crawled[] = $link;
     }
 }
-$textBlob = trim($title . "\n" . $metaDesc . "\n" . $ogDesc . "\n" . implode("\n", $chunks));
-$textBlob = preg_replace('~\n{2,}~', "\n", $textBlob);
-if (mb_strlen($textBlob) > 6000) { $textBlob = mb_substr($textBlob, 0, 6000); }
+$textBlob = trim(implode("\n", $blocks));
+$textBlob = preg_replace('~\n{3,}~', "\n\n", $textBlob);
+if (mb_strlen($textBlob) > 11000) { $textBlob = mb_substr($textBlob, 0, 11000); }
+$textBlob .= iz_contact_details($html); // real phone/address from the home page (footer/JSON-LD/tel:)
 if (mb_strlen(trim($textBlob)) < 40) {
     echo json_encode(['success' => false, 'message' => "That site didn't have enough readable text. Tell us about your business below."]); exit;
 }
@@ -126,9 +221,9 @@ if (mb_strlen($bizName) > 80) { $bizName = ''; }
 $glmKey = trim((string) getEnv('GLM_API_KEY', ''));
 if ($glmKey === '') { echo json_encode(['success' => false, 'message' => 'Analyzer is unavailable right now — please type your description.']); exit; }
 
-$sys = "You read the text of a small business's CURRENT website and write a short, clear description to brief building them a brand-new site. Output 2-4 sentences, written as the business owner describing their business: what they do, their main services or products, who they serve, their city/area if stated, and the overall tone. Use ONLY facts present in the text — do NOT invent prices, addresses, phone numbers, awards, or statistics. Plain text only, no preamble or markdown.";
-$usr = "Website: " . $url . "\n" . ($bizName !== '' ? "Business name: $bizName\n" : '') . "\nPAGE TEXT:\n" . $textBlob;
-$payload = json_encode(['model' => 'glm-5', 'max_tokens' => 700, 'messages' => [
+$sys = "You read text gathered from a small business's CURRENT website (home page plus a few inner pages such as services/about) and write a clear description to brief building them a brand-new site. Write 3-6 sentences as the business owner. You MUST include: what the business does; a concrete list of their main services or products by name (pull the actual service names found in the text — e.g. \"We offer X, Y, and Z\"); who they serve; their city/service area if stated; and the overall tone. If the text shows the business's real phone number or street address (e.g. a 'CONTACT DETAILS FOUND' section, footer, or contact page), include them accurately so the new site can reuse the real contact info. Use ONLY facts present in the text — never invent services, prices, addresses, phone numbers, awards, or statistics; omit anything not present. Refer to the business by its plain name without legal suffixes like LLC, Inc., or Corp. Plain text only, no preamble, no markdown, no bullet characters.";
+$usr = "Website: " . $url . "\n" . ($bizName !== '' ? "Business name: $bizName\n" : '') . "\nPAGE TEXT (multiple pages, separated by '--- url ---'):\n" . $textBlob;
+$payload = json_encode(['model' => 'glm-5', 'max_tokens' => 900, 'messages' => [
     ['role' => 'system', 'content' => $sys], ['role' => 'user', 'content' => $usr],
 ]]);
 
