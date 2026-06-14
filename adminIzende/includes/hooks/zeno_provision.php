@@ -52,6 +52,53 @@ if (!function_exists('zeno_http')) {
         return $r;
     }
 }
+if (!function_exists('zeno_create_mailbox')) {
+    /**
+     * Best-effort: create a professional mailbox (hello@domain) on the freshly-made cPanel
+     * account via UAPI Email::add_pop (through the WHM reseller-token proxy). Returns
+     * ['addr','pass','webmail'] on success, null otherwise. Never throws — a failure here
+     * must never block provisioning or the welcome email.
+     */
+    function zeno_create_mailbox($cfg, $username, $domain) {
+        $domain = strtolower(trim($domain));
+        if ($domain === '' || strpos($domain, '.') === false || $username === '' || empty($cfg['WHM_HOST'])) { return null; }
+        $local = 'hello';
+        $pass  = bin2hex(random_bytes(10)) . 'Em7!';
+        $wh = ['Authorization: whm ' . ($cfg['WHM_USER'] ?? '') . ':' . ($cfg['WHM_API_TOKEN'] ?? '')];
+        $fields = http_build_query([
+            'cpanel_jsonapi_apiversion' => 3, 'cpanel_jsonapi_user' => $username,
+            'cpanel_jsonapi_module' => 'Email', 'cpanel_jsonapi_func' => 'add_pop',
+            'email' => $local, 'domain' => $domain, 'password' => $pass, 'quota' => 0,
+        ]);
+        $j = json_decode((string)zeno_http('https://' . $cfg['WHM_HOST'] . '/json-api/cpanel', $wh, $fields, 45), true);
+        if ((int)($j['result']['status'] ?? 0) !== 1) {
+            zeno_log('mailbox create FAILED', ['user' => $username, 'domain' => $domain, 'err' => $j['result']['errors'] ?? 'unknown']);
+            return null;
+        }
+        zeno_log('mailbox created', ['addr' => $local . '@' . $domain]);
+        return ['addr' => $local . '@' . $domain, 'pass' => $pass, 'webmail' => 'https://' . $domain . '/webmail'];
+    }
+}
+if (!function_exists('zeno_static_email')) {
+    function zeno_static_email($to, $domain, $mailbox, $bizName) {
+        if (!$to) { return; }
+        $from = 'support@izendestudioweb.com';
+        $subject = 'Your website is live: ' . $bizName;
+        $body = "Your new website is published and hosted — it matches the design you claimed.\n\n"
+            . "Site:  https://" . $domain . "\n\n";
+        if ($mailbox) {
+            $body .= "Your professional email is ready:\n"
+                . "  Address:   " . $mailbox['addr'] . "\n"
+                . "  Password:  " . $mailbox['pass'] . "\n"
+                . "  Webmail:   " . $mailbox['webmail'] . "\n"
+                . "  (Add more inboxes anytime in cPanel > Email Accounts.)\n\n";
+        }
+        $body .= "Secure https:// and email fully activate once your domain's DNS points to our server.\n\n"
+            . "Questions? Reply to this email or call (314) 312-6441.\n\n— Izende Studio Web\n";
+        $headers = "From: Izende Studio Web <$from>\r\nReply-To: $from\r\nContent-Type: text/plain; charset=UTF-8";
+        foreach (array_unique([$to, $from]) as $rcpt) { @mail($rcpt, $subject, $body, $headers); }
+    }
+}
 if (!function_exists('zeno_find_lead')) {
     function zeno_find_lead($cfg, $email, $domain) {
         $base = rtrim($cfg['SUPABASE_URL'] ?? '', '/');
@@ -79,9 +126,16 @@ if (!function_exists('zeno_wp_email')) {
             . "Site:        " . $prov['wp_url'] . "\n"
             . "WP admin:    " . $prov['login_url'] . "\n"
             . "  Username:  " . $prov['admin_user'] . "\n"
-            . "  Password:  " . $prov['admin_pass'] . "\n\n"
-            . "Your homepage is fully editable under Pages > Home in the WordPress dashboard.\n"
-            . "Secure https:// activates automatically once your domain's DNS points to our server.\n\n"
+            . "  Password:  " . $prov['admin_pass'] . "\n\n";
+        if (!empty($prov['email_addr'])) {
+            $body .= "Your professional email is ready:\n"
+                . "  Address:   " . $prov['email_addr'] . "\n"
+                . "  Password:  " . $prov['email_pass'] . "\n"
+                . "  Webmail:   " . $prov['webmail'] . "\n"
+                . "  (Add more inboxes anytime in cPanel > Email Accounts.)\n\n";
+        }
+        $body .= "Your homepage is fully editable under Pages > Home in the WordPress dashboard.\n"
+            . "Secure https:// and email activate automatically once your domain's DNS points to our server.\n\n"
             . "Questions? Reply to this email or call (314) 312-6441.\n\n— Izende Studio Web\n";
         $headers = "From: Izende Studio Web <$from>\r\nReply-To: $from\r\nContent-Type: text/plain; charset=UTF-8";
         foreach (array_unique([$to, $from]) as $rcpt) { @mail($rcpt, $subject, $body, $headers); }
@@ -134,6 +188,8 @@ add_hook('AfterModuleCreate', 1, function ($vars) {
                 zeno_log('static site deployed', ['lead' => $lead['id'], 'user' => $username]);
             }
             $patch['plan_kind'] = 'static';
+            $mb = zeno_create_mailbox($cfg, $username, $domain);
+            zeno_static_email($email, $domain, $mb, $lead['business_name'] ?? $domain);
         } else {
             // ---- WordPress tiers (15 self-edit, 16 managed) ----
             $lib = dirname(__DIR__, 3) . '/scripts/lib/wp-provision.php';
@@ -142,6 +198,8 @@ add_hook('AfterModuleCreate', 1, function ($vars) {
                 require_once $lib;
                 $prov = izende_wp_provision($cfg, $username, $cpPass, $domain, $email, $html, ($lead['business_name'] ?? $domain), 'zeno_log');
                 if (!empty($prov['ok'])) {
+                    $mb = zeno_create_mailbox($cfg, $username, $domain);
+                    if ($mb) { $prov['email_addr'] = $mb['addr']; $prov['email_pass'] = $mb['pass']; $prov['webmail'] = $mb['webmail']; }
                     zeno_wp_email($email, $domain, $prov, $lead['business_name'] ?? $domain);
                     $patch['plan_kind']   = ($pid === 16) ? 'wordpress_managed' : 'wordpress';
                     $patch['wp_admin_url'] = $prov['login_url'];
