@@ -1,27 +1,32 @@
 # Next Actions (Execution Queue)
-Last updated: 2026-06-13 (AI Website Builder funnel)
+Last updated: 2026-06-14 (AI Website Builder funnel)
 
-## AI Website Builder Funnel — Active Queue (2026-06-13)
+## AI Website Builder Funnel — Active Queue (2026-06-14)
 
 ### Owner-gated (cannot complete without owner action)
-- **[OWNER] Run one live paid order through WHMCS/PayPal — STATIC (pid14)** to prove the money loop end-to-end (account create → hook → site deploy → converted). `todo`
-- **[OWNER] Run one live paid order — WORDPRESS (pid15)** to prove auto WP install+seed on a real domain. `todo`
-- **[OWNER] Set price for WHMCS "Online Booking" add-on** (suggested $20/mo) so it can be created. `todo`
+- **[OWNER] Run one live paid order through WHMCS/PayPal — STATIC (pid14)** to prove the money loop end-to-end (account create → hook → site deploy + mailbox → converted). `todo` — still the only true end-to-end proof.
+- **[OWNER] Run one live paid order — WORDPRESS (pid15)** to prove auto WP install+seed + mailbox on a real domain. `todo`
 - **[OWNER] Enable glm-5.2 access in z.ai**, then A/B vs glm-5. `todo`
-- **[OWNER/SECURITY] Rotate ALL chat-exposed keys** (Anthropic/GLM/Gemini/Supabase/FTP/WHM/SITE_BOOKING_SECRET). `todo`
-
-### P1 — Build (agent can do)
-- **Stage 4 — AI Editor (NOT built).** Presets (client-side CSS-var re-theme, free) + queued AI chat edits (Haiku, section-targeted). The plan's biggest unbuilt phase; it's the editing/conversion lever. `todo`
-- **Booking add-on auto-enable:** create WHMCS "Online Booking" add-on SKU (once price set) + `AddonActivated` hook to flip `booking_enabled` for Static/WP buyers (interim: `scripts/enable-booking.php`). `todo`
+- **[OWNER/SECURITY] Rotate ALL chat-exposed keys** (Anthropic/GLM/Gemini/Supabase/**FTP ai-agent@**/WHM/SITE_BOOKING_SECRET). `todo` — FTP password was recovered from a prior transcript this session; rotate.
 
 ### P2 — Hardening / polish
-- Async WP provisioning queue (hook marks lead, cron installs) — only if synchronous Softaculous install in the hook causes delays (autosetup runs in WHMCS CLI cron, so low risk now). `todo`
-- Localize hero/logo images into the provisioned account (currently referenced from izende.com /genmedia; persists for converted leads but not fully self-contained). `todo`
-- Backfill existing previews' claim bar → /claim-site.php (new previews already do). `todo`
-- Optional: Gemini logo as transparent PNG (currently white-bg in a rounded tile — works, looks intentional). `todo`
+- **Resync / fix local working clone:** `git reset --hard origin/main` is blocked by Permission-denied unlinking FTP-written `previews/` files (owned by another uid). Needs sudo/chown or a fresh clone. Cosmetic — remote+prod authoritative. `todo`
+- Version-control the `previews/samples/*` HTML (currently prod-only, like all samples). `todo`
+- Async WP provisioning queue — only if synchronous Softaculous install in the hook causes delays (low risk now). `todo`
+- Localize hero/logo images into the provisioned account (currently referenced from izende.com /genmedia). `todo`
+- Persist editor PRESET colour/font choices to the lead so they carry to the provisioned site (currently localStorage-only; AI content edits already carry). `todo`
+- Optional: Gemini logo as transparent PNG (currently white-bg in a rounded tile — works). `todo`
 
 ### Done (funnel) — see HANDOFF_LOG.md for evidence
-Stage 1 intake; Stage 2 generation+preview+email (+ Gemini hero/logo, claim bar glow, nav-collision fix, un-forced hero); Stage 3 static provisioning hook; 3-card chooser; Stage 5 WordPress tier (transform + canvas mu-plugin + Softaculous provisioner, dry-run PASS); Booking upsell core (endpoint + owner view + generator widget + Managed auto-enable).
+- Stage 1 intake; Stage 2 generation+preview+email (Gemini hero/logo, design diversity + motion, premium logos); Stage 3 static provisioning hook; Stage 4 AI editor (presets + queued chat edits, live re-apply static+WP); Stage 5 WordPress tier (dry-run PASS); Booking upsell core.
+- **$20 "Online Booking" add-on** created + visible (showorder=1) + auto-enable (Managed + add-on present). Mojibake in product/add-on descriptions fixed.
+- **3-step animated wizard** + "don't leave while generating" guard.
+- **Analyze-my-site** endpoint (SSRF-safe inner-page crawl → GLM description with real services/location/phone/email).
+- **Professional email auto-create** on every paid tier (`hello@<domain>`), creds in welcome emails — proven on throwaway.
+- **Benefit-led plan cards** with scope guards (static = technical only; managed = fair-use everyday edits).
+- **Business name** legal-suffix strip (client+server+generator); **client emails** → office line (314) 312-6441; checkout font fix.
+- **Professional & Corporate showcase sample** added (all 5 vibes covered).
+- **Funnel checked into git** for the first time — PR #1 + PR #2 merged to `main` (`34d8cc7`).
 
 ---
 

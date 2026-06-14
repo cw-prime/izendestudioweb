@@ -1,5 +1,5 @@
 # Current State — Izende Studio Web
-Last updated: 2026-03-05
+Last updated: 2026-06-14
 
 ## Product
 - What it does: Professional web design, hosting, and digital marketing services for businesses in St. Louis, Missouri, and Illinois. Includes consultation booking, portfolio showcase, blog integration, and client management.
@@ -78,4 +78,13 @@ Last updated: 2026-03-05
 - No SSH — deploy via FTP (ai-agent@). Long HTTPS must run on prod (local network can't hold them).
 
 ### Status: BUILT + VERIFIED (to extent possible without live paid orders)
-Stages 1, 2, 3(static hook), 5(WordPress — dry-run PASS on throwaway), Booking upsell core. **NOT built: Stage 4 (AI editor — presets + chat edits).** Owner-gated: real paid order tests (static + WP); GLM-5.2 A/B; rotate all keys; set WHMCS booking add-on price.
+Stages 1, 2, 3(static hook), 4(AI editor — presets + queued chat edits, live re-apply: static via Fileman + WordPress via versioned re-seed), 5(WordPress — dry-run PASS on throwaway), Booking upsell core ($20 "Online Booking" add-on live + auto-enable). Owner-gated: real paid order tests (static + WP) — the only true money-loop proof left; GLM-5.2 A/B; rotate all keys.
+
+### UX / offer pass + version control (added 2026-06-14)
+- **3-step wizard** on `ai-website-builder.php` (Business → Style → Send it): progress stepper, slide+fade transitions, per-step validation, and a "don't leave while generating" beforeunload guard.
+- **Analyze-my-site** (`api/analyze-site.php`, NEW): optional Step-1 URL → SSRF-safe crawl of a few same-host inner pages → GLM drafts a description capturing real services, location, phone, email (never invents). Pre-fills the description field.
+- **Professional email on signup:** `zeno_create_mailbox()` auto-creates `hello@<domain>` on every paid tier at provisioning (cPanel UAPI `Email::add_pop`, best-effort, non-blocking); creds in the welcome emails. Proven via throwaway account.
+- **Benefit-led plan cards** (`claim-site.php`): outcome names, free-email perk on all tiers, Wix/GoDaddy framing; static scope = technical upkeep only (no content edits promised), managed = fair-use "everyday edits" (redesigns/custom quoted separately).
+- **Business name** strips legal suffixes (LLC/Inc) at client + server + generator. **Client emails** now use the office line (314) 312-6441 (886-6356 = AI booking agent; on-page web numbers unchanged).
+- **Showcase** now covers all 5 vibes (added Professional & Corporate → Coastal Tax sample in `previews/samples/`).
+- **Version control:** the entire previously-untracked funnel was checked into git — PR #1 (feature work) + PR #2 (funnel + working tree) merged to `main` (`34d8cc7`); `main` now reflects production. NOTE: a local working clone may sit behind `origin/main` because FTP-written `previews/` files (owned by another uid) block `git reset --hard` without elevated perms — cosmetic only; remote + prod are authoritative.
