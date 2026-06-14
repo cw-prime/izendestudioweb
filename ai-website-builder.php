@@ -182,6 +182,18 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     @keyframes wizReady{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.45)}50%{box-shadow:0 0 0 7px rgba(37,99,235,0)}}
     @media (max-width:420px){.wiz-name{font-size:0}.wiz-node.is-active .wiz-name{font-size:.78rem}}
     @media (prefers-reduced-motion: reduce){.wiz-step.active,.wiz-step.active.back{animation:none!important}.wiz-dot,.wiz-bar span,.wiz-name{transition:none!important}.wiz-build.ready{animation:none!important}}
+    /* ===== Analyze-my-site helper (Step 1) ===== */
+    .iz-analyze{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:18px}
+    .iz-analyze-row{display:flex;gap:8px}
+    .iz-analyze-row .form-control{flex:1}
+    .iz-analyze-row .btn{white-space:nowrap}
+    .iz-analyze-note{display:block;margin-top:8px;font-size:12.5px;color:#64748b}
+    .iz-analyze-note.err{color:#b91c1c}
+    .iz-analyze-note.ok{color:#15803d;font-weight:600}
+    .iz-spin{display:inline-block;width:13px;height:13px;border:2px solid #cbd5e1;border-top-color:#2563eb;border-radius:50%;animation:izSpin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+    @keyframes izSpin{to{transform:rotate(360deg)}}
+    @media (max-width:480px){.iz-analyze-row{flex-direction:column}}
+    @media (prefers-reduced-motion: reduce){.iz-spin{animation:none}}
   </style>
 </head>
 
@@ -289,6 +301,15 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                   </div>
 
                   <div class="wiz-step active" data-step="1">
+                    <div class="iz-analyze">
+                      <label class="form-label mb-1">Already have a website? <span class="text-muted fw-normal">(optional)</span></label>
+                      <div class="iz-analyze-row">
+                        <input type="text" inputmode="url" class="form-control" id="izAnalyzeUrl" placeholder="yourcurrentsite.com" autocomplete="off">
+                        <button type="button" class="btn btn-outline-primary" id="izAnalyzeBtn"><i class="bi bi-magic"></i> Analyze</button>
+                      </div>
+                      <small class="iz-analyze-note" id="izAnalyzeNote">Paste your current site and our AI will draft your description below — edit anything you like.</small>
+                    </div>
+
                     <div class="mb-3">
                       <label class="form-label">Business Name <span class="text-danger">*</span></label>
                       <input type="text" class="form-control" name="business_name" maxlength="120" required>
@@ -579,6 +600,47 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       }
 
       showStep(1, false, false);
+  })();
+
+  /* ---- Analyze an existing site -> draft the description ---- */
+  (function(){
+      var btn   = document.getElementById('izAnalyzeBtn');
+      var urlEl = document.getElementById('izAnalyzeUrl');
+      var note  = document.getElementById('izAnalyzeNote');
+      var form  = document.getElementById('aiBuilderForm');
+      if (!btn || !urlEl || !form) { return; }
+      var descEl = form.querySelector('[name="business_description"]');
+      var nameEl = form.querySelector('[name="business_name"]');
+      var csrfEl = form.querySelector('[name="csrf_token"]');
+
+      function setNote(html, cls){ note.className = 'iz-analyze-note' + (cls ? ' ' + cls : ''); note.innerHTML = html; }
+
+      function run(){
+          var url = (urlEl.value || '').trim();
+          if (url.length < 4){ setNote('Enter your website address first.', 'err'); urlEl.focus(); return; }
+          var lbl = btn.innerHTML;
+          btn.disabled = true; btn.innerHTML = 'Analyzing…';
+          setNote('<span class="iz-spin"></span>Reading your site… about 10 seconds.', '');
+          fetch('api/analyze-site.php', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url: url, csrf_token: csrfEl ? csrfEl.value : '' })
+          }).then(function(r){ return r.json(); }).then(function(j){
+              btn.disabled = false; btn.innerHTML = lbl;
+              if (j && j.success){
+                  if (descEl){ descEl.value = j.description; }
+                  if (nameEl && !nameEl.value.trim() && j.business_name){ nameEl.value = j.business_name; }
+                  setNote('<i class="bi bi-check-circle-fill"></i> Done — review and edit your description below.', 'ok');
+                  if (descEl){ try { descEl.focus({ preventScroll: true }); } catch(_){} }
+              } else {
+                  setNote((j && j.message) || "Couldn't read that site — just tell us about your business below.", 'err');
+              }
+          }).catch(function(){
+              btn.disabled = false; btn.innerHTML = lbl;
+              setNote("Network error — just tell us about your business below.", 'err');
+          });
+      }
+      btn.addEventListener('click', run);
+      urlEl.addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); e.stopPropagation(); run(); } });
   })();
 
   document.getElementById('aiBuilderForm').addEventListener('submit', async function(e) {
