@@ -40,7 +40,13 @@ Options -Indexes +FollowSymLinks
     # -------------------------------------------------------------------------
     RewriteCond %{REQUEST_URI} !^/admin/config/ [NC]
     RewriteRule ^config/ - [F,L]
-
+    
+    # -------------------------------------------------------------------------
+    # Block direct HTTP access to /admin/config/ - P0 security fix
+    # Prevents unauthorized access to sensitive admin configuration files
+    # -------------------------------------------------------------------------
+    RewriteRule ^admin/config/ - [F,L]
+    
     # -------------------------------------------------------------------------
     # XML sitemap
     # -------------------------------------------------------------------------
@@ -65,7 +71,7 @@ Options -Indexes +FollowSymLinks
 # -------------------------------------------------------------------------
 # Deny direct access to sensitive files
 # -------------------------------------------------------------------------
-<FilesMatch "^(\.env|\.git.*|composer\.(json|lock)|package(-lock)?\.json|README\.md|.*\.(log|bak|backup|sql))$">
+<FilesMatch "^(\.env.*|\.git.*|composer\.(json|lock)|package(-lock)?\.json|README\.md|.*\.(log|bak|backup|sql))$">
     Require all denied
 </FilesMatch>
 

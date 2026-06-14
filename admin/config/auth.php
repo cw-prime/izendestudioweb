@@ -14,6 +14,31 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Security headers for all admin panel pages.
+// Applied once here so every page that includes auth.php gets them automatically.
+if (!headers_sent()) {
+    // CSP: admin panel only needs self, Bootstrap/Icons CDN, and inline scripts
+    // (Bootstrap 5 uses inline event handlers internally; 'unsafe-inline' only for scripts
+    //  in admin — not ideal, but necessary without a full nonce pass-through in the template).
+    $adminCsp = "default-src 'self'; ";
+    $adminCsp .= "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://ajax.googleapis.com; ";
+    $adminCsp .= "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; ";
+    $adminCsp .= "img-src 'self' data: https:; ";
+    $adminCsp .= "font-src 'self' https://cdn.jsdelivr.net data:; ";
+    $adminCsp .= "connect-src 'self'; ";
+    $adminCsp .= "frame-src 'none'; ";
+    $adminCsp .= "frame-ancestors 'none'; ";
+    $adminCsp .= "form-action 'self'; ";
+    $adminCsp .= "base-uri 'self';";
+    header("Content-Security-Policy: " . $adminCsp);
+    header("Strict-Transport-Security: max-age=31536000; includeSubDomains");
+    header("X-Frame-Options: DENY");
+    header("X-Content-Type-Options: nosniff");
+    header("X-XSS-Protection: 1; mode=block");
+    header("Referrer-Policy: strict-origin-when-cross-origin");
+    header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
+}
+
 // Database connection
 require_once __DIR__ . '/database.php';
 

@@ -155,7 +155,13 @@ if (!$saved) {
 }
 
 // 6. Load and use PHP Email Form library
-$receiving_email_address = getEnv('MAIL_TO', 'support@izendestudioweb.com');
+// MAIL_TO must be set as an environment variable — no hardcoded fallback to
+// prevent silently routing contact messages to the wrong recipient.
+$receiving_email_address = getEnv('MAIL_TO');
+if (empty($receiving_email_address) || !filter_var($receiving_email_address, FILTER_VALIDATE_EMAIL)) {
+    logSecurityEvent('contact_email_misconfigured', ['MAIL_TO' => (string)$receiving_email_address], 'CRITICAL');
+    die(json_encode(['success' => false, 'message' => 'Contact form is not configured. Please try again later or call us directly.']));
+}
 
 if (file_exists($php_email_form = '../assets/vendor/php-email-form/php-email-form.php')) {
     include($php_email_form);

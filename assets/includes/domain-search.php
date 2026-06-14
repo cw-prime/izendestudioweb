@@ -58,7 +58,13 @@ $currencyCode = (string) getEnv('WHMCS_DEFAULT_CURRENCY_CODE', 'USD');
   </div>
 </div>
 
-<style>
+<?php
+// Use the nonce provided by the including page (index.php sets $nonce).
+// Fall back to getCSPNonce() so the block works if included independently.
+$_domainNonce = isset($nonce) ? $nonce : (function_exists('getCSPNonce') ? getCSPNonce() : '');
+$_domainNonceAttr = $_domainNonce !== '' ? ' nonce="' . htmlspecialchars($_domainNonce, ENT_QUOTES) . '"' : '';
+?>
+<style<?php echo $_domainNonceAttr; ?>>
 .domain-search-container {
   background: linear-gradient(135deg, rgba(92, 184, 116, 0.1) 0%, rgba(74, 157, 95, 0.05) 100%);
   padding: 40px 20px;
@@ -349,7 +355,7 @@ $currencyCode = (string) getEnv('WHMCS_DEFAULT_CURRENCY_CODE', 'USD');
 }
 </style>
 
-<script>
+<script<?php echo $_domainNonceAttr; ?>>
 (function initDomainSearch() {
   const start = function() {
     const form = document.getElementById('frmDomainHomepage');

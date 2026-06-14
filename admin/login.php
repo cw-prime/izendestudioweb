@@ -6,8 +6,9 @@
 require_once __DIR__ . '/config/auth.php';
 require_once __DIR__ . '/includes/login-throttle.php';
 
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
+ini_set('log_errors', 1);
 
 global $conn;
 

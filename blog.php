@@ -146,7 +146,7 @@ setSecurityHeaders();
   <!-- End Footer -->
 
   <!-- Blog Page JS -->
-  <script src="./assets/js/blog.js"></script>
+  <script src="./assets/js/blog.js" defer></script>
 
 </body>
 </html>

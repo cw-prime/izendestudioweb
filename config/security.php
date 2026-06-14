@@ -153,11 +153,21 @@ function cleanupRateLimitFiles($directory) {
         return;
     }
 
-    $files = glob($directory . '/*');
-    foreach ($files as $file) {
-        if (is_file($file) && ($currentTime - filemtime($file)) > $maxAge) {
-            @unlink($file);
+    // Use DirectoryIterator instead of glob() to avoid loading all filenames into memory
+    // at once, which can cause resource exhaustion when there are thousands of rate limit files.
+    try {
+        $iter = new DirectoryIterator($directory);
+        foreach ($iter as $fileInfo) {
+            if ($fileInfo->isDot() || !$fileInfo->isFile()) {
+                continue;
+            }
+            if (($currentTime - $fileInfo->getMTime()) > $maxAge) {
+                @unlink($fileInfo->getRealPath());
+            }
         }
+    } catch (UnexpectedValueException $e) {
+        // Directory became unreadable; silently skip cleanup this cycle.
+        error_log('Rate limit cleanup failed: ' . $e->getMessage());
     }
 }
 
@@ -327,10 +337,14 @@ function initSecureSession() {
         $cookieDomain = '.' . ltrim($host, '.');
     }
 
+    // Secure cookie flag: enabled on HTTPS production, disabled on localhost to
+    // prevent session breakage during local development without HTTPS.
+    $isSecure = isHTTPS() && !$isLocalHost;
+
     // Configure session security settings
     ini_set('session.cookie_httponly', 1);
     ini_set('session.use_only_cookies', 1);
-    ini_set('session.cookie_secure', 1); // HTTPS only
+    ini_set('session.cookie_secure', $isSecure ? 1 : 0);
     ini_set('session.cookie_samesite', 'Lax');
     ini_set('session.use_strict_mode', 1);
     ini_set('session.use_trans_sid', 0);
@@ -343,7 +357,7 @@ function initSecureSession() {
         'lifetime' => 3600, // 1 hour
         'path' => '/',
         'domain' => $cookieDomain,
-        'secure' => true, // HTTPS only
+        'secure' => $isSecure, // HTTPS only in production; allows HTTP on localhost
         'httponly' => true, // No JavaScript access
         'samesite' => 'Lax'
     ]);
@@ -382,11 +396,59 @@ function validateSession() {
         session_start();
     }
 
-    // Optionally validate IP address (commented out as it can cause issues with mobile users)
-    // if (isset($_SESSION['ip_address']) && $_SESSION['ip_address'] !== ($_SERVER['REMOTE_ADDR'] ?? '')) {
-    //     session_destroy();
-    //     session_start();
-    // }
+    // Configurable IP validation to prevent session hijacking.
+    // Controlled by the SESSION_IP_VALIDATION environment variable.
+    //   true  — enforce IP validation (strict /32 or /24-subnet tolerance for IPv4)
+    //   false — skip IP validation (default; preserves previous behaviour for mobile users)
+    //
+    // To enable in production, set SESSION_IP_VALIDATION=true in the server environment
+    // or in .env.local (loaded before this file is included).
+    $enableSessionIpValidation = getenv('SESSION_IP_VALIDATION') === 'true';
+
+    if ($enableSessionIpValidation && isset($_SESSION['ip_address'])) {
+        $sessionIp = $_SESSION['ip_address'];
+        $currentIp = $_SERVER['REMOTE_ADDR'] ?? '';
+
+        if ($sessionIp !== $currentIp) {
+            // Allow tolerance for IPv4 /24 subnet changes (e.g. mobile IP reassignment
+            // within the same carrier block).  IPv6 or any mismatch beyond /24 is rejected.
+            $allowSameSubnet = false;
+            if (
+                filter_var($sessionIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) &&
+                filter_var($currentIp,  FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+            ) {
+                // Compare first three octets (equivalent to a /24 mask).
+                $sessionOctets = explode('.', $sessionIp);
+                $currentOctets = explode('.', $currentIp);
+                if (
+                    $sessionOctets[0] === $currentOctets[0] &&
+                    $sessionOctets[1] === $currentOctets[1] &&
+                    $sessionOctets[2] === $currentOctets[2]
+                ) {
+                    $allowSameSubnet = true;
+                }
+            }
+
+            if ($allowSameSubnet) {
+                // Minor IP change within same /24 — update stored IP and continue.
+                logSecurityEvent('session_ip_subnet_shift', [
+                    'previous_ip' => $sessionIp,
+                    'current_ip'  => $currentIp,
+                    'action'      => 'allowed_same_subnet'
+                ], 'INFO');
+                $_SESSION['ip_address'] = $currentIp;
+            } else {
+                // Significant IP change — possible session hijacking; destroy session.
+                logSecurityEvent('session_ip_mismatch', [
+                    'previous_ip' => $sessionIp,
+                    'current_ip'  => $currentIp,
+                    'action'      => 'session_destroyed'
+                ], 'WARNING');
+                session_destroy();
+                session_start();
+            }
+        }
+    }
 }
 
 // =============================================================================
@@ -396,23 +458,40 @@ function validateSession() {
 /**
  * Set comprehensive security headers
  */
+/**
+ * Ensure a CSP nonce is available in the session, generating one if needed.
+ * Single source of truth for nonce creation, used by both setSecurityHeaders()
+ * and getCSPNonce() to guarantee the same nonce appears in the CSP header and
+ * on all inline script/style elements.
+ *
+ * @return string CSP nonce value (base64-encoded 16 random bytes)
+ */
+function ensureCSPNonce() {
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        initSecureSession();
+    }
+    if (!isset($_SESSION['csp_nonce'])) {
+        $_SESSION['csp_nonce'] = base64_encode(random_bytes(16));
+    }
+    return $_SESSION['csp_nonce'];
+}
+
 function setSecurityHeaders() {
     // Prevent sending if headers already sent
     if (headers_sent()) {
         return;
     }
 
-    // Generate nonce for CSP
-    $nonce = base64_encode(random_bytes(16));
-    if (session_status() === PHP_SESSION_ACTIVE) {
-        $_SESSION['csp_nonce'] = $nonce;
-    }
+    // Get or generate nonce via single source of truth to ensure the nonce
+    // stored in session matches what is emitted in the CSP header.
+    $nonce = ensureCSPNonce();
 
     // Content Security Policy (CSP)
-    // Note: Relaxed policy for development - tighten for production
+    // Phase 3 enforcement: removed 'unsafe-inline' and 'unsafe-eval' from script-src,
+    // removed 'unsafe-inline' from style-src; nonce required for all inline scripts/styles.
     $csp = "default-src 'self'; ";
-    $csp .= "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://fonts.googleapis.com https://www.googletagmanager.com https://pagead2.googlesyndication.com; ";
-    $csp .= "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com; ";
+    $csp .= "script-src 'self' 'nonce-$nonce' https://www.google.com https://www.gstatic.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://fonts.googleapis.com https://www.googletagmanager.com https://pagead2.googlesyndication.com; ";
+    $csp .= "style-src 'self' 'nonce-$nonce' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com; ";
     $csp .= "img-src 'self' data: https: http:; ";
     $csp .= "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; ";
     $csp .= "connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 https://www.google-analytics.com https://unpkg.com https://tile.openstreetmap.org; ";
@@ -422,6 +501,26 @@ function setSecurityHeaders() {
     $csp .= "base-uri 'self'; ";
 
     header("Content-Security-Policy: " . $csp);
+
+    // CSP Report-Only: only emitted when CSP_REPORT_ONLY env var is 'true'.
+    // Useful during initial deployment to monitor violations in browser dev tools
+    // without blocking any resources.  Once CSP is stable, disable by removing
+    // the env var (or setting it to 'false') to eliminate redundant violation reports.
+    if (getenv('CSP_REPORT_ONLY') === 'true') {
+        // Report-only uses the same nonce-based policy so violations surfaced here
+        // reflect exactly what the enforced policy would block.
+        $cspRo = "default-src 'self'; ";
+        $cspRo .= "script-src 'self' 'nonce-$nonce' https://www.google.com https://www.gstatic.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://fonts.googleapis.com https://www.googletagmanager.com https://pagead2.googlesyndication.com; ";
+        $cspRo .= "style-src 'self' 'nonce-$nonce' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com; ";
+        $cspRo .= "img-src 'self' data: https: http:; ";
+        $cspRo .= "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; ";
+        $cspRo .= "connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 https://www.google-analytics.com https://unpkg.com https://tile.openstreetmap.org; ";
+        $cspRo .= "frame-src 'self' https://www.google.com; ";
+        $cspRo .= "frame-ancestors 'self'; ";
+        $cspRo .= "form-action 'self'; ";
+        $cspRo .= "base-uri 'self'; ";
+        header("Content-Security-Policy-Report-Only: " . $cspRo);
+    }
 
     // Strict Transport Security (HSTS)
     header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
@@ -443,15 +542,22 @@ function setSecurityHeaders() {
 }
 
 /**
- * Get CSP nonce for inline scripts
+ * Get CSP nonce for inline scripts.
  *
- * @return string CSP nonce value
+ * If setSecurityHeaders() has already stored a nonce in the session, that
+ * value is returned so every inline script/style uses the same nonce that
+ * appears in the Content-Security-Policy header.
+ *
+ * If the session is not yet active or the nonce has not been set yet
+ * (e.g. getCSPNonce() is called before setSecurityHeaders()), a fresh
+ * nonce is generated, stored in the session, and returned.  This avoids
+ * an empty-string nonce that browsers reject, which would silently block
+ * all inline scripts on the page.
+ *
+ * @return string CSP nonce value (base64-encoded 16 random bytes)
  */
 function getCSPNonce() {
-    if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['csp_nonce'])) {
-        return $_SESSION['csp_nonce'];
-    }
-    return '';
+    return ensureCSPNonce();
 }
 
 // =============================================================================

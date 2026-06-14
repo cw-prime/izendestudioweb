@@ -99,14 +99,18 @@ function loadEnvFile($envPath = null) {
  */
 if (!function_exists('setDefaultEnvVariables')) {
 function setDefaultEnvVariables() {
+    // IMPORTANT: Do NOT add email address defaults here.
+    // MAIL_TO and MAIL_FROM must be set explicitly in environment to prevent
+    // silently sending sensitive form submissions to wrong addresses.
     $defaults = [
-        'APP_ENV' => 'production',
-        'APP_DEBUG' => 'false',
-        'SESSION_LIFETIME' => '3600',
-        'RATE_LIMIT_MAX_ATTEMPTS' => '5',
-        'RATE_LIMIT_TIME_WINDOW' => '300',
-        'MAIL_TO' => 'support@izendestudioweb.com',
-        'MAIL_FROM' => 'noreply@izendestudioweb.com'
+        'APP_ENV'                  => 'production',
+        'APP_DEBUG'                => 'false',
+        'SESSION_LIFETIME'         => '3600',
+        'SESSION_IP_VALIDATION'    => 'false',   // off by default; enable in staging/production after testing
+        'CSP_REPORT_ONLY'          => 'false',   // set 'true' in dev/staging to monitor CSP violations
+        'BOOKING_FROM_NAME'        => 'Izende Studio Web',  // display name for booking notification emails
+        'RATE_LIMIT_MAX_ATTEMPTS'  => '5',
+        'RATE_LIMIT_TIME_WINDOW'   => '300',
     ];
 
     foreach ($defaults as $key => $value) {
@@ -209,6 +213,67 @@ function getEnvInt($key, $default = 0) {
 }
 }
 
+/**
+ * Validate environment variables at startup.
+ *
+ * Required vars trigger an error_log entry regardless of APP_DEBUG — missing
+ * required vars indicate a deployment misconfiguration that must be surfaced.
+ * Recommended vars are logged only when APP_DEBUG is true (they may be absent
+ * in minimal environments).
+ *
+ * Groups:
+ *   required    — application will be broken or insecure without these
+ *   recommended — degrade functionality when absent (email, SMTP, etc.)
+ *
+ * @return array{required: string[], recommended: string[]} Missing var names by group
+ */
+if (!function_exists('validateEnvVars')) {
+function validateEnvVars() {
+    $groups = [
+        'required' => [
+            'RECAPTCHA_SECRET_KEY',   // reCAPTCHA server-side verification
+            'RECAPTCHA_SITE_KEY',     // reCAPTCHA client-side widget
+            'MAIL_TO',                // Recipient for quote/contact form emails (required — no safe default)
+            'MAIL_FROM',              // Sender address for outbound emails (required — no safe default)
+        ],
+        'recommended' => [
+            'BOOKING_ADMIN_EMAIL',    // Admin notification email for bookings
+            'BOOKING_FROM_EMAIL',     // From address for booking notification emails
+            'SMTP_HOST',              // SMTP relay host
+            'SMTP_USERNAME',          // SMTP credentials
+            'SMTP_PASSWORD',          // SMTP credentials
+            'SMTP_PORT',              // SMTP port (465 or 587)
+        ],
+    ];
+
+    $missing = ['required' => [], 'recommended' => []];
+
+    foreach ($groups['required'] as $key) {
+        if (getEnv($key) === null) {
+            $missing['required'][] = $key;
+        }
+    }
+
+    foreach ($groups['recommended'] as $key) {
+        if (getEnv($key) === null) {
+            $missing['recommended'][] = $key;
+        }
+    }
+
+    // Required missing vars are always logged — deployment misconfiguration must be surfaced.
+    if (!empty($missing['required'])) {
+        error_log('[ENV] CRITICAL — missing required env vars: ' . implode(', ', $missing['required']));
+    }
+
+    // Recommended missing vars are logged only in debug mode (may be absent legitimately).
+    if (!empty($missing['recommended']) && getEnvBool('APP_DEBUG', false)) {
+        error_log('[ENV] WARNING — missing recommended env vars: ' . implode(', ', $missing['recommended']));
+    }
+
+    return $missing;
+}
+}
+
 // Auto-load .env file when this file is included
 loadEnvFile();
 
@@ -219,11 +284,6 @@ if (file_exists($localOverride) && is_readable($localOverride)) {
     loadEnvFile($localOverride);
 }
 
-// Verify critical variables are set
-$criticalVars = ['RECAPTCHA_SECRET_KEY', 'RECAPTCHA_SITE_KEY'];
-$missingVars = checkRequiredEnvVars($criticalVars);
-
-if (!empty($missingVars) && getEnvBool('APP_DEBUG', false)) {
-    // Only show warning in debug mode
-    error_log('Warning: Missing environment variables: ' . implode(', ', $missingVars));
-}
+// Centralized environment variable validation at startup.
+// Missing required vars are always logged; recommended vars only in APP_DEBUG mode.
+validateEnvVars();

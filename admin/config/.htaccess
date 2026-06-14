@@ -1,0 +1,4 @@
+# Deny all direct HTTP access to this directory.
+# PHP includes from within the application still work because include/require
+# are server-side operations and do not go through Apache's access rules.
+Require all denied
