@@ -8,9 +8,14 @@ require_once __DIR__ . '/config/security.php';
 require_once __DIR__ . '/config/cms-data.php';
 require_once __DIR__ . '/admin/config/database.php';
 require_once __DIR__ . '/includes/SEOHelper.php';
+require_once __DIR__ . '/includes/SpamProtection.php';
 
 initSecureSession();
 setSecurityHeaders();
+
+// Get CSP nonce for inline scripts
+$nonce = getCSPNonce();
+$recaptchaSiteKey = getEnv('RECAPTCHA_SITE_KEY', '');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -59,6 +64,9 @@ SEOHelper::outputMetaTags('book-consultation', [
             <div class="card shadow-sm">
               <div class="card-body p-4">
                 <form id="bookingForm">
+                  <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES); ?>">
+                  <?php echo SpamProtection::generateHoneypot('booking_new'); ?>
+                  <?php echo SpamProtection::generateTimestamp('booking_new'); ?>
                   <div class="row mb-3">
                     <div class="col-md-6">
                       <label class="form-label">Full Name <span class="text-danger">*</span></label>
@@ -111,6 +119,12 @@ SEOHelper::outputMetaTags('book-consultation', [
                     <label class="form-label">Tell us about your project</label>
                     <textarea class="form-control" name="message" rows="4" placeholder="Brief description of what you're looking for..."></textarea>
                   </div>
+
+                  <?php if (!empty($recaptchaSiteKey)): ?>
+                  <div class="recaptcha-container mb-3" id="recaptcha-placeholder">
+                    <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars($recaptchaSiteKey, ENT_QUOTES); ?>" style="display:none;"></div>
+                  </div>
+                  <?php endif; ?>
 
                   <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
                     <i class="bi bi-calendar-check"></i> Book Consultation
@@ -166,7 +180,7 @@ SEOHelper::outputMetaTags('book-consultation', [
 
   <?php include './assets/includes/footer.php'; ?>
 
-  <script>
+  <script nonce="<?= htmlspecialchars($nonce, ENT_QUOTES) ?>">
   document.getElementById('bookingForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
@@ -181,11 +195,21 @@ SEOHelper::outputMetaTags('book-consultation', [
           client_email: formData.get('client_email'),
           client_phone: formData.get('client_phone'),
           service_type: formData.get('service_type'),
+          csrf_token: formData.get('csrf_token'),
+          form_timestamp: formData.get('form_timestamp'),
+          'g-recaptcha-response': formData.get('g-recaptcha-response'),
           // Send as separate fields (API will also accept legacy combined datetime)
           preferred_date: formData.get('preferred_date'),
           preferred_time: formData.get('preferred_time'),
           message: formData.get('message')
       };
+
+      // Include the session-bound honeypot field without hardcoding its randomized name.
+      for (const [key, value] of formData.entries()) {
+          if (key.startsWith('website_url_')) {
+              data[key] = value;
+          }
+      }
 
       // Disable button
       submitBtn.disabled = true;

@@ -37,7 +37,17 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
 <link rel="stylesheet" href="https://unpkg.com/swiper@11/swiper-bundle.min.css" />
 
 <!-- WebP Support Detection -->
-<script>
+<?php
+// Resolve nonce from page context (set by setSecurityHeaders/getCSPNonce) or generate one.
+$_headerNonce = '';
+if (function_exists('getCSPNonce')) {
+    $_headerNonce = getCSPNonce();
+} elseif (isset($nonce)) {
+    $_headerNonce = $nonce;
+}
+$_headerNonceAttr = $_headerNonce !== '' ? ' nonce="' . htmlspecialchars($_headerNonce, ENT_QUOTES, 'UTF-8') . '"' : '';
+?>
+<script<?php echo $_headerNonceAttr; ?>>
 (function() {
   var webP = new Image();
   webP.onload = webP.onerror = function() {

@@ -177,11 +177,31 @@ function shutdownHandler() {
  * @param string $message User-friendly error message
  */
 function displayErrorPage($message = 'An error occurred') {
-    // Only send headers if not already sent
+    // Obtain a CSP nonce for the inline <style> block.
+    // Strategy:
+    //   1. If headers not yet sent: reuse the session nonce from getCSPNonce() so the
+    //      inline <style> is authorised by the page's existing CSP header.  Do NOT emit
+    //      a new CSP header here — overwriting the main page CSP would strip all the
+    //      approved allowlist sources and could block legitimate resources.
+    //   2. If headers are already sent (mid-page fatal): no CSP header can be sent anyway,
+    //      so omit the nonce attribute entirely.  The browser may block the inline style,
+    //      but that is acceptable on a fatal error page.
+    $errNonce = '';
     if (!headers_sent()) {
         header('HTTP/1.1 500 Internal Server Error');
         header('Content-Type: text/html; charset=UTF-8');
+        if (function_exists('getCSPNonce')) {
+            // Reuse the nonce already stored in the session so it matches the
+            // Content-Security-Policy header that setSecurityHeaders() already sent.
+            $errNonce = getCSPNonce();
+        } else {
+            // No security module loaded (e.g. early bootstrap failure).
+            // Generate a standalone nonce and emit a minimal CSP header.
+            $errNonce = base64_encode(random_bytes(16));
+            header("Content-Security-Policy: default-src 'self'; style-src 'nonce-{$errNonce}'; img-src 'self'; frame-ancestors 'none'");
+        }
     }
+    $nonceAttr = $errNonce !== '' ? ' nonce="' . htmlspecialchars($errNonce, ENT_QUOTES) . '"' : '';
 
     // Display simple error page
     echo '<!DOCTYPE html>
@@ -190,7 +210,7 @@ function displayErrorPage($message = 'An error occurred') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Error - Izende Studio Web</title>
-    <style>
+    <style' . $nonceAttr . '>
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;

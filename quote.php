@@ -26,6 +26,7 @@ $companyBudget = '';
 $comment = '';
 $name = '';
 $errors = [];
+$fieldErrors = []; // Field-specific error tracking for inline highlighting
 $success = false;
 
 // Process form submission
@@ -59,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['csrf_token'])) {
 
             // Required consent checkbox (must be present and checked)
             if (!isset($_POST['consent']) || ($_POST['consent'] !== 'on' && $_POST['consent'] !== '1' && $_POST['consent'] !== 'yes')) {
-                $errors[] = 'You must agree to the privacy policy to submit this form.';
+                $fieldErrors['consent'] = 'You must agree to the Privacy Policy to submit this form.';
             }
 
             // Marketing consent (optional) - record opt-in if provided
@@ -74,79 +75,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['csrf_token'])) {
             // First Name
             $fname = sanitizeInput($_POST['fname'] ?? '', 'string');
             if (empty($fname)) {
-                $errors[] = 'First name is required.';
+                $fieldErrors['fname'] = 'First name is required.';
             } elseif (!validateLength($fname, 1, 50)) {
-                $errors[] = 'First name must be between 1 and 50 characters.';
+                $fieldErrors['fname'] = 'First name must be between 1 and 50 characters.';
             }
 
             // Last Name
             $lname = sanitizeInput($_POST['lname'] ?? '', 'string');
             if (empty($lname)) {
-                $errors[] = 'Last name is required.';
+                $fieldErrors['lname'] = 'Last name is required.';
             } elseif (!validateLength($lname, 1, 50)) {
-                $errors[] = 'Last name must be between 1 and 50 characters.';
+                $fieldErrors['lname'] = 'Last name must be between 1 and 50 characters.';
             }
 
             // Email
             $emailInput = sanitizeInput($_POST['email'] ?? '', 'string');
             $email = validateEmail($emailInput);
             if ($email === false) {
-                $errors[] = 'Please enter a valid email address.';
+                $fieldErrors['email'] = 'Please enter a valid email address.';
+                $email = '';
             }
 
             // Phone
             $phoneInput = sanitizeInput($_POST['phone'] ?? '', 'string');
             $phone = validatePhone($phoneInput);
             if ($phone === false) {
-                $errors[] = 'Please enter a valid phone number (format: 123-456-7890).';
+                $fieldErrors['phone'] = 'Please enter a valid phone number (format: 123-456-7890).';
+                $phone = sanitizeInput($phoneInput, 'string');
             }
 
             // Company Name
             $company = sanitizeInput($_POST['company'] ?? '', 'string');
             if (!empty($company) && !validateLength($company, 0, 100)) {
-                $errors[] = 'Company name must not exceed 100 characters.';
+                $fieldErrors['company'] = 'Company name must not exceed 100 characters.';
             }
 
             // Website (optional)
             $websiteRaw = trim((string)($_POST['website'] ?? ''));
             $website = $websiteRaw === '' ? '' : sanitizeInput($websiteRaw, 'url');
             if ($websiteRaw !== '' && !filter_var($website, FILTER_VALIDATE_URL)) {
-                $errors[] = 'Please enter a valid website URL.';
+                $fieldErrors['website'] = 'Please enter a valid website URL (e.g. https://example.com).';
             }
 
             // Company Size
             $companySize = sanitizeInput($_POST['selectSize'] ?? '', 'int');
             if (!in_array($companySize, ['1', '2', '3', '4', '5'], true)) {
-                $errors[] = 'Please select a valid company size.';
+                $fieldErrors['selectSize'] = 'Please select a company size.';
             }
 
             // Service
             $companyService = sanitizeInput($_POST['selectService'] ?? '', 'int');
             if (!in_array($companyService, ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], true)) {
-                $errors[] = 'Please select a valid service.';
+                $fieldErrors['selectService'] = 'Please select a service.';
             }
 
             // Budget
             $companyBudget = sanitizeInput($_POST['selectBudget'] ?? '', 'int');
             if (!in_array($companyBudget, ['1', '2', '3', '4', '5'], true)) {
-                $errors[] = 'Please select a valid budget range.';
+                $fieldErrors['selectBudget'] = 'Please select a budget range.';
             }
 
             // Industry
             $industry = sanitizeInput($_POST['industry'] ?? '', 'string');
             if (empty($industry)) {
-                $errors[] = 'Industry is required.';
+                $fieldErrors['industry'] = 'Industry is required.';
             } elseif (!validateLength($industry, 1, 100)) {
-                $errors[] = 'Industry must be between 1 and 100 characters.';
+                $fieldErrors['industry'] = 'Industry must be between 1 and 100 characters.';
             }
 
             // Comment
             $comment = sanitizeInput($_POST['comment'] ?? '', 'string');
             if (empty($comment)) {
-                $errors[] = 'Please tell us about your business.';
+                $fieldErrors['comment'] = 'Please tell us about your business.';
             } elseif (!validateLength($comment, 1, 2000)) {
-                $errors[] = 'Comment must be between 1 and 2000 characters.';
+                $fieldErrors['comment'] = 'Comment must be between 1 and 2000 characters.';
             }
+
+            // Derive summary errors from field errors (single source of truth)
+            $errors = array_merge($errors, array_values($fieldErrors));
 
             // 4. reCAPTCHA Verification
             if (empty($errors) && isset($_POST['g-recaptcha-response'])) {
@@ -264,9 +270,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['csrf_token'])) {
                 $messageHTML .= "<p><strong>IP Address:</strong> " . getClientIP() . "</p>";
                 $messageHTML .= "</body></html>";
 
-                // Email routing
-                $to = getEnv('MAIL_TO', 'support@izendestudioweb.com');
-                $fromEmail = getEnv('MAIL_FROM', 'noreply@izendestudioweb.com');
+                // Email routing — no hardcoded defaults; both vars are required env vars.
+                // validateEnvVars() at startup already logs a CRITICAL if they're missing.
+                $to = getEnv('MAIL_TO');
+                $fromEmail = getEnv('MAIL_FROM');
+
+                if (empty($to) || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+                    $errors[] = 'Quote form is not configured. Please contact us directly.';
+                    logSecurityEvent('quote_mail_to_missing', ['MAIL_TO' => (string)$to], 'CRITICAL');
+                } elseif (empty($fromEmail) || !filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+                    $errors[] = 'Quote form is not configured. Please contact us directly.';
+                    logSecurityEvent('quote_mail_from_missing', ['MAIL_FROM' => (string)$fromEmail], 'CRITICAL');
+                }
+
+                if (empty($errors)) {
+
                 $fromName = 'Izende Studio Web - Quote Form';
                 $mailSent = false;
                 $mailTransport = 'php-mail';
@@ -449,6 +467,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['csrf_token'])) {
                         'mail_error' => $mailError
                     ], 'CRITICAL');
                 }
+                } // end if (empty($errors)) — email config guard
             }
         }
     }
@@ -457,6 +476,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['csrf_token'])) {
 // Generate CSRF token for form
 $csrfToken = generateCSRFToken();
 $recaptchaSiteKey = getEnv('RECAPTCHA_SITE_KEY');
+
+/**
+ * Helper: returns 'is-invalid' CSS class if the field has a server-side error.
+ */
+function fieldClass(string $fieldName, array $fieldErrors): string {
+    return isset($fieldErrors[$fieldName]) ? ' is-invalid' : '';
+}
+
+/**
+ * Helper: renders an inline .invalid-feedback div if the field has a server-side error.
+ */
+function fieldError(string $fieldName, array $fieldErrors): string {
+    if (isset($fieldErrors[$fieldName])) {
+        return '<div class="invalid-feedback" role="alert" style="display:block;">'
+            . htmlspecialchars($fieldErrors[$fieldName], ENT_QUOTES, 'UTF-8')
+            . '</div>';
+    }
+    return '';
+}
 
 // Validate reCAPTCHA configuration
 if (empty($recaptchaSiteKey)) {
@@ -525,7 +563,9 @@ if (empty($recaptchaSiteKey)) {
                         </ol>
                     </nav>
 
-                    <form action="" id="myform" method="post" role="form">
+                    <form action="" id="myform" method="post" role="form"
+                          data-has-errors="<?php echo !empty($errors) ? 'true' : 'false'; ?>"
+                          data-field-errors="<?php echo !empty($fieldErrors) ? htmlspecialchars(json_encode(array_keys($fieldErrors)), ENT_QUOTES, 'UTF-8') : '[]'; ?>">
                         <!-- CSRF Token -->
                         <input type="hidden" name="csrf_token" value="<?php echo sanitizeHTML($csrfToken); ?>">
 
@@ -536,18 +576,18 @@ if (empty($recaptchaSiteKey)) {
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-floating">
-                                        <input type="text" name="fname" value="<?php echo sanitizeHTML($fname); ?>" class="form-control" placeholder=" " id="fname" required aria-describedby="fname-error">
-                                        <label for="fname">First Name</label>
+                                        <input type="text" name="fname" value="<?php echo sanitizeHTML($fname); ?>" class="form-control<?php echo fieldClass('fname', $fieldErrors); ?>" placeholder=" " id="fname" required aria-describedby="fname-error">
+                                        <label for="fname">First Name <span class="text-danger" aria-hidden="true">*</span></label>
                                     </div>
-                                    <div class="invalid-feedback" id="fname-error" role="alert"></div>
+                                    <div class="invalid-feedback" id="fname-error" role="alert"><?php echo isset($fieldErrors['fname']) ? sanitizeHTML($fieldErrors['fname']) : ''; ?></div>
                                     <div class="valid-feedback">Looks good!</div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control" name="lname" value="<?php echo sanitizeHTML($lname); ?>" placeholder=" " id="lname" required aria-describedby="lname-error">
-                                        <label for="lname">Last Name</label>
+                                        <input type="text" class="form-control<?php echo fieldClass('lname', $fieldErrors); ?>" name="lname" value="<?php echo sanitizeHTML($lname); ?>" placeholder=" " id="lname" required aria-describedby="lname-error">
+                                        <label for="lname">Last Name <span class="text-danger" aria-hidden="true">*</span></label>
                                     </div>
-                                    <div class="invalid-feedback" id="lname-error" role="alert"></div>
+                                    <div class="invalid-feedback" id="lname-error" role="alert"><?php echo isset($fieldErrors['lname']) ? sanitizeHTML($fieldErrors['lname']) : ''; ?></div>
                                     <div class="valid-feedback">Looks good!</div>
                                 </div>
                             </div>
@@ -555,18 +595,18 @@ if (empty($recaptchaSiteKey)) {
                             <div class="row mt-3">
                                 <div class="col-lg-6">
                                     <div class="form-floating">
-                                        <input type="tel" id="phone" name="phone" value="<?php echo sanitizeHTML($phone); ?>" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required class="form-control" placeholder=" " aria-describedby="phone-error">
-                                        <label for="phone">Phone (123-456-7890)</label>
+                                        <input type="tel" id="phone" name="phone" value="<?php echo sanitizeHTML($phone); ?>" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required class="form-control<?php echo fieldClass('phone', $fieldErrors); ?>" placeholder=" " aria-describedby="phone-error">
+                                        <label for="phone">Phone (123-456-7890) <span class="text-danger" aria-hidden="true">*</span></label>
                                     </div>
-                                    <div class="invalid-feedback" id="phone-error" role="alert"></div>
+                                    <div class="invalid-feedback" id="phone-error" role="alert"><?php echo isset($fieldErrors['phone']) ? sanitizeHTML($fieldErrors['phone']) : ''; ?></div>
                                     <div class="valid-feedback">Looks good!</div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-floating">
-                                        <input type="email" name="email" value="<?php echo sanitizeHTML($email); ?>" class="form-control" placeholder=" " id="email" required aria-describedby="email-error">
-                                        <label for="email">Email</label>
+                                        <input type="email" name="email" value="<?php echo sanitizeHTML($email); ?>" class="form-control<?php echo fieldClass('email', $fieldErrors); ?>" placeholder=" " id="email" required aria-describedby="email-error">
+                                        <label for="email">Email <span class="text-danger" aria-hidden="true">*</span></label>
                                     </div>
-                                    <div class="invalid-feedback" id="email-error" role="alert"></div>
+                                    <div class="invalid-feedback" id="email-error" role="alert"><?php echo isset($fieldErrors['email']) ? sanitizeHTML($fieldErrors['email']) : ''; ?></div>
                                     <div class="valid-feedback">Looks good!</div>
                                 </div>
                             </div>
@@ -583,18 +623,18 @@ if (empty($recaptchaSiteKey)) {
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control" value="<?php echo sanitizeHTML($company); ?>" name="company" placeholder=" " id="company" aria-describedby="company-error">
+                                        <input type="text" class="form-control<?php echo fieldClass('company', $fieldErrors); ?>" value="<?php echo sanitizeHTML($company); ?>" name="company" placeholder=" " id="company" aria-describedby="company-error">
                                         <label for="company">Company Name (Optional)</label>
                                     </div>
-                                    <div class="invalid-feedback" id="company-error" role="alert"></div>
+                                    <div class="invalid-feedback" id="company-error" role="alert"><?php echo isset($fieldErrors['company']) ? sanitizeHTML($fieldErrors['company']) : ''; ?></div>
                                     <div class="valid-feedback">Looks good!</div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-floating">
-                                        <input type="url" class="form-control" name="website" value="<?php echo sanitizeHTML($website); ?>" placeholder=" " id="website" aria-describedby="website-error">
-                                        <label for="website">Website URL</label>
+                                        <input type="url" class="form-control<?php echo fieldClass('website', $fieldErrors); ?>" name="website" value="<?php echo sanitizeHTML($website); ?>" placeholder=" " id="website" aria-describedby="website-error">
+                                        <label for="website">Website URL (Optional)</label>
                                     </div>
-                                    <div class="invalid-feedback" id="website-error" role="alert"></div>
+                                    <div class="invalid-feedback" id="website-error" role="alert"><?php echo isset($fieldErrors['website']) ? sanitizeHTML($fieldErrors['website']) : ''; ?></div>
                                     <div class="valid-feedback">Looks good!</div>
                                 </div>
                             </div>
@@ -602,7 +642,7 @@ if (empty($recaptchaSiteKey)) {
                             <div class="row mt-3">
                                 <div class="col-lg-6">
                                     <div class="form-floating">
-                                        <select id="selectSize" name="selectSize" class="form-select" required aria-describedby="selectSize-error">
+                                        <select id="selectSize" name="selectSize" class="form-select<?php echo fieldClass('selectSize', $fieldErrors); ?>" required aria-describedby="selectSize-error">
                                             <option value="" disabled <?php echo empty($companySize) ? 'selected' : ''; ?>>Choose...</option>
                                             <option value="1" <?php echo $companySize == '1' ? 'selected' : ''; ?>>1-10</option>
                                             <option value="2" <?php echo $companySize == '2' ? 'selected' : ''; ?>>11-20</option>
@@ -610,17 +650,17 @@ if (empty($recaptchaSiteKey)) {
                                             <option value="4" <?php echo $companySize == '4' ? 'selected' : ''; ?>>51-100</option>
                                             <option value="5" <?php echo $companySize == '5' ? 'selected' : ''; ?>>100+</option>
                                         </select>
-                                        <label for="selectSize">Company Size</label>
+                                        <label for="selectSize">Company Size <span class="text-danger" aria-hidden="true">*</span></label>
                                     </div>
-                                    <div class="invalid-feedback" id="selectSize-error" role="alert"></div>
+                                    <div class="invalid-feedback" id="selectSize-error" role="alert"><?php echo isset($fieldErrors['selectSize']) ? sanitizeHTML($fieldErrors['selectSize']) : ''; ?></div>
                                     <div class="valid-feedback">Looks good!</div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control" name="industry" value="<?php echo sanitizeHTML($industry); ?>" placeholder=" " id="industry" required aria-describedby="industry-error">
-                                        <label for="industry">Industry</label>
+                                        <input type="text" class="form-control<?php echo fieldClass('industry', $fieldErrors); ?>" name="industry" value="<?php echo sanitizeHTML($industry); ?>" placeholder=" " id="industry" required aria-describedby="industry-error">
+                                        <label for="industry">Industry <span class="text-danger" aria-hidden="true">*</span></label>
                                     </div>
-                                    <div class="invalid-feedback" id="industry-error" role="alert"></div>
+                                    <div class="invalid-feedback" id="industry-error" role="alert"><?php echo isset($fieldErrors['industry']) ? sanitizeHTML($fieldErrors['industry']) : ''; ?></div>
                                     <div class="valid-feedback">Looks good!</div>
                                 </div>
                             </div>
@@ -638,7 +678,7 @@ if (empty($recaptchaSiteKey)) {
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-floating">
-                                        <select id="selectService" name="selectService" class="form-select" required aria-describedby="selectService-error">
+                                        <select id="selectService" name="selectService" class="form-select<?php echo fieldClass('selectService', $fieldErrors); ?>" required aria-describedby="selectService-error">
                                             <option value="" disabled <?php echo empty($companyService) ? 'selected' : ''; ?>>Choose...</option>
                                             <option value="1" <?php echo $companyService == '1' ? 'selected' : ''; ?>>CUSTOM WEBSITE / APPLICATION</option>
                                             <option value="2" <?php echo $companyService == '2' ? 'selected' : ''; ?>>WORDPRESS</option>
@@ -651,14 +691,14 @@ if (empty($recaptchaSiteKey)) {
                                             <option value="9" <?php echo $companyService == '9' ? 'selected' : ''; ?>>EMAIL MARKETING</option>
                                             <option value="10" <?php echo $companyService == '10' ? 'selected' : ''; ?>>SPEED OPTIMIZATION</option>
                                         </select>
-                                        <label for="selectService">Select Service</label>
+                                        <label for="selectService">Select Service <span class="text-danger" aria-hidden="true">*</span></label>
                                     </div>
-                                    <div class="invalid-feedback" id="selectService-error" role="alert"></div>
+                                    <div class="invalid-feedback" id="selectService-error" role="alert"><?php echo isset($fieldErrors['selectService']) ? sanitizeHTML($fieldErrors['selectService']) : ''; ?></div>
                                     <div class="valid-feedback">Looks good!</div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-floating">
-                                        <select id="selectBudget" name="selectBudget" class="form-select" required aria-describedby="selectBudget-error">
+                                        <select id="selectBudget" name="selectBudget" class="form-select<?php echo fieldClass('selectBudget', $fieldErrors); ?>" required aria-describedby="selectBudget-error">
                                             <option value="" disabled <?php echo empty($companyBudget) ? 'selected' : ''; ?>>Choose...</option>
                                             <option value="1" <?php echo $companyBudget == '1' ? 'selected' : ''; ?>>< 1K</option>
                                             <option value="2" <?php echo $companyBudget == '2' ? 'selected' : ''; ?>>2-5K</option>
@@ -666,9 +706,9 @@ if (empty($recaptchaSiteKey)) {
                                             <option value="4" <?php echo $companyBudget == '4' ? 'selected' : ''; ?>>11-20K</option>
                                             <option value="5" <?php echo $companyBudget == '5' ? 'selected' : ''; ?>>30K+</option>
                                         </select>
-                                        <label for="selectBudget">Budget</label>
+                                        <label for="selectBudget">Budget <span class="text-danger" aria-hidden="true">*</span></label>
                                     </div>
-                                    <div class="invalid-feedback" id="selectBudget-error" role="alert"></div>
+                                    <div class="invalid-feedback" id="selectBudget-error" role="alert"><?php echo isset($fieldErrors['selectBudget']) ? sanitizeHTML($fieldErrors['selectBudget']) : ''; ?></div>
                                     <div class="valid-feedback">Looks good!</div>
                                 </div>
                             </div>
@@ -676,10 +716,10 @@ if (empty($recaptchaSiteKey)) {
                             <div class="row mt-3">
                                 <div class="col-12">
                                     <div class="form-floating">
-                                        <textarea class="form-control" name="comment" id="comment" placeholder=" " style="height: 120px;" required aria-describedby="comment-error"><?php echo sanitizeHTML($comment); ?></textarea>
-                                        <label for="comment">Tell Us About Your Business</label>
+                                        <textarea class="form-control<?php echo fieldClass('comment', $fieldErrors); ?>" name="comment" id="comment" placeholder=" " style="height: 120px;" required aria-describedby="comment-error"><?php echo sanitizeHTML($comment); ?></textarea>
+                                        <label for="comment">Tell Us About Your Business <span class="text-danger" aria-hidden="true">*</span></label>
                                     </div>
-                                    <div class="invalid-feedback" id="comment-error" role="alert"></div>
+                                    <div class="invalid-feedback" id="comment-error" role="alert"><?php echo isset($fieldErrors['comment']) ? sanitizeHTML($fieldErrors['comment']) : ''; ?></div>
                                     <div class="valid-feedback">Looks good!</div>
                                 </div>
                             </div>
@@ -692,8 +732,9 @@ if (empty($recaptchaSiteKey)) {
                                             <!-- Consent checkboxes (required consent + optional marketing) -->
                                             <div class="form-group mt-3">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="quote-consent" name="consent" required>
-                                                    <label class="form-check-label" for="quote-consent">I agree to the <a href="/privacy-policy.php" target="_blank" rel="noopener">Privacy Policy</a>.</label>
+                                                    <input class="form-check-input<?php echo fieldClass('consent', $fieldErrors); ?>" type="checkbox" id="quote-consent" name="consent" required aria-describedby="quote-consent-error">
+                                                    <label class="form-check-label" for="quote-consent">I agree to the <a href="/privacy-policy.php" target="_blank" rel="noopener">Privacy Policy</a>. <span class="text-danger" aria-hidden="true">*</span></label>
+                                                    <div class="invalid-feedback" id="quote-consent-error" role="alert"><?php echo isset($fieldErrors['consent']) ? sanitizeHTML($fieldErrors['consent']) : ''; ?></div>
                                                 </div>
                                                 <div class="form-check mt-2">
                                                     <input class="form-check-input" type="checkbox" id="quote-marketing-consent" name="marketing_consent" value="1">

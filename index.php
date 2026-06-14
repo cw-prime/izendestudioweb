@@ -5,8 +5,15 @@
  */
 
 // Step 1: Error handling and security
-error_reporting(0);
+error_reporting(E_ALL);
 ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+$_logsDir = __DIR__ . '/logs';
+if (!is_dir($_logsDir)) {
+    @mkdir($_logsDir, 0750, true);
+}
+ini_set('error_log', $_logsDir . '/php-error.log');
+unset($_logsDir);
 
 // Try to load basic config files
 @require_once __DIR__ . '/config/env-loader.php';
@@ -19,6 +26,8 @@ if (function_exists('initSecureSession')) {
 if (function_exists('setSecurityHeaders')) {
     @setSecurityHeaders();
 }
+// Capture nonce for inline scripts/styles on this page
+$nonce = function_exists('getCSPNonce') ? getCSPNonce() : '';
 
 // Step 2: Load database configuration
 @require_once __DIR__ . '/admin/config/database.php';

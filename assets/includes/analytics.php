@@ -36,9 +36,20 @@ if ($analyticsEnabled != '1') {
 }
 ?>
 
+<?php
+// Resolve CSP nonce from page context for inline script nonce attributes.
+$_analyticsNonce = '';
+if (function_exists('getCSPNonce')) {
+    $_analyticsNonce = getCSPNonce();
+} elseif (isset($nonce)) {
+    $_analyticsNonce = $nonce;
+}
+$_analyticsNonceAttr = $_analyticsNonce !== '' ? ' nonce="' . htmlspecialchars($_analyticsNonce, ENT_QUOTES, 'UTF-8') . '"' : '';
+?>
+
 <?php if (!empty($gtmId)): ?>
 <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+<script<?php echo $_analyticsNonceAttr; ?>>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
@@ -49,7 +60,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <?php if (!empty($ga4Id)): ?>
 <!-- Google Analytics 4 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo htmlspecialchars($ga4Id); ?>"></script>
-<script>
+<script<?php echo $_analyticsNonceAttr; ?>>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());

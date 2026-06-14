@@ -1,6 +1,15 @@
 <?php
 // Detect if we're in a subdirectory
 $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudioweb') ? '../' : '';
+
+// Resolve CSP nonce for inline scripts — use page-context $nonce or generate one.
+$_footerNonce = '';
+if (function_exists('getCSPNonce')) {
+    $_footerNonce = getCSPNonce();
+} elseif (isset($nonce)) {
+    $_footerNonce = $nonce;
+}
+$_footerNonceAttr = $_footerNonce !== '' ? ' nonce="' . htmlspecialchars($_footerNonce, ENT_QUOTES, 'UTF-8') . '"' : '';
 ?>
   <!-- ======= Footer ======= -->
   <footer id="footer">
@@ -98,7 +107,7 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <!-- Service Area Map with Leaflet -->
-    <script>
+    <script<?php echo $_footerNonceAttr; ?>>
     (function() {
         const mapContainer = document.getElementById('service-area-map');
         if (!mapContainer) {
@@ -158,7 +167,7 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
     </script>
 
     <!-- Hero Carousel Script -->
-    <script>
+    <script<?php echo $_footerNonceAttr; ?>>
     function initHeroCarousel() {
         if (typeof Swiper === 'undefined') {
             // If Swiper not loaded yet, retry
@@ -200,7 +209,7 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
     <script src="<?php echo $base_path; ?>assets/js/main.js" defer></script>
 
     <!-- Newsletter Signup Script -->
-    <script>
+    <script<?php echo $_footerNonceAttr; ?>>
     document.getElementById('newsletterForm')?.addEventListener('submit', async function(e) {
         e.preventDefault();
 

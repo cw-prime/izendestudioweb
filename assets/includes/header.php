@@ -18,6 +18,7 @@ $base_path = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'izendestudiowe
           <li><a class="nav-link scrollto " href="<?php echo $base_path; ?>#portfolio">Portfolio</a></li>
           <li><a class="nav-link scrollto" href="<?php echo $base_path; ?>#contact">Contact</a></li>
           <li><a class="nav-link scrollto" href="<?php echo $base_path; ?>blog.php">Blog</a></li>
+          <li><a class="nav-link" href="<?php echo $base_path; ?>ai-website-builder.php"><i class="bi bi-magic"></i> AI Builder</a></li>
           <li><a class="nav-link book-appointment" href="<?php echo $base_path; ?>book-consultation"><i class="bi bi-calendar-check"></i> Book Appointment</a></li>
           <li><a class="getstarted scrollto" href="<?php echo $base_path; ?>quote" id="quote">Free Quote</a></li>
         </ul>

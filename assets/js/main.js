@@ -301,9 +301,14 @@
     }
   });
 
-  //SHow Hide Quote on Quote Page
-  if(window.location.href.indexOf('quote') != -1){
-    document.getElementById("quote").hidden = true;
+  // Hide the Quote nav link when already on the quote page.
+  // Use pathname to avoid false-positives from query strings or anchors
+  // containing the word "quote" (e.g. ?ref=quote-form on a different page).
+  const _quotePath = window.location.pathname;
+  if (_quotePath === '/quote.php' || _quotePath.endsWith('/quote.php') ||
+      _quotePath === '/quote' || _quotePath.endsWith('/quote/')) {
+    const _quoteEl = document.getElementById("quote");
+    if (_quoteEl) _quoteEl.hidden = true;
   }
 
   /**
@@ -410,17 +415,52 @@
    * Form Validation Handler
    */
   const FormValidator = {
+    /**
+     * Find the .invalid-feedback element associated with a given input.
+     * Resolves via: aria-describedby attribute → id convention (inputId + '-error') → DOM traversal.
+     * Always returns an Element or null — never undefined.
+     */
+    _getFeedback: function(input) {
+      if (!input) return null;
+      // 1. Prefer aria-describedby (explicit association)
+      const ariaId = input.getAttribute('aria-describedby');
+      if (ariaId) {
+        const el = document.getElementById(ariaId);
+        if (el) return el;
+      }
+      // 2. Try id convention: inputId + '-error'
+      if (input.id) {
+        const el = document.getElementById(input.id + '-error');
+        if (el) return el;
+      }
+      // 3. DOM traversal: walk up two levels and look for .invalid-feedback
+      const parent = input.parentElement;
+      if (parent) {
+        const fb = parent.querySelector('.invalid-feedback');
+        if (fb) return fb;
+        const grandparent = parent.parentElement;
+        if (grandparent) {
+          const fbGp = grandparent.querySelector('.invalid-feedback');
+          if (fbGp) return fbGp;
+        }
+      }
+      return null;
+    },
+
     setValid: function(input) {
       input.classList.remove('is-invalid');
       input.classList.add('is-valid');
-      const feedback = input.parentElement.parentElement.querySelector('.invalid-feedback');
-      if (feedback) feedback.style.display = 'none';
+      const feedback = this._getFeedback(input);
+      if (feedback) {
+        feedback.textContent = '';
+        feedback.style.display = 'none';
+      }
     },
 
     setInvalid: function(input, message) {
       input.classList.remove('is-valid');
       input.classList.add('is-invalid');
-      const feedback = input.parentElement.parentElement.querySelector('.invalid-feedback');
+      const feedback = this._getFeedback(input);
       if (feedback) {
         feedback.textContent = message;
         feedback.style.display = 'block';
@@ -429,17 +469,51 @@
 
     clearValidation: function(input) {
       input.classList.remove('is-valid', 'is-invalid');
-      const feedback = input.parentElement.parentElement.querySelector('.invalid-feedback');
-      if (feedback) feedback.style.display = 'none';
+      const feedback = this._getFeedback(input);
+      if (feedback) {
+        feedback.textContent = '';
+        feedback.style.display = 'none';
+      }
     },
 
     validateField: function(input) {
-      const value = input.value.trim();
       const type = input.type;
-      const name = input.name;
+
+      // Special handling for checkboxes
+      if (type === 'checkbox') {
+        if (input.hasAttribute('required') && !input.checked) {
+          this.setInvalid(input, 'You must check this box to continue.');
+          return false;
+        }
+        if (input.checked) {
+          this.setValid(input);
+        }
+        return true;
+      }
+
+      const value = input.value.trim();
 
       if (input.hasAttribute('required') && !value) {
-        this.setInvalid(input, 'This field is required.');
+        // Field-specific required messages — kept in sync with server-side
+        // validation in quote.php to prevent conflicting UX.
+        // If a server-side message is already present in the .invalid-feedback
+        // element (e.g. after a page reload with errors), prefer that text so
+        // users see a single consistent message from one source of truth.
+        const feedbackEl = this._getFeedback(input);
+        const existingMsg = feedbackEl ? feedbackEl.textContent.trim() : '';
+        const fieldLabels = {
+          fname: 'First name is required.',
+          lname: 'Last name is required.',
+          email: 'Email address is required.',
+          phone: 'Phone number is required.',
+          selectSize: 'Please select a company size.',
+          selectService: 'Please select a service.',
+          selectBudget: 'Please select a budget range.',
+          industry: 'Industry is required.',
+          comment: 'Please tell us about your business.'
+        };
+        const msg = existingMsg || fieldLabels[input.name] || 'This field is required.';
+        this.setInvalid(input, msg);
         return false;
       }
 
@@ -458,11 +532,48 @@
             }
             break;
           case 'url':
-            if (!ValidationUtils.validateURL(value)) {
-              this.setInvalid(input, 'Please enter a valid URL.');
+            if (value && !ValidationUtils.validateURL(value)) {
+              this.setInvalid(input, 'Please enter a valid URL (e.g. https://example.com).');
               return false;
             }
             break;
+          case 'text':
+            // Length checks
+            if (input.name === 'fname' || input.name === 'lname') {
+              if (!ValidationUtils.validateLength(value, 1, 50)) {
+                this.setInvalid(input, 'Must be between 1 and 50 characters.');
+                return false;
+              }
+            }
+            if (input.name === 'industry') {
+              if (!ValidationUtils.validateLength(value, 1, 100)) {
+                this.setInvalid(input, 'Must be between 1 and 100 characters.');
+                return false;
+              }
+            }
+            if (input.name === 'company') {
+              if (!ValidationUtils.validateLength(value, 0, 100)) {
+                this.setInvalid(input, 'Company name must not exceed 100 characters.');
+                return false;
+              }
+            }
+            break;
+          case 'textarea':
+            if (input.name === 'comment') {
+              if (!ValidationUtils.validateLength(value, 1, 2000)) {
+                this.setInvalid(input, 'Must be between 1 and 2000 characters.');
+                return false;
+              }
+            }
+            break;
+        }
+
+        // Textarea element type is 'textarea' but tagName check needed
+        if (input.tagName.toLowerCase() === 'textarea' && input.name === 'comment') {
+          if (!ValidationUtils.validateLength(value, 1, 2000)) {
+            this.setInvalid(input, 'Must be between 1 and 2000 characters.');
+            return false;
+          }
         }
       }
 
@@ -501,23 +612,61 @@
 
       // Add validation listeners
       this.form.querySelectorAll('input, select, textarea').forEach(input => {
-        input.addEventListener('blur', () => FormValidator.validateField(input));
-        input.addEventListener('input', debounce(() => {
-          if (input.classList.contains('is-invalid') || input.classList.contains('is-valid')) {
-            FormValidator.validateField(input);
+        if (input.type === 'checkbox' || input.type === 'radio') {
+          // Checkboxes/radios validate on change
+          input.addEventListener('change', () => FormValidator.validateField(input));
+        } else {
+          // Text inputs, selects, textareas validate on blur
+          input.addEventListener('blur', () => FormValidator.validateField(input));
+          // Re-validate on input if already validated (live feedback)
+          input.addEventListener('input', debounce(() => {
+            if (input.classList.contains('is-invalid') || input.classList.contains('is-valid')) {
+              FormValidator.validateField(input);
+            }
+          }, 400));
+          // Selects also validate on change immediately
+          if (input.tagName.toLowerCase() === 'select') {
+            input.addEventListener('change', () => FormValidator.validateField(input));
           }
-        }, 500));
+        }
       });
 
       // Handle form submission
       this.form.addEventListener('submit', (e) => this.handleSubmit(e));
 
-      // Show first step
-      this.goToStep(1);
+      // Determine starting step: if server-side returned errors, navigate to first error step
+      const hasServerErrors = this.form.dataset.hasErrors === 'true';
+      if (hasServerErrors) {
+        // Map field names to their wizard step number
+        const stepFieldMap = {
+          fname: 1, lname: 1, email: 1, phone: 1,
+          selectSize: 2, industry: 2,
+          selectService: 3, selectBudget: 3, comment: 3, consent: 3
+        };
+        let startStep = 1;
+        try {
+          const errorFields = JSON.parse(this.form.dataset.fieldErrors || '[]');
+          for (const field of errorFields) {
+            const step = stepFieldMap[field];
+            if (step) { startStep = step; break; }
+          }
+        } catch (e) { /* ignore parse errors */ }
+        this.goToStep(startStep);
+        // Ensure inline error messages are visible in the current step
+        this.steps[startStep - 1].querySelectorAll('.invalid-feedback').forEach(fb => {
+          if (fb.textContent.trim()) {
+            fb.style.display = 'block';
+          }
+        });
+      } else {
+        // Show first step (fresh form load)
+        this.goToStep(1);
+      }
     }
 
     validateStep(stepNumber) {
       const step = this.steps[stepNumber - 1];
+      // Include checkboxes with required attribute in validation
       const inputs = step.querySelectorAll('input[required], select[required], textarea[required]');
       let valid = true;
 
@@ -527,6 +676,24 @@
         }
       });
 
+      return valid;
+    }
+
+    validateAllSteps() {
+      let valid = true;
+      for (let i = 1; i <= this.totalSteps; i++) {
+        if (!this.validateStep(i)) {
+          valid = false;
+        }
+      }
+      // Validate the consent checkbox here so it is always evaluated alongside
+      // every other required field.  This ensures the error order is consistent
+      // regardless of which step the user is on when they click Submit.
+      const consentCheckbox = this.form.querySelector('#quote-consent');
+      if (consentCheckbox && !consentCheckbox.checked) {
+        FormValidator.setInvalid(consentCheckbox, 'You must agree to the Privacy Policy to submit this form.');
+        valid = false;
+      }
       return valid;
     }
 
@@ -581,18 +748,43 @@
     handleSubmit(e) {
       e.preventDefault();
 
-      if (!this.validateStep(this.currentStep)) {
-        Toast.error('Please fill in all required fields correctly.');
+      // Validate ALL steps before submitting to catch any missed fields
+      const allValid = this.validateAllSteps();
+
+      if (!allValid) {
+        // Find the first step with an error and navigate to it
+        for (let i = 1; i <= this.totalSteps; i++) {
+          const step = this.steps[i - 1];
+          if (step.querySelector('.is-invalid')) {
+            this.goToStep(i);
+            Toast.error('Please fill in all required fields correctly before submitting.');
+            // Focus the first invalid field in that step
+            const firstInvalid = step.querySelector('.is-invalid');
+            if (firstInvalid) firstInvalid.focus();
+            return;
+          }
+        }
+        Toast.error('Please fill in all required fields correctly before submitting.');
         return;
       }
 
       const submitBtn = this.form.querySelector('.btn-submit');
-      submitBtn.classList.add('loading');
-      submitBtn.disabled = true;
+      const btnText = submitBtn ? submitBtn.querySelector('.btn-text') : null;
+      const btnSpinner = submitBtn ? submitBtn.querySelector('.btn-spinner') : null;
 
-      // Track conversion before form submission
-      if (typeof trackConversion === 'function') {
-        trackConversion('quote_form_submit', { form_name: 'quote_form' });
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        if (btnText) btnText.style.display = 'none';
+        if (btnSpinner) btnSpinner.style.display = 'inline-flex';
+      }
+
+      // Track conversion before form submission (non-blocking; errors must not prevent submit)
+      try {
+        if (typeof trackConversion === 'function') {
+          trackConversion('quote_form_submit', { form_name: 'quote_form' });
+        }
+      } catch (trackErr) {
+        console.warn('Conversion tracking failed:', trackErr);
       }
 
       // Allow normal form submission (non-AJAX for quote form)
@@ -1168,12 +1360,17 @@
       }
       this._previousActive = document.activeElement;
       this.modal.style.display = 'flex';
-      // setup focus trap
+      // setup focus trap — remove any previous handler before adding a new one
+      // to prevent accumulating duplicate listeners across multiple modal opens.
+      if (this._trapHandler) {
+        document.removeEventListener('keydown', this._trapHandler);
+        this._trapHandler = null;
+      }
       setTimeout(() => {
         const focusable = this.modal.querySelectorAll(this._focusableElementsString);
         if (focusable.length) {
           this._firstFocusable = focusable[0];
-          this._lastFocusable = focusable[focusable.length -1];
+          this._lastFocusable = focusable[focusable.length - 1];
           this._firstFocusable.focus();
         }
         document.addEventListener('keydown', this._trapHandler = (e) => this._handleTrap(e));
@@ -2003,7 +2200,6 @@
     });
 
     container.innerHTML = html;
-    markLazyImagesLoaded(container);
     markLazyImagesLoaded(container);
 
     // Re-initialize AOS if it exists

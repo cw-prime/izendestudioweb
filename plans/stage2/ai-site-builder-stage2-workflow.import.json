@@ -1,0 +1,365 @@
+{
+  "name": "Izende AI Website Builder - Stage 2 Preview Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "schedule_poll_pending_leads",
+      "name": "Every 5 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -820,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://ocgearsjyqeoscjvcdrz.supabase.co/rest/v1/site_builder_leads?select=*&status=eq.pending&order=created_at.asc&limit=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $vars.SUPABASE_SERVICE_ROLE_KEY || 'PASTE_SUPABASE_SERVICE_ROLE_KEY' }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + ($vars.SUPABASE_SERVICE_ROLE_KEY || 'PASTE_SUPABASE_SERVICE_ROLE_KEY') }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "poll_supabase_pending_lead",
+      "name": "Poll pending lead from Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -600,
+        0
+      ],
+      "notesInFlow": true,
+      "notes": "Uses Supabase PostgREST. Replace placeholders with n8n variables/credentials before activation. Do not use $env in this n8n Docker setup."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has_pending_lead",
+              "leftValue": "={{ Array.isArray($json) ? $json.length : 0 }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "has_pending_lead_filter",
+      "name": "Has pending lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -380,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = Array.isArray($json) ? $json : [$json];\nconst lead = rows[0];\nif (!lead || !lead.id) return [];\nconst systemPrompt = `You are a senior web designer at a professional web studio. You build a complete, production-ready, single-page marketing website for a small business from a short brief.\n\nOutput rules (CRITICAL):\n- Return ONE complete HTML document and NOTHING else. Start at <!DOCTYPE html> and end at </html>. No markdown code fences, no explanation, no preamble.\n- Everything inline in that one file: a single <style> block in <head>. No external build step, no JS frameworks. A small amount of vanilla JS is fine but the site must work with JS disabled.\n- You MAY use Google Fonts via <link> and may use CSS only. No other external assets except Unsplash/picsum-style placeholder image URLs if you need photography.\n- Mobile-first and fully responsive. Must look great at 375px and 1280px.\n- Accessible: semantic landmarks, alt text, sufficient color contrast, focus states.\n\nRequired sections, in order:\n1. Sticky header with the business name/logo text + anchor nav.\n2. Hero: headline, one-sentence subhead, primary call-to-action button.\n3. About: 2-3 short paragraphs in the business's voice.\n4. Services: 3-6 cards. Include prices ONLY if the brief implies them; otherwise describe the offering without inventing prices.\n5. A trust/why-us strip.\n6. Contact: business hours if implied, tel link if phone present, mailto link, and simple contact form action=\"#\". Embed a Google Maps iframe ONLY if a real address is given.\n7. Footer with copyright + business name.\n\nTheming contract (REQUIRED): define ALL colors and fonts as CSS custom properties on :root using EXACTLY these names and reference them everywhere: --c-bg, --c-surface, --c-text, --c-heading, --c-muted, --c-border, --c-accent, --c-accent-contrast, --font-heading, --font-body, --radius.\n\nDesign rules:\n- Match requested style/vibe in palette, type, spacing, imagery mood.\n- Avoid generic AI slop: no purple SaaS gradients, no emoji icon cards, no cookie-cutter equal-card page.\n- Use real, specific copy derived from the brief.\n- Give it a polished local-business feel that could sell hosting.`;\nconst userPrompt = `Business name: ${lead.business_name || ''}\nWhat the business does: ${lead.business_description || ''}\nStyle / vibe: ${lead.style_vibe || 'choose the most fitting style for this business'}\nContact email: ${lead.contact_email || ''}\nContact phone: ${lead.contact_phone || ''}\n\nBuild the complete single-file website now. Output only the HTML.`;\nreturn [{ json: { lead, anthropicPayload: { model: 'claude-sonnet-4-6', max_tokens: 16000, system: systemPrompt, messages: [{ role: 'user', content: userPrompt }] } } }];"
+      },
+      "id": "prepare_anthropic_payload",
+      "name": "Prepare Anthropic payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -140,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $vars.ANTHROPIC_API_KEY || 'PASTE_ANTHROPIC_API_KEY' }}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.anthropicPayload) }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "generate_html_anthropic",
+      "name": "Generate HTML with Anthropic",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        100,
+        -100
+      ],
+      "notesInFlow": true,
+      "notes": "Needs ANTHROPIC_API_KEY as n8n variable/credential. n8n env access is blocked in this Docker setup; do not use $env."
+    },
+    {
+      "parameters": {
+        "jsCode": "const lead = $('Prepare Anthropic payload').first().json.lead;\nconst content = $json.content || [];\nlet html = '';\nif (Array.isArray(content)) {\n  html = content.map(part => part.text || '').join('');\n} else if (typeof content === 'string') {\n  html = content;\n}\nhtml = html.replace(/^\\s*```[a-zA-Z]*\\s*\\n/, '').replace(/\\n```\\s*$/, '').trim();\nif (!html.includes('<html') || !html.toLowerCase().startsWith('<!doctype html')) {\n  throw new Error('Anthropic output did not look like a complete HTML document');\n}\nreturn [{ json: { lead, html } }];"
+      },
+      "id": "extract_and_validate_html",
+      "name": "Extract + validate HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        340,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://izendestudioweb.com/api/preview-deploy.php",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Deploy-Token",
+              "value": "={{ $vars.PREVIEW_DEPLOY_SECRET || 'PASTE_PREVIEW_DEPLOY_SECRET' }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ lead_id: $json.lead.id, html: $json.html }) }}",
+        "options": {}
+      },
+      "id": "deploy_preview",
+      "name": "Deploy preview to Izende",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://ocgearsjyqeoscjvcdrz.supabase.co/rest/v1/site_builder_leads?id=eq.' + $('Extract + validate HTML').first().json.lead.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $vars.SUPABASE_SERVICE_ROLE_KEY || 'PASTE_SUPABASE_SERVICE_ROLE_KEY' }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + ($vars.SUPABASE_SERVICE_ROLE_KEY || 'PASTE_SUPABASE_SERVICE_ROLE_KEY') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ status: 'preview_live', preview_url: $json.preview_url, generated_html: $('Extract + validate HTML').first().json.html }) }}",
+        "options": {}
+      },
+      "id": "update_supabase_preview_live",
+      "name": "Update lead: preview live",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        820,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "support@izendestudioweb.com",
+        "toEmail": "={{ $('Extract + validate HTML').first().json.lead.contact_email }}",
+        "subject": "={{ 'Your free website preview is ready: ' + $('Extract + validate HTML').first().json.lead.business_name }}",
+        "text": "={{ 'Your AI-built preview is ready: ' + $('Deploy preview to Izende').first().json.preview_url + '\\n\\nClaim this site when you are ready and Izende Studio Web will host it for you.' }}",
+        "html": "={{ '<p>Your AI-built website preview is ready:</p><p><a href=\"' + $('Deploy preview to Izende').first().json.preview_url + '\">View your preview</a></p><p>When you are ready, click <strong>Claim this site</strong> and Izende Studio Web will host it for you.</p>' }}",
+        "options": {}
+      },
+      "id": "email_preview_link",
+      "name": "Email preview link",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1060,
+        -100
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "Lf3xmbkVez9LDNSJ",
+          "name": "Brevo SMTP"
+        }
+      },
+      "notesInFlow": true,
+      "notes": "Credential name from handoff: Lf3xmbkVez9LDNSJ / Brevo SMTP. Verify credential id/name in n8n before activation."
+    },
+    {
+      "parameters": {
+        "content": "# Izende AI Website Builder — Stage 2\n\nPolls Supabase for pending leads, generates a single-file HTML preview with Anthropic, deploys it through izendestudioweb.com/api/preview-deploy.php, updates Supabase, and emails the prospect.\n\nBefore activation, set n8n variables/credentials for SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY, PREVIEW_DEPLOY_SECRET, and verify Brevo SMTP credential."
+      },
+      "id": "workflow_note",
+      "name": "Workflow notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -820,
+        -300
+      ]
+    }
+  ],
+  "connections": {
+    "Every 5 minutes": {
+      "main": [
+        [
+          {
+            "node": "Poll pending lead from Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll pending lead from Supabase": {
+      "main": [
+        [
+          {
+            "node": "Has pending lead?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has pending lead?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Anthropic payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Prepare Anthropic payload": {
+      "main": [
+        [
+          {
+            "node": "Generate HTML with Anthropic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate HTML with Anthropic": {
+      "main": [
+        [
+          {
+            "node": "Extract + validate HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract + validate HTML": {
+      "main": [
+        [
+          {
+            "node": "Deploy preview to Izende",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deploy preview to Izende": {
+      "main": [
+        [
+          {
+            "node": "Update lead: preview live",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update lead: preview live": {
+      "main": [
+        [
+          {
+            "node": "Email preview link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "tags": []
+}
