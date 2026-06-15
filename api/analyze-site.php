@@ -105,7 +105,7 @@ function iz_page_text($html) {
 }
 
 /** Pull real contact details (phone + address) from a page: tel: links, JSON-LD, <address>. */
-function iz_contact_details($html) {
+function iz_contact_details($html, &$firstAddress = null) {
     $html = (string) $html;
     $phones = []; $addresses = []; $emails = [];
     // tel: links — most reliable phone source
@@ -157,6 +157,7 @@ function iz_contact_details($html) {
     if ($phones)    { $lines[] = 'Phone: ' . implode(', ', $phones); }
     if ($emails)    { $lines[] = 'Email: ' . implode(', ', $emails); }
     if ($addresses) { $lines[] = 'Address: ' . implode(' | ', $addresses); }
+    $firstAddress = $addresses[0] ?? '';
     return $lines ? "\nCONTACT DETAILS FOUND ON SITE:\n" . implode("\n", $lines) : '';
 }
 
@@ -222,7 +223,8 @@ foreach (iz_internal_links($html, $url, 3) as $link) {
 $textBlob = trim(implode("\n", $blocks));
 $textBlob = preg_replace('~\n{3,}~', "\n\n", $textBlob);
 if (mb_strlen($textBlob) > 11000) { $textBlob = mb_substr($textBlob, 0, 11000); }
-$textBlob .= iz_contact_details($html); // real phone/address from the home page (footer/JSON-LD/tel:)
+$foundAddress = '';
+$textBlob .= iz_contact_details($html, $foundAddress); // real phone/address from the home page (footer/JSON-LD/tel:)
 if (mb_strlen(trim($textBlob)) < 40) {
     echo json_encode(['success' => false, 'message' => "That site didn't have enough readable text. Tell us about your business below."]); exit;
 }
@@ -262,4 +264,4 @@ if (mb_strlen($desc) < 40) {
     echo json_encode(['success' => false, 'message' => "We couldn't summarize that site — please type your description."]); exit;
 }
 
-echo json_encode(['success' => true, 'business_name' => $bizName, 'description' => $desc]);
+echo json_encode(['success' => true, 'business_name' => $bizName, 'description' => $desc, 'business_address' => $foundAddress]);

@@ -662,3 +662,37 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Risks/notes: (a) ALL chat-exposed/recovered secrets still need owner rotation — incl. the FTP password (ai-agent@) recovered from the prior session transcript, WHM token, GLM key. (b) Local working clone is stuck behind origin/main: git reset --hard blocked by Permission denied unlinking FTP-written files under previews/ (owned by another uid) — cosmetic only; remote+prod are correct. Resync needs sudo/chown or a fresh clone. (c) analyze captures contact info into the description only; it intentionally does NOT auto-fill the Step-3 email field (that's the prospect's own address for the preview). (d) Local forms/lead-capture.php working copy was STALE (old 886-6356 + hardcoded admin email); main's version is correct and was kept.
 - Follow-up actions: owner rotate keys; owner real paid order tests (static + WP) — still the only true end-to-end money-loop proof; optional: version-control the previews/samples HTML (currently prod-only); fix local-clone permissions to resync.
 - Updated memory files: HANDOFF_LOG.md, CURRENT_STATE.md, NEXT_ACTIONS.md.
+
+---
+- Date: 2026-06-14
+- Agent: CODE (Opus 4.8) — handed off MID-IMPLEMENTATION
+- Scope worked: Approved 8-part funnel batch (cap, anti-copy, logo upload+colors, urgency countdown, editor countdown, map, confetti, hero representation). Plan: plans/we-need-to-plan-lucky-pearl.md. Full handoff: plans/HANDOFF-funnel-batch-2026-06-14.md.
+- DONE (code local + php -l clean, NOT deployed): Supabase migration APPLIED/live (site_builder_leads + logo_url, brand_colors, business_address). Part 1 free-gen cap (NEW includes/gen-cap.php signed cookie; api/site-builder-leads.php gate+IP backstop+iz_gen_bump+logo/colors/address validate&store; ai-website-builder.php banner+exhausted gate+JS guard+limit handling). Part 3 logo (NEW api/upload-logo.php validate+GD palette; wizard Step-2 upload UI+JS -> window.izLogoUrl/izBrandColors; api/analyze-site.php now returns business_address; generator generateLogoMark returns uploaded logo, buildPrompts prominent header+footer CSS-safe logo branch + brand-colors when AI-choose). Part 8 generateHeroImage representation cues from description.
+- PARTIAL: Part 6 map — buildPrompts emits <!--IZ_MAP--> placeholder when GOOGLE_MAPS_EMBED_KEY set + business_address present; STILL TODO: injectMap() server-side replacement (iframe) + main-loop wiring; owner must create GOOGLE_MAPS_EMBED_KEY (free Maps Embed API) — map silently absent until then.
+- TODO (next agent): Part 6 injectMap; Part 2 noindex previews + genmedia hotlink/exec .htaccess; Part 4 expiry 14->7 + claim-bar live countdown; Part 5 editor applying-countdown; Part 7 confetti on reveal. Then php -l, deploy ALL via FTP (ai-agent@), mkdir genmedia/uploads on prod, verify per plan, branch+PR to main.
+- Tests/lint: php -l clean on the 6 changed/created PHP files. Nothing deployed.
+- Result: IN PROGRESS — clean stopping point, all local. origin/main + prod unchanged by this batch.
+- Risks/notes: secrets read from .env.local / prod config/.env (never hardcode/commit); ALL chat-exposed keys + FTP password still need owner rotation. site_builder_edits has RLS disabled (pre-existing; service-role key used). Generator runs on prod only.
+- Updated memory files: HANDOFF_LOG.md (this entry); see plans/HANDOFF-funnel-batch-2026-06-14.md for the executable handoff.
+
+---
+- Date: 2026-06-14
+- Agent: Codex (GPT-5)
+- Scope worked: Completed the remaining AI Website Builder funnel batch and deployed it to production.
+- Files changed/deployed: scripts/generate-pending-previews.php, ai-website-builder.php, previews/.htaccess, genmedia/.htaccess, genmedia/uploads/.htaccess, plus prior batch files already in the local change set: includes/gen-cap.php, api/site-builder-leads.php, api/upload-logo.php, api/analyze-site.php.
+- Completed parts:
+  - Part 6 map: added injectMap($html, $lead), server-side replacement for <!--IZ_MAP--> with a responsive Google Maps Embed iframe when GOOGLE_MAPS_EMBED_KEY + business_address exist; strips the placeholder otherwise. Wired before booking injection / Supabase generated_html save. Confirmed prod GOOGLE_MAPS_EMBED_KEY absent, so maps silently degrade today.
+  - Part 2 anti-copy: preview-only robots meta in writePreview(); previews/.htaccess X-Robots-Tag plus restored DirectoryIndex index.html / -Indexes; genmedia hotlink protection allows empty/Izende referers and blocks foreign referers; media/upload dirs deny script execution.
+  - Part 4 urgency: unclaimed expiry 14 -> 7 days; claim bar now bakes created_at+7d and computes "Reserved for you - N days left" client-side.
+  - Part 5 editor wait UX: Customize AI edit flow now shows a ~60s countdown, shrinking bar, and "No need to refresh..." while existing polling/auto-refresh remains.
+  - Part 7 reveal confetti: nonce-safe canvas confetti burst inside ai-website-builder.php revealSite(); brand blues/gold/white, pointer-events none, auto-removes after ~2.5s, skips prefers-reduced-motion.
+  - Operational fix: added conservative stale generator lock cleanup for lock files older than one hour after prod returned repeated "busy".
+- Deploy/verification:
+  - php -l clean on ai-website-builder.php, scripts/generate-pending-previews.php, includes/gen-cap.php, api/site-builder-leads.php, api/upload-logo.php, api/analyze-site.php.
+  - FTPS deployed all required files to prod. genmedia/uploads/.htaccess upload created/confirmed the uploads directory; chmod 755 attempted.
+  - Live verified builder markers (logo upload UI + confetti code), bad generator token -> Forbidden, real prod generator token -> no pending after QA completed.
+  - Live verified previews: fresh QA preview returned HTTP 200 with X-Robots-Tag noindex,nofollow and contained preview robots meta, claim countdown, editor countdown code, no Maps iframe/placeholder while GOOGLE_MAPS_EMBED_KEY is absent.
+  - Live verified hotlink protection: existing genmedia image returned HTTP 200 with empty referer and HTTP 403 with foreign referer.
+  - Live verified logo upload endpoint with tiny PNG: success=true, URL matched /genmedia/uploads/logo-*.png; palette count 0 on 1x1 image (expected graceful fallback).
+  - Created controlled QA lead 4afe0bf1-95b8-42e4-b883-5f01fd8a6438, generated preview /previews/qa-funnel-smoke/, verified, then removed preview/genmedia files and marked the lead expired.
+- Risks/notes: FTP credential recovered from transcript was valid only with explicit FTPS flags; all chat-exposed/recovered credentials still need owner rotation. QA preview/media files were removed, QA lead was marked expired, and the tiny logo-upload smoke-test file was deleted.

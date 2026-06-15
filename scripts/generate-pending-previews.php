@@ -62,6 +62,10 @@ if (!$isCli) {
 
 // ---- Single-instance lock ----------------------------------------------------
 $lockFile = sys_get_temp_dir() . '/site-builder-generate.lock';
+if (is_file($lockFile) && (time() - (int) @filemtime($lockFile)) > 3600) {
+    @unlink($lockFile);
+    cronLog('Removed stale generator lock');
+}
 $lock = fopen($lockFile, 'c');
 if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
     cronLog('Another instance is running — exiting');
@@ -245,7 +249,25 @@ PROMPT;
     }
 
     if (!empty($logoUrl)) {
-        $user .= "\nLOGO MARK (a custom icon was generated for this business — use THIS EXACT URL as the small logo icon in the header, paired with the business name as a text wordmark beside it; the image is icon-only, do NOT overlay any letters on it). The icon sits on a solid WHITE background, so seat it inside a small rounded-corner tile/badge (about 40-44px, border-radius, object-fit:contain, optional subtle shadow or thin border) so it reads as an intentional logo on any header color: " . $logoUrl . "\n";
+        if (strpos($logoUrl, '/genmedia/uploads/') !== false) {
+            // Customer's OWN logo — feature it prominently, and size it defensively so any shape/resolution fits.
+            $user .= "\nCUSTOMER LOGO (this is the customer's REAL brand logo — feature it prominently). Use THIS EXACT URL in the header as the primary logo, and also echo it in the footer. Display it FREE-STANDING (do NOT box it in a small tile, do NOT crop, stretch, or overlay text). Apply this exact CSS so any shape/resolution fits without breaking the layout: height auto, max-height:clamp(36px,5vw,52px), width:auto, object-fit:contain (a wide wordmark renders wide-but-short; a square icon stays square). Give the header enough padding that the logo has breathing room. URL: " . $logoUrl . "\n";
+        } else {
+            $user .= "\nLOGO MARK (a custom icon was generated for this business — use THIS EXACT URL as the small logo icon in the header, paired with the business name as a text wordmark beside it; the image is icon-only, do NOT overlay any letters on it). The icon sits on a solid WHITE background, so seat it inside a small rounded-corner tile/badge (about 40-44px, border-radius, object-fit:contain, optional subtle shadow or thin border) so it reads as an intentional logo on any header color: " . $logoUrl . "\n";
+        }
+    }
+
+    // Brand colors from the customer's uploaded logo — only steer the palette when they let the AI choose the style.
+    $autoVibe = empty($lead['style_vibe']);
+    $bc = [];
+    if (!empty($lead['brand_colors'])) { $decoded = json_decode((string) $lead['brand_colors'], true); if (is_array($decoded)) { $bc = $decoded; } }
+    if ($autoVibe && $bc) {
+        $user .= "\nBRAND COLORS (pulled from the customer's logo — build the palette around these; set --c-accent and --c-accent-2 from them and choose harmonious supporting colors so the whole site feels on-brand): " . implode(', ', $bc) . "\n";
+    }
+
+    // Embedded map placeholder — only when a Maps key is configured AND we have an address (location business).
+    if (trim((string) envOr('GOOGLE_MAPS_EMBED_KEY', '')) !== '' && !empty($lead['business_address'])) {
+        $user .= "\nMAP: This business has a physical address. In the contact section, place the exact placeholder comment <!--IZ_MAP--> on its own line where an embedded map should appear (we insert the real map there). Put it after the address text.\n";
     }
 
     $user .= "\nONLINE BOOKING: If this business takes appointments or reservations (salon, spa, massage, clinic, dentist, barber, trades/home-services, tutor, coach, consultant, photographer, restaurant, etc.), make the Contact section an 'Online Booking' section with id=\"book\" and point the hero's primary call-to-action button at #book. Inside it, build a styled form with EXACTLY this contract (match the site's theme): <form id=\"izBookingForm\"> containing inputs with these exact name attributes — name, email, phone, service (a <select> listing this business's actual services), preferred_date (input type=\"date\"), preferred_time (input type=\"time\"), message (textarea) — plus a visually-hidden honeypot <input name=\"website\"> (off-screen, tabindex=-1, autocomplete=off) and a submit button. Do NOT set a form action or method and do NOT write any submit JavaScript — leave the form as-is; it is wired up automatically. If this is NOT an appointment business, use a normal contact form instead (no izBookingForm id).\n";
@@ -434,6 +456,9 @@ function generateHeroImage($lead, $slug, $isCli) {
         . ' keep it visually calm with reasonably even tones, avoid a single hard-edged focal point dead-center,'
         . ' and do NOT leave a large flat empty panel on one side (the layout adds its own dark gradient scrim for legibility).'
         . ' Natural, flattering light; authentic, editorial, professional quality.'
+        . ' Depict authentic, respectful people consistent with the clientele and community this business describes serving —'
+        . ' reflect any cues in the description about the people served (e.g. ethnicity, age group, families, profession).'
+        . ' If the description gives no such cues, show people naturally relevant to the service. Real and candid, never stocky.'
         . ' Absolutely NO text, NO words, NO logos, NO watermarks, and NO user-interface elements in the image.';
     $url = geminiImageToFile($prompt, $slug, 'hero');
     if ($url !== '' && !$isCli) { echo " [hero image ok] "; flush(); }
@@ -442,6 +467,12 @@ function generateHeroImage($lead, $slug, $isCli) {
 
 /** Premium icon-only logo mark (no text — letters in raster logos misrender). */
 function generateLogoMark($lead, $slug, $isCli) {
+    // Customer uploaded their own logo? Use it as-is (skip AI generation).
+    $uploaded = trim((string) ($lead['logo_url'] ?? ''));
+    if ($uploaded !== '' && preg_match('~^https://izendestudioweb\.com/genmedia/uploads/[\w-]+\.(?:png|jpe?g|webp|gif)$~i', $uploaded)) {
+        if (!$isCli) { echo " [using uploaded logo] "; flush(); }
+        return $uploaded;
+    }
     $desc = trim((string) ($lead['business_description'] ?? ''));
     $vibe = trim((string) ($lead['style_vibe'] ?? ''));
     $prompt = 'Design a polished, PREMIUM logo ICON (emblem/symbol only) for "'
@@ -521,13 +552,44 @@ JS;
     return $html . $js;
 }
 
-function injectClaimBar($html, $slug = '') {
+function injectMap($html, $lead) {
+    $placeholder = '<!--IZ_MAP-->';
+    $key = trim((string) envOr('GOOGLE_MAPS_EMBED_KEY', ''));
+    $address = trim((string) ($lead['business_address'] ?? ''));
+    if ($key === '' || $address === '') {
+        return str_replace($placeholder, '', $html);
+    }
+
+    $src = 'https://www.google.com/maps/embed/v1/place?key=' . rawurlencode($key) . '&q=' . rawurlencode($address);
+    $map = '<div class="iz-map-embed" style="position:relative;aspect-ratio:16/7;max-width:100%;overflow:hidden;border-radius:16px;background:#e2e8f0">'
+        . '<iframe src="' . htmlspecialchars($src, ENT_QUOTES) . '" loading="lazy" title="Map" referrerpolicy="no-referrer-when-downgrade" '
+        . 'style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>';
+    return str_replace($placeholder, $map, $html);
+}
+
+function injectPreviewRobotsMeta($html) {
+    $meta = '<meta name="robots" content="noindex,nofollow">';
+    if (stripos($html, 'name="robots"') !== false || stripos($html, "name='robots'") !== false) {
+        return $html;
+    }
+    if (preg_match('/<head\b[^>]*>/i', $html, $m, PREG_OFFSET_CAPTURE)) {
+        $pos = $m[0][1] + strlen($m[0][0]);
+        return substr($html, 0, $pos) . "\n  " . $meta . substr($html, $pos);
+    }
+    return $meta . "\n" . $html;
+}
+
+function injectClaimBar($html, $slug = '', $createdAt = '') {
+    $createdTs = $createdAt !== '' ? strtotime((string) $createdAt) : false;
+    if (!$createdTs) { $createdTs = time(); }
+    $expiryMs = (int) (($createdTs + 7 * 86400) * 1000);
     $bar = '<div id="izende-claim-bar" style="position:fixed;top:0;left:0;right:0;z-index:2147483647;'
         . 'background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:space-between;'
         . 'gap:10px;flex-wrap:wrap;padding:9px 16px;font-family:system-ui,-apple-system,\'Segoe UI\',sans-serif;'
         . 'font-size:14px;line-height:1.3;box-shadow:0 2px 14px rgba(0,0,0,.28)">'
         . '<span style="display:flex;align-items:center;gap:8px">✨ <strong>Built for you by Izende Studio Web</strong>'
         . '<span style="opacity:.8"> — love it? Make it yours.</span></span>'
+        . '<span id="izende-claim-countdown" style="margin-left:auto;opacity:.92;font-weight:700;white-space:nowrap">Reserved for you — 7 days left</span>'
         . '<a href="https://izendestudioweb.com/claim-site.php?slug=' . rawurlencode($slug) . '" class="izende-claim-btn" '
         . 'style="background:#2563eb;color:#fff;text-decoration:none;font-weight:700;padding:9px 22px;'
         . 'border-radius:999px;white-space:nowrap">Claim this site →</a></div>'
@@ -537,7 +599,11 @@ function injectClaimBar($html, $slug = '') {
         . '.izende-claim-btn:hover{background:#1d4ed8!important;transform:scale(1.04)}'
         . '@keyframes izClaimPulse{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.7),0 0 12px rgba(56,189,248,.5)}'
         . '50%{box-shadow:0 0 0 10px rgba(37,99,235,0),0 0 26px rgba(56,189,248,.95)}}'
-        . '@media(prefers-reduced-motion:reduce){.izende-claim-btn{animation:none}}</style>';
+        . '@media(max-width:680px){#izende-claim-countdown{margin-left:0;font-size:13px;flex-basis:100%}}'
+        . '@media(prefers-reduced-motion:reduce){.izende-claim-btn{animation:none}}</style>'
+        . '<script>(function(){var el=document.getElementById("izende-claim-countdown");if(!el)return;var exp=' . $expiryMs . ';'
+        . 'function tick(){var left=Math.max(0,exp-Date.now());var days=Math.max(0,Math.ceil(left/86400000));'
+        . 'el.textContent="Reserved for you — "+days+" day"+(days===1?"":"s")+" left";}tick();})();</script>';
     if (stripos($html, '</body>') !== false) {
         return preg_replace('/<\/body>/i', $bar . '</body>', $html, 1);
     }
@@ -557,8 +623,10 @@ function injectEditorWidget($html, $slug, $leadId = '') {
 #izEditPanel .iz-h{font-weight:700;color:#0f172a;margin-bottom:6px}
 #izEditPanel .iz-sub{color:#475569}
 .izspin{display:inline-block;width:14px;height:14px;border:2px solid #c7d2fe;border-top-color:#2563eb;border-radius:50%;animation:izspin .7s linear infinite;vertical-align:-2px;margin-right:7px}
+.izwaitbar{height:7px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin:9px 0 7px}
+.izwaitbar span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#2563eb,#38bdf8);transition:width 1s linear}
 @keyframes izspin{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){.izspin{animation:none}}</style>
+@media(prefers-reduced-motion:reduce){.izspin{animation:none}.izwaitbar span{transition:none}}</style>
 <div id="izEdit" style="position:fixed;right:16px;bottom:16px;z-index:2147483646;font-family:system-ui,-apple-system,'Segoe UI',sans-serif">
 <button id="izEditBtn" aria-label="Customize this site" style="display:flex;align-items:center;gap:7px;background:#0f172a;color:#fff;border:0;border-radius:999px;padding:11px 18px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.28)">🎨 Customize</button>
 <div id="izEditPanel" style="display:none;position:absolute;right:0;bottom:54px;width:290px;max-height:80vh;overflow:auto;background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.25);padding:18px">
@@ -593,14 +661,16 @@ var cw=document.getElementById('izColors');COLORS.forEach(function(c){var b=docu
 var fw=document.getElementById('izFonts');FONTS.forEach(function(f){var b=document.createElement('button');b.textContent=f.n;b.style.cssText='text-align:left;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:9px 11px;cursor:pointer;font-weight:600;font-size:14px;color:#334155';b.onclick=function(){applyFont(f);st.font=f.n;save(st);};fw.appendChild(b);});
 document.getElementById('izEditBtn').onclick=function(){var p=document.getElementById('izEditPanel');p.style.display=p.style.display=='none'?'block':'none';};
 document.getElementById('izReset').onclick=function(){['--c-accent','--c-accent-2','--c-accent-contrast','--font-heading','--font-body'].forEach(function(v){R.style.removeProperty(v)});try{localStorage.removeItem(K)}catch(e){}st={};};
-var send=document.getElementById('izSend'),ask=document.getElementById('izAsk'),msg=document.getElementById('izMsg'),lbl='Send to AI';
+var send=document.getElementById('izSend'),ask=document.getElementById('izAsk'),msg=document.getElementById('izMsg'),lbl='Send to AI',waitTimer=null,waitEnd=0;
 if(!LEAD){document.getElementById('izAskWrap').style.display='none';}
 function setMsg(t,c){msg.style.color=c||'#334155';msg.innerHTML=t;}
-function reset(){send.disabled=false;send.textContent=lbl;}
+function stopWait(){if(waitTimer){clearInterval(waitTimer);waitTimer=null;}}
+function reset(){stopWait();send.disabled=false;send.textContent=lbl;}
+function startWait(freeLeft){stopWait();waitEnd=Date.now()+60000;function draw(){var left=Math.max(0,Math.ceil((waitEnd-Date.now())/1000));var pct=Math.max(0,Math.min(100,(left/60)*100));setMsg('<span class="izspin"></span>Building your change — ready in ~'+left+'s…'+(freeLeft!=null?' <span style="color:#64748b">('+freeLeft+' free left)</span>':'')+'<div class="izwaitbar" aria-hidden="true"><span style="width:'+pct+'%"></span></div><div style="color:#64748b">No need to refresh — we will refresh for you when it is done.</div>','#334155');}draw();waitTimer=setInterval(draw,1000);}
 function poll(eid,tries){
  if(tries<=0){setMsg('Still working — refresh the page in a moment to see your change.','#475569');reset();return;}
  fetch(EP+'?eid='+encodeURIComponent(eid)+'&lead_id='+encodeURIComponent(LEAD)+'&token='+encodeURIComponent(TOKEN)).then(function(r){return r.json();}).then(function(s){
-  if(s&&s.status==='applied'){setMsg('✓ Done! Refreshing your preview…','#15803d');setTimeout(function(){location.reload();},900);}
+  if(s&&s.status==='applied'){stopWait();setMsg('✓ Done! Refreshing your preview…','#15803d');setTimeout(function(){location.reload();},900);}
   else if(s&&s.status==='failed'){setMsg('That one didn’t take — try rewording the change.','#b91c1c');reset();}
   else{setTimeout(function(){poll(eid,tries-1);},7000);}
  }).catch(function(){setTimeout(function(){poll(eid,tries-1);},7000);});
@@ -608,7 +678,7 @@ function poll(eid,tries){
 send&&(send.onclick=function(){var q=(ask.value||'').trim();if(q.length<3){setMsg('Tell us the change in a sentence.','#b91c1c');return;}
 send.disabled=true;send.textContent='Sending…';setMsg('<span class="izspin"></span>Sending your request…','#334155');
 fetch(EP,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lead_id:LEAD,token:TOKEN,request_text:q})}).then(function(r){return r.json();}).then(function(j){
-if(j.success&&j.edit_id){ask.value='';setMsg('<span class="izspin"></span>Applying your change… this takes about a minute.'+(j.free_left!=null?' <span style="color:#64748b">('+j.free_left+' free left)</span>':''),'#334155');poll(j.edit_id,24);}
+if(j.success&&j.edit_id){ask.value='';startWait(j.free_left);poll(j.edit_id,24);}
 else if(j.success){ask.value='';setMsg('✓ Queued — refresh in about a minute.','#15803d');reset();}
 else if(j.gated){setMsg((j.message||'')+' <a href="'+(j.claim_url||'#')+'" style="color:#2563eb;font-weight:700">Claim now &rarr;</a>','#1d4ed8');reset();}
 else{setMsg(j.message||'Could not queue that.','#b91c1c');reset();}
@@ -622,7 +692,7 @@ JS;
     return $html . $js;
 }
 
-function writePreview($slug, $html, $leadId = '') {
+function writePreview($slug, $html, $leadId = '', $createdAt = '') {
     global $deployRoot, $baseUrl;
     if (!preg_match('/^[a-z0-9][a-z0-9-]{1,70}$/', $slug)) {
         return [null, 'invalid slug'];
@@ -631,7 +701,8 @@ function writePreview($slug, $html, $leadId = '') {
     if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
         return [null, 'mkdir failed: ' . $dir];
     }
-    $fileHtml = injectClaimBar($html, $slug);                    // preview gets the claim bar; stored generated_html stays clean
+    $fileHtml = injectPreviewRobotsMeta($html);                  // preview only; stored generated_html stays indexable
+    $fileHtml = injectClaimBar($fileHtml, $slug, $createdAt);    // preview gets the claim bar; stored generated_html stays clean
     $fileHtml = injectEditorWidget($fileHtml, $slug, $leadId);   // + the "Customize" widget (presets + AI chat), preview only
     $tmp = $dir . '/.index.' . bin2hex(random_bytes(4)) . '.tmp';
     if (@file_put_contents($tmp, $fileHtml, LOCK_EX) === false || !@rename($tmp, $dir . '/index.html')) {
@@ -694,7 +765,7 @@ HTML;
 
 function expireOldPreviews($isCli) {
     global $deployRoot;
-    $maxAge = 14 * 86400;
+    $maxAge = 7 * 86400;
     $now = time();
     foreach (@scandir($deployRoot) ?: [] as $entry) {
         if ($entry === '.' || $entry === '..') { continue; }
@@ -757,9 +828,10 @@ foreach ($leads as $lead) {
         continue;
     }
 
+    $html = injectMap($html, $lead); // replace the placeholder server-side so the Maps key never goes to GLM
     $html = injectBookingScript($html, $id); // wire any booking form to the endpoint (persisted into generated_html)
 
-    list($previewUrl, $werr) = writePreview($slug, $html, $id);
+    list($previewUrl, $werr) = writePreview($slug, $html, $id, $lead['created_at'] ?? '');
     if ($previewUrl === null) {
         cronLog('Write FAILED', ['id' => $id, 'err' => $werr]);
         supabaseRequest('PATCH', '/rest/v1/site_builder_leads?id=eq.' . $id, ['status' => 'failed']);

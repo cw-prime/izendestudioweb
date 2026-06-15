@@ -12,12 +12,16 @@ require_once __DIR__ . '/config/security.php';
 require_once __DIR__ . '/admin/config/database.php';
 require_once __DIR__ . '/includes/SEOHelper.php';
 require_once __DIR__ . '/includes/SpamProtection.php';
+require_once __DIR__ . '/includes/gen-cap.php';
 
 initSecureSession();
 setSecurityHeaders();
 
 $nonce = getCSPNonce();
 $recaptchaSiteKey = getEnv('RECAPTCHA_SITE_KEY', '');
+$genCap = iz_gen_read();          // ['used'=>n,'remaining'=>r]
+$genRemaining = (int) $genCap['remaining'];
+$genExhausted = $genRemaining <= 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -126,6 +130,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     /* reveal */
     .build-reveal{position:fixed;inset:0;z-index:4;display:none;flex-direction:column;background:#0b1220}
     .build-reveal.show{display:flex}
+    .iz-confetti-canvas{position:fixed;inset:0;z-index:1095;pointer-events:none;width:100vw;height:100vh}
     .reveal-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:12px 18px;background:#fff;border-bottom:1px solid #e2e8f0;box-shadow:0 2px 14px rgba(0,0,0,.18)}
     .reveal-bar .rb-msg{font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;font-size:1.02rem}
     .reveal-bar .rb-msg i{color:#2563eb}
@@ -133,7 +138,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     .reveal-frame-wrap{flex:1;position:relative;background:#f8fafc}
     .reveal-frame-wrap iframe{width:100%;height:100%;border:0;display:block;filter:blur(22px);opacity:.4;transition:filter 1.1s ease,opacity 1.1s ease}
     .reveal-frame-wrap iframe.sharp{filter:blur(0);opacity:1}
-    @media (prefers-reduced-motion: reduce){.sk,.build-orb,.build-bar span,.reveal-frame-wrap iframe,.zeno-aura,.zeno,.zeno *,.z-spark{animation:none!important;transition:none!important;filter:none!important;opacity:1!important}.z-spark{opacity:.7!important}}
+    @media (prefers-reduced-motion: reduce){.sk,.build-orb,.build-bar span,.reveal-frame-wrap iframe,.zeno-aura,.zeno,.zeno *,.z-spark{animation:none!important;transition:none!important;filter:none!important;opacity:1!important}.z-spark{opacity:.7!important}.iz-confetti-canvas{display:none!important}}
 
     /* ===== Zeno sample-sites showcase (Swiper 3D coverflow) ===== */
     .zeno-showcase{margin-top:22px;border-top:1px solid #e2e8f0;padding-top:18px}
@@ -283,6 +288,17 @@ SEOHelper::outputMetaTags('ai-website-builder', [
               <p>Tell us about your business and our AI builds you a real, live website preview — no page builders, no templates to wrestle with. Like what you see? We host it for you, right here.</p>
             </div>
 
+<?php if ($genRemaining > 0 && $genRemaining < IZ_GEN_LIMIT): ?>
+            <div class="alert alert-info py-2 px-3" style="font-size:14px"><i class="bi bi-info-circle"></i> You have <strong><?= $genRemaining ?></strong> of <?= IZ_GEN_LIMIT ?> free previews left — <a href="claim-site.php" class="alert-link">claim a site</a> to keep building unlimited.</div>
+<?php endif; ?>
+<?php if ($genExhausted): ?>
+            <div class="card shadow-sm"><div class="card-body p-4 text-center">
+              <div style="font-size:42px;line-height:1" aria-hidden="true">🎉</div>
+              <h3 class="mt-2">You've used your <?= IZ_GEN_LIMIT ?> free previews</h3>
+              <p class="text-muted mb-4">Claim one of the sites you built and you can edit and build as much as you like — hosting, your own domain, a free professional email and more, all set up for you.</p>
+              <a class="btn btn-primary btn-lg" href="claim-site.php"><i class="bi bi-magic"></i> Claim your site</a>
+            </div></div>
+<?php else: ?>
             <div class="card shadow-sm">
               <div class="card-body p-4">
                 <form id="aiBuilderForm" novalidate>
@@ -395,6 +411,15 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                     </div>
                   </div>
 
+                  <div class="mb-3">
+                    <label class="form-label">Have a logo? Upload it <span class="text-muted fw-normal">(optional)</span></label>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                      <input type="file" class="form-control" id="izLogoFile" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:300px">
+                      <span id="izLogoSwatches" class="d-flex gap-1"></span>
+                    </div>
+                    <small class="text-muted d-block mt-1" id="izLogoNote">We'll feature your logo on the site — and if you let the AI choose the style, we'll match your brand colors.</small>
+                  </div>
+
                     <div class="wiz-nav">
                       <button type="button" class="btn btn-outline-secondary btn-lg wiz-back" data-target="1"><i class="bi bi-arrow-left"></i> Back</button>
                       <button type="button" class="btn btn-primary btn-lg wiz-next" data-target="3">Next <i class="bi bi-arrow-right"></i></button>
@@ -438,6 +463,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                 </form>
               </div>
             </div>
+<?php endif; ?>
           </div>
 
           <div class="col-lg-5">
@@ -630,6 +656,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
               if (j && j.success){
                   if (descEl){ descEl.value = j.description; }
                   if (nameEl && !nameEl.value.trim() && j.business_name){ nameEl.value = j.business_name; }
+                  if (j.business_address){ window.izBusinessAddress = j.business_address; }
                   setNote('<i class="bi bi-check-circle-fill"></i> Done — review and edit your description below.', 'ok');
                   if (descEl){ try { descEl.focus({ preventScroll: true }); } catch(_){} }
               } else {
@@ -644,7 +671,49 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       urlEl.addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); e.stopPropagation(); run(); } });
   })();
 
-  document.getElementById('aiBuilderForm').addEventListener('submit', async function(e) {
+  /* ---- Logo upload -> use their logo + match colors ---- */
+  (function(){
+      var fileEl = document.getElementById('izLogoFile');
+      var note   = document.getElementById('izLogoNote');
+      var sw     = document.getElementById('izLogoSwatches');
+      var form   = document.getElementById('aiBuilderForm');
+      if (!fileEl || !form) { return; }
+      var csrfEl = form.querySelector('[name="csrf_token"]');
+      fileEl.addEventListener('change', function(){
+          var file = fileEl.files && fileEl.files[0];
+          if (!file) { return; }
+          if (file.size > 5 * 1024 * 1024) { note.textContent = 'That image is over 5 MB — please pick a smaller one.'; note.className = 'text-danger d-block mt-1'; fileEl.value=''; return; }
+          note.innerHTML = '<span class="iz-spin"></span>Uploading your logo…'; note.className = 'text-muted d-block mt-1';
+          if (sw) sw.innerHTML = '';
+          var fd = new FormData();
+          fd.append('logo', file);
+          fd.append('csrf_token', csrfEl ? csrfEl.value : '');
+          fetch('api/upload-logo.php', { method: 'POST', body: fd })
+            .then(function(r){ return r.json(); })
+            .then(function(j){
+                if (j && j.success){
+                    window.izLogoUrl = j.url;
+                    window.izBrandColors = j.brand_colors || [];
+                    var swatch = '';
+                    (j.brand_colors || []).forEach(function(c){ swatch += '<span style="display:inline-block;width:16px;height:16px;border-radius:4px;border:1px solid #cbd5e1;background:'+c+'"></span>'; });
+                    if (sw) sw.innerHTML = swatch;
+                    note.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Logo added' + ((j.brand_colors && j.brand_colors.length) ? ' — we’ll match these colors if you let the AI choose the style.' : '.');
+                    note.className = 'text-muted d-block mt-1';
+                } else {
+                    window.izLogoUrl = ''; window.izBrandColors = [];
+                    note.textContent = (j && j.message) || 'Could not use that image — try a PNG or JPG.';
+                    note.className = 'text-danger d-block mt-1';
+                    fileEl.value = '';
+                }
+            }).catch(function(){
+                note.textContent = 'Upload failed — please try again.';
+                note.className = 'text-danger d-block mt-1';
+            });
+      });
+  })();
+
+  const _aiForm = document.getElementById('aiBuilderForm');
+  if (_aiForm) _aiForm.addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const form = this;
@@ -662,7 +731,10 @@ SEOHelper::outputMetaTags('ai-website-builder', [
           domain: formData.get('domain'),
           csrf_token: formData.get('csrf_token'),
           form_timestamp: formData.get('form_timestamp'),
-          'g-recaptcha-response': formData.get('g-recaptcha-response')
+          'g-recaptcha-response': formData.get('g-recaptcha-response'),
+          logo_url: window.izLogoUrl || '',
+          brand_colors: window.izBrandColors || [],
+          business_address: window.izBusinessAddress || ''
       };
 
       // Include the session-bound honeypot field without hardcoding its randomized name.
@@ -696,6 +768,11 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                   gtag('event', 'ai_builder_submitted', { 'business_name': data.business_name });
               }
               startBuildExperience(result.lead_id, data.business_name, data.contact_email);
+          } else if (result.limit) {
+              const claim = result.claim_url || 'claim-site.php';
+              messageDiv.innerHTML = `<div class="alert alert-info"><i class="bi bi-stars"></i> ${result.message || "You've used your free previews."} <a href="${claim}" class="alert-link fw-bold">Claim your site →</a></div>`;
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="bi bi-magic"></i> Build My Free Preview';
           } else {
               const msg = result.message || `Error ${response.status}: ${rawText || 'Unable to submit right now. Please call us directly.'}`;
               messageDiv.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> ${msg}</div>`;
@@ -833,8 +910,63 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       stepEl.textContent = 'Done! Here it is…';
       frame.src = url;
       frame.addEventListener('load', function () { frame.classList.add('sharp'); }, { once: true });
-      setTimeout(function () { reveal.classList.add('show'); }, 450);
+      setTimeout(function () { reveal.classList.add('show'); burstConfetti(); }, 450);
       if (typeof gtag !== 'undefined') { gtag('event', 'ai_builder_preview_revealed'); }
+    }
+
+    function burstConfetti() {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+      if (document.querySelector('.iz-confetti-canvas')) { return; }
+      const canvas = document.createElement('canvas');
+      canvas.className = 'iz-confetti-canvas';
+      canvas.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const palette = ['#2563eb', '#38bdf8', '#0ea5e9', '#1d4ed8', '#fbbf24', '#ffffff'];
+      let w = 0, h = 0, start = performance.now();
+      function size() {
+        w = window.innerWidth; h = window.innerHeight;
+        canvas.width = Math.floor(w * dpr); canvas.height = Math.floor(h * dpr);
+        canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      size();
+      const pieces = Array.from({ length: 80 }, function (_, i) {
+        const angle = (-Math.PI / 2) + (Math.random() - 0.5) * 1.35;
+        const speed = 7 + Math.random() * 8;
+        return {
+          x: w * (0.5 + (Math.random() - 0.5) * 0.18),
+          y: h * 0.22,
+          vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 2.2,
+          vy: Math.sin(angle) * speed,
+          r: 4 + Math.random() * 5,
+          rot: Math.random() * Math.PI,
+          vr: (Math.random() - 0.5) * 0.24,
+          color: palette[i % palette.length],
+          shape: Math.random() > 0.45 ? 'rect' : 'circle'
+        };
+      });
+      function draw(now) {
+        const age = now - start;
+        ctx.clearRect(0, 0, w, h);
+        pieces.forEach(function (p) {
+          p.vy += 0.22; p.vx *= 0.992; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+          const alpha = Math.max(0, 1 - age / 2500);
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          if (p.shape === 'rect') { ctx.fillRect(-p.r, -p.r * 0.55, p.r * 2, p.r * 1.1); }
+          else { ctx.beginPath(); ctx.arc(0, 0, p.r * 0.72, 0, Math.PI * 2); ctx.fill(); }
+          ctx.restore();
+        });
+        if (age < 2500) { requestAnimationFrame(draw); }
+        else { canvas.remove(); window.removeEventListener('resize', size); }
+      }
+      window.addEventListener('resize', size, { passive: true });
+      requestAnimationFrame(draw);
     }
 
     function fallbackToEmail(failed) {

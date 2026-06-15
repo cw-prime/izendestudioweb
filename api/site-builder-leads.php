@@ -15,6 +15,7 @@ header('Content-Type: application/json');
 require_once __DIR__ . '/../config/env-loader.php';
 require_once __DIR__ . '/../config/security.php';
 require_once __DIR__ . '/../includes/SpamProtection.php';
+require_once __DIR__ . '/../includes/gen-cap.php';
 
 initSecureSession();
 
@@ -105,6 +106,24 @@ $email               = filter_var($data['contact_email'] ?? '', FILTER_SANITIZE_
 $phone               = trim((string)($data['contact_phone'] ?? ''));
 $domain              = trim((string)($data['domain'] ?? ''));
 
+// Optional logo (uploaded via api/upload-logo.php), brand colors (from that logo), and a
+// captured street address. Validate strictly so we never store an attacker-supplied URL.
+$logoUrl = trim((string)($data['logo_url'] ?? ''));
+if ($logoUrl !== '' && !preg_match('~^https://izendestudioweb\.com/genmedia/uploads/[\w-]+\.(?:png|jpe?g|webp|gif)$~i', $logoUrl)) {
+    $logoUrl = '';
+}
+$brandColors = null;
+if (!empty($data['brand_colors']) && is_array($data['brand_colors'])) {
+    $clean = [];
+    foreach ($data['brand_colors'] as $c) {
+        if (is_string($c) && preg_match('/^#[0-9a-fA-F]{6}$/', $c)) { $clean[] = strtolower($c); }
+    }
+    if ($clean) { $brandColors = json_encode(array_slice(array_values(array_unique($clean)), 0, 4)); }
+}
+$businessAddress = trim((string)($data['business_address'] ?? ''));
+$businessAddress = preg_replace('/[\x00-\x1f]+/', ' ', $businessAddress);
+if (mb_strlen($businessAddress) > 200) { $businessAddress = ''; }
+
 if ($businessName === '' || !validateLength($businessName, 2, 120)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Please enter your business name.']);
@@ -140,6 +159,17 @@ if ($spamCheck['is_spam']) {
     exit;
 }
 
+// Free-generation cap: signed cookie counts previews; gate once exhausted.
+if (iz_gen_read()['remaining'] <= 0) {
+    echo json_encode([
+        'success' => false,
+        'limit'   => true,
+        'message' => "You've used your " . IZ_GEN_LIMIT . " free previews — claim a site to keep building as many as you like.",
+        'claim_url' => 'https://izendestudioweb.com/claim-site.php',
+    ]);
+    exit;
+}
+
 // Supabase configuration (cloud queue bridged between the cPanel site and the basement n8n box)
 $supabaseUrl = rtrim((string)getEnv('SUPABASE_URL', ''), '/');
 $supabaseKey = trim((string)getEnv('SUPABASE_SERVICE_ROLE_KEY', ''));
@@ -149,6 +179,26 @@ if ($supabaseUrl === '' || $supabaseKey === '') {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'We could not start your build right now. Please try again later.']);
     exit;
+}
+
+// Anti-abuse backstop: cap leads per IP per 24h (catches cookie-clearers at scale).
+$ipAddr = $_SERVER['REMOTE_ADDR'] ?? '';
+if ($ipAddr !== '') {
+    $since = gmdate('Y-m-d\TH:i:s\Z', time() - 86400);
+    $cch = curl_init($supabaseUrl . '/rest/v1/site_builder_leads?select=id&ip_address=eq.' . rawurlencode($ipAddr) . '&created_at=gte.' . rawurlencode($since));
+    curl_setopt($cch, CURLOPT_HTTPHEADER, ['apikey: ' . $supabaseKey, 'Authorization: Bearer ' . $supabaseKey, 'Prefer: count=exact', 'Range: 0-0']);
+    curl_setopt($cch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($cch, CURLOPT_HEADER, true);
+    curl_setopt($cch, CURLOPT_SSL_VERIFYPEER, true);
+    curl_setopt($cch, CURLOPT_TIMEOUT, 8);
+    $cres = (string) curl_exec($cch);
+    curl_close($cch);
+    if (preg_match('~Content-Range:\s*\d+-\d+/(\d+)~i', $cres, $m) && (int)$m[1] > 8) {
+        siteBuilderLog('IP daily generation backstop hit', ['ip' => $ipAddr, 'count' => $m[1]]);
+        http_response_code(429);
+        echo json_encode(['success' => false, 'message' => 'Too many previews from your network today. Please try again tomorrow or claim a site.']);
+        exit;
+    }
 }
 
 // Insert lead into the Supabase queue via PostgREST
@@ -161,6 +211,9 @@ $lead = [
     'domain'               => $domain !== '' ? $domain : null,
     'status'               => 'pending',
     'ip_address'           => $_SERVER['REMOTE_ADDR'] ?? null,
+    'logo_url'             => $logoUrl !== '' ? $logoUrl : null,
+    'brand_colors'         => $brandColors,
+    'business_address'     => $businessAddress !== '' ? $businessAddress : null,
 ];
 
 $ch = curl_init($supabaseUrl . '/rest/v1/site_builder_leads');
@@ -196,6 +249,9 @@ if (is_array($decoded) && isset($decoded[0]['id'])) {
 }
 
 siteBuilderLog('Lead queued', ['email' => $email, 'business' => $businessName, 'id' => $leadId]);
+
+// Count this successful generation against the visitor's free cap.
+iz_gen_bump();
 
 // Kick the generator NOW so the prospect can watch their site build in real time,
 // rather than waiting for the next cron tick. Fire-and-forget: the generator runs
