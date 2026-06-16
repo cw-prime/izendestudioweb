@@ -32,7 +32,7 @@ $genExhausted = $genRemaining <= 0;
 <?php
 SEOHelper::outputMetaTags('ai-website-builder', [
     'page_title' => 'Get a Free Website Draft in Minutes | Izende Studio Web',
-    'meta_description' => 'Describe your business and we\'ll prepare a live first-draft website in minutes — then host it for you. No page builders, no Wix. Free draft, St. Louis web hosting.',
+    'meta_description' => 'Describe your business and we\'ll prepare a live draft of your website in minutes — then host it for you on your own domain. No page builders, no Wix. Free draft, St. Louis web hosting.',
     'canonical_url' => 'https://izendestudioweb.com/ai-website-builder.php',
     'og_image' => 'https://www.izendestudioweb.com/assets/img/ai-builder-og-v3-1200x630.jpg'
 ]);
@@ -498,7 +498,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                   </li>
                   <li class="mb-3">
                     <i class="bi bi-3-circle text-primary"></i>
-                    <strong>Claim &amp; go live</strong> — we host it for you on your domain
+                    <strong>Claim &amp; go live</strong> — we host it for you on your own domain
                   </li>
                 </ul>
 
