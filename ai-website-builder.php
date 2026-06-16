@@ -1,10 +1,10 @@
 <?php
 /**
- * AI Website Builder — Intake / Landing Page
+ * Website Draft — Intake / Landing Page
  *
- * "Build Your Website with AI — Free Preview in 2 Minutes."
+ * "Get a Free Website Draft in Minutes."
  * Captures a prospect's business details and queues them in Supabase
- * (via api/site-builder-leads.php) for the n8n generation workflow.
+ * (via api/site-builder-leads.php) for the generation workflow.
  */
 
 require_once __DIR__ . '/config/env-loader.php';
@@ -31,11 +31,16 @@ $genExhausted = $genRemaining <= 0;
 
 <?php
 SEOHelper::outputMetaTags('ai-website-builder', [
-    'page_title' => 'Build Your Website with AI — Free Preview in 2 Minutes | Izende Studio Web',
-    'meta_description' => 'Describe your business and our AI builds you a live website preview in minutes — then we host it for you. No page builders, no Wix. Free preview, St. Louis web hosting.',
-    'canonical_url' => 'https://izendestudioweb.com/ai-website-builder.php'
+    'page_title' => 'Get a Free Website Draft in Minutes | Izende Studio Web',
+    'meta_description' => 'Describe your business and we\'ll prepare a live first-draft website in minutes — then host it for you. No page builders, no Wix. Free draft, St. Louis web hosting.',
+    'canonical_url' => 'https://izendestudioweb.com/ai-website-builder.php',
+    'og_image' => 'https://www.izendestudioweb.com/assets/img/ai-builder-og-v3-1200x630.jpg'
 ]);
 ?>
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Izende — free website draft, ready in minutes">
+<meta name="twitter:image:alt" content="Izende — free website draft, ready in minutes">
 
   <?php include './assets/includes/header-links.php'; ?>
 
@@ -206,7 +211,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
   <?php include './assets/includes/header.php'; ?>
 
   <!-- Watch-it-build overlay -->
-  <div id="buildOverlay" class="build-overlay" role="dialog" aria-modal="true" aria-label="Building your website">
+  <div id="buildOverlay" class="build-overlay" role="dialog" aria-modal="true" aria-label="Preparing your website draft">
     <button type="button" class="build-close" id="buildClose" aria-label="Close">&times;</button>
     <div class="build-stage">
       <div class="build-skeleton" aria-hidden="true">
@@ -221,7 +226,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
         <div class="zeno-scene" id="zenoScene" aria-hidden="true">
           <span class="zeno-aura"></span>
           <span class="z-spark">✦</span><span class="z-spark">✦</span><span class="z-spark">✦</span><span class="z-spark">✦</span>
-          <svg class="zeno" viewBox="0 0 96 108" role="img" aria-label="Zeno the AI web designer at work">
+          <svg class="zeno" viewBox="0 0 96 108" role="img" aria-label="Zeno the website draft assistant at work">
             <!-- antenna -->
             <line class="z-antenna" x1="48" y1="6" x2="48" y2="16"></line>
             <circle class="z-dot" cx="48" cy="5" r="3"></circle>
@@ -243,16 +248,16 @@ SEOHelper::outputMetaTags('ai-website-builder', [
             <line class="z-arm" x1="76" y1="64" x2="86" y2="74"></line>
           </svg>
         </div>
-        <h2>Zeno is building <span class="build-biz" id="buildBiz">your website</span>…</h2>
+        <h2>Zeno is drafting <span class="build-biz" id="buildBiz">your website</span>…</h2>
         <p class="build-step" id="buildStep">Warming up the design studio…</p>
         <div class="build-bar"><span id="buildBarFill"></span></div>
-        <p class="build-hint">Hi, I'm <strong style="color:#7dd3fc">Zeno</strong> — your AI web designer. This takes me about two minutes. Hang tight, I'm on it.</p>
+        <p class="build-hint">Hi, I'm <strong style="color:#7dd3fc">Zeno</strong> — your website draft assistant. This takes me about two minutes. Hang tight, I'm on it.</p>
       </div>
     </div>
 
     <div class="build-reveal" id="buildReveal">
       <div class="reveal-bar">
-        <span class="rb-msg"><i class="bi bi-stars"></i> Here's what I built for you! &mdash; Zeno</span>
+        <span class="rb-msg"><i class="bi bi-stars"></i> Here's your draft! &mdash; Zeno</span>
         <span class="reveal-actions">
           <a id="claimBtn" class="btn btn-primary btn-sm" href="#">Claim this site &rarr;</a>
           <a class="btn btn-outline-secondary btn-sm" href="tel:314-886-6356"><i class="bi bi-telephone"></i> (314) 886-6356</a>
@@ -269,10 +274,10 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     <section class="breadcrumbs">
       <div class="container">
         <div class="d-flex justify-content-between align-items-center">
-          <h2>AI Website Builder</h2>
+          <h2>Website Drafter</h2>
           <ol>
             <li><a href="index.php">Home</a></li>
-            <li>AI Website Builder</li>
+            <li>Website Drafter</li>
           </ol>
         </div>
       </div>
@@ -284,18 +289,15 @@ SEOHelper::outputMetaTags('ai-website-builder', [
         <div class="row">
           <div class="col-lg-7">
             <div class="section-title">
-              <h2>Build Your Website with AI — Free Preview in 2 Minutes</h2>
-              <p>Tell us about your business and our AI builds you a real, live website preview — no page builders, no templates to wrestle with. Like what you see? We host it for you, right here.</p>
+              <h2>Start With a Free Website Draft — Live in 2 Minutes</h2>
+              <p>Tell us about your business and we'll put together a real, live draft of your website — no page builders, no blank page to stare at. Like what you see? We host it for you, right here.</p>
             </div>
 
-<?php if ($genRemaining > 0 && $genRemaining < IZ_GEN_LIMIT): ?>
-            <div class="alert alert-info py-2 px-3" style="font-size:14px"><i class="bi bi-info-circle"></i> You have <strong><?= $genRemaining ?></strong> of <?= IZ_GEN_LIMIT ?> free previews left — <a href="claim-site.php" class="alert-link">claim a site</a> to keep building unlimited.</div>
-<?php endif; ?>
 <?php if ($genExhausted): ?>
             <div class="card shadow-sm"><div class="card-body p-4 text-center">
               <div style="font-size:42px;line-height:1" aria-hidden="true">🎉</div>
-              <h3 class="mt-2">You've used your <?= IZ_GEN_LIMIT ?> free previews</h3>
-              <p class="text-muted mb-4">Claim one of the sites you built and you can edit and build as much as you like — hosting, your own domain, a free professional email and more, all set up for you.</p>
+              <h3 class="mt-2">Ready to make it yours?</h3>
+              <p class="text-muted mb-4">Claim your draft and you can edit and build as much as you like — hosting, your own domain, a free professional email and more, all set up for you.</p>
               <a class="btn btn-primary btn-lg" href="claim-site.php"><i class="bi bi-magic"></i> Claim your site</a>
             </div></div>
 <?php else: ?>
@@ -335,8 +337,8 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                     <div class="mb-3">
                       <label class="form-label">Tell us about your business <span class="text-danger">*</span></label>
                       <textarea class="form-control" name="business_description" rows="7" style="min-height:160px;resize:vertical" maxlength="2000"
-                        placeholder="e.g. We're a [type of business] in [city] offering [your main services or products]. Tell the AI anything you want on the site — services, hours, pricing, photos, online booking, contact info — plus the look or tone you're going for." required></textarea>
-                      <small class="text-muted">Describe your business and tell the AI exactly what to include — the more detail, the better your preview.</small>
+                        placeholder="e.g. We're a [type of business] in [city] offering [your main services or products]. Tell us anything you want on the site — services, hours, pricing, photos, online booking, contact info — plus the look or tone you're going for." required></textarea>
+                      <small class="text-muted">Describe your business and tell us exactly what to include — the more detail, the better your draft.</small>
                     </div>
 
                     <div class="wiz-nav">
@@ -454,7 +456,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                   <div class="wiz-nav">
                     <button type="button" class="btn btn-outline-secondary btn-lg wiz-back" data-target="2"><i class="bi bi-arrow-left"></i> Back</button>
                     <button type="submit" class="btn btn-primary btn-lg wiz-build" id="aiBuilderSubmit">
-                      <i class="bi bi-magic"></i> Build My Free Preview
+                      <i class="bi bi-magic"></i> Get My Free Draft
                     </button>
                   </div>
 
@@ -482,7 +484,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                   </svg>
                   <div class="ai-bot-text">
                     <strong>Hi, I'm Zeno 👋</strong>
-                    <span>Your AI web designer — tell me about your business and I'll build it</span>
+                    <span>Your website draft assistant — tell me about your business and I'll put together your draft</span>
                   </div>
                 </div>
                 <ul class="list-unstyled mt-3">
@@ -492,7 +494,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                   </li>
                   <li class="mb-3">
                     <i class="bi bi-2-circle text-primary"></i>
-                    <strong>I build your site</strong> — a real, live preview in about 2 minutes
+                    <strong>I draft your site</strong> — a real, live draft in about 2 minutes
                   </li>
                   <li class="mb-3">
                     <i class="bi bi-3-circle text-primary"></i>
@@ -501,8 +503,8 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                 </ul>
 
                 <div class="zeno-showcase" id="zenoShowcase">
-                  <div class="zeno-showcase-head"><i class="bi bi-stars"></i> A few sites I've built</div>
-                  <p class="zeno-showcase-sub">Real, live sites — every one generated from a single sentence.</p>
+                  <div class="zeno-showcase-head"><i class="bi bi-stars"></i> A few drafts I've put together</div>
+                  <p class="zeno-showcase-sub">Real, live drafts — each one started from a single sentence.</p>
                   <div class="swiper zeno-swiper">
                     <div class="swiper-wrapper">
                       <div class="swiper-slide"><div class="zeno-card"><div class="chrome"><b></b><b></b><b></b></div><div class="shot"><iframe src="/previews/samples/serenity-massage-therapy/" title="Serenity Massage Therapy" scrolling="no" tabindex="-1" aria-hidden="true" loading="lazy"></iframe><a href="/previews/samples/serenity-massage-therapy/" target="_blank" rel="noopener" aria-label="Open Serenity Massage Therapy"></a></div><div class="cap">Serenity Massage Therapy<br>Warm &amp; Welcoming</div></div></div>
@@ -745,7 +747,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       }
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Building…';
+      submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Preparing your draft…';
       messageDiv.textContent = '';
 
       try {
@@ -770,19 +772,19 @@ SEOHelper::outputMetaTags('ai-website-builder', [
               startBuildExperience(result.lead_id, data.business_name, data.contact_email);
           } else if (result.limit) {
               const claim = result.claim_url || 'claim-site.php';
-              messageDiv.innerHTML = `<div class="alert alert-info"><i class="bi bi-stars"></i> ${result.message || "You've used your free previews."} <a href="${claim}" class="alert-link fw-bold">Claim your site →</a></div>`;
+              messageDiv.innerHTML = `<div class="alert alert-info"><i class="bi bi-stars"></i> ${result.message || "Ready to make your draft yours?"} <a href="${claim}" class="alert-link fw-bold">Claim your site →</a></div>`;
               submitBtn.disabled = false;
-              submitBtn.innerHTML = '<i class="bi bi-magic"></i> Build My Free Preview';
+              submitBtn.innerHTML = '<i class="bi bi-magic"></i> Get My Free Draft';
           } else {
               const msg = result.message || `Error ${response.status}: ${rawText || 'Unable to submit right now. Please call us directly.'}`;
               messageDiv.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> ${msg}</div>`;
               submitBtn.disabled = false;
-              submitBtn.innerHTML = '<i class="bi bi-magic"></i> Build My Free Preview';
+              submitBtn.innerHTML = '<i class="bi bi-magic"></i> Get My Free Draft';
           }
       } catch (error) {
           messageDiv.innerHTML = `<div class="alert alert-danger">An error occurred: ${error.message}. Please try again or call us directly.</div>`;
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="bi bi-magic"></i> Build My Free Preview';
+          submitBtn.innerHTML = '<i class="bi bi-magic"></i> Get My Free Draft';
       }
   });
 
@@ -849,7 +851,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       reveal.classList.remove('show');
       document.body.style.overflow = '';
       const btn = document.getElementById('aiBuilderSubmit');
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-magic"></i> Build My Free Preview'; }
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-magic"></i> Get My Free Draft'; }
     }
 
     window.startBuildExperience = function (leadId, biz, email) {
@@ -907,7 +909,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       building = false;
       clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer);
       barFill.style.width = '100%';
-      stepEl.textContent = 'Done! Here it is…';
+      stepEl.textContent = 'Your draft is ready 🎉';
       frame.src = url;
       frame.addEventListener('load', function () { frame.classList.add('sharp'); }, { once: true });
       setTimeout(function () { reveal.classList.add('show'); burstConfetti(); }, 450);
@@ -973,7 +975,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       building = false;
       clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer);
       panel.querySelector('h2').textContent = failed ? 'Almost there' : 'Still polishing…';
-      stepEl.textContent = "I'll email your preview the moment it's ready — check your inbox shortly. — Zeno";
+      stepEl.textContent = "I'll email your draft the moment it's ready — check your inbox shortly. — Zeno";
       barFill.style.width = '100%';
       const hint = panel.querySelector('.build-hint');
       if (hint) { hint.innerHTML = 'You can close this window. <a href="#" id="buildDone" style="color:#7dd3fc">Back to site</a>'; }

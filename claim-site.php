@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Website Builder — Claim / Plan Chooser
+ * Website Drafter — Claim / Plan Chooser
  *
  * Where "Claim this site" lands. Presents the three tiers and routes the
  * prospect to the matching WHMCS product cart:

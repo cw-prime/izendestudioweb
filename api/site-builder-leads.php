@@ -164,7 +164,7 @@ if (iz_gen_read()['remaining'] <= 0) {
     echo json_encode([
         'success' => false,
         'limit'   => true,
-        'message' => "You've used your " . IZ_GEN_LIMIT . " free previews — claim a site to keep building as many as you like.",
+        'message' => "Claim your draft to keep going — hosting, your domain and email all set up for you.",
         'claim_url' => 'https://izendestudioweb.com/claim-site.php',
     ]);
     exit;
