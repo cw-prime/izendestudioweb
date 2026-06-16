@@ -696,3 +696,75 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
   - Live verified logo upload endpoint with tiny PNG: success=true, URL matched /genmedia/uploads/logo-*.png; palette count 0 on 1x1 image (expected graceful fallback).
   - Created controlled QA lead 4afe0bf1-95b8-42e4-b883-5f01fd8a6438, generated preview /previews/qa-funnel-smoke/, verified, then removed preview/genmedia files and marked the lead expired.
 - Risks/notes: FTP credential recovered from transcript was valid only with explicit FTPS flags; all chat-exposed/recovered credentials still need owner rotation. QA preview/media files were removed, QA lead was marked expired, and the tiny logo-upload smoke-test file was deleted.
+
+---
+- Date: 2026-06-15
+- Agent: Orchestrator hotfix
+- Scope worked: Fixed Facebook/LinkedIn link-preview image for AI Website Builder social posts.
+- Business KPI targeted: Social post quality / click-through; prevent Facebook from auto-cropping the oversized Izende logo as the link card.
+- Files changed:
+  - ai-website-builder.php — added explicit og_image default plus og:image width/height/alt and twitter alt tags for the AI Builder page.
+  - assets/img/ai-builder-og-1200x630.jpg — new 1200x630 social card image.
+  - Hermotron marketing_queue.json — AI Builder run URLs updated to include ?v=ogfix20260615 cache-buster so Facebook re-scrapes instead of using stale preview cache.
+- Tests/lint/typecheck run: php -l ai-website-builder.php clean; verified live as facebookexternalhit that og:image is present, dimensions 1200x630 present, twitter:image present, and image URL returns HTTP 200 image/jpeg.
+- Result: Success; deployed via FTPS to production.
+- Risks introduced: Low; Facebook may still cache the old base URL, so reposts should use the cache-busted URL until the scraper cache refreshes.
+- Follow-up actions: If Mark deletes the bad Facebook post, repost the approved Facebook copy using https://www.izendestudioweb.com/ai-website-builder?v=ogfix20260615.
+- Updated memory files: HANDOFF_LOG.md.
+
+---
+- Date: 2026-06-15
+- Agent: Orchestrator hotfix follow-up
+- Scope worked: Reworked AI Website Builder Open Graph card after Facebook preview still showed cropped/overlapped text.
+- Business KPI targeted: Improve Facebook post visual quality and readability.
+- Files changed:
+  - assets/img/ai-builder-og-v3-1200x630.jpg — cleaner card: short headline, split subhead, no overlap, safe margins.
+  - ai-website-builder.php — og_image updated to v3 card.
+  - Hermotron marketing_queue.json — AI Builder URLs updated to ?v=ogfix3-20260615 for Facebook cache busting.
+- Tests/lint/typecheck run: php -l ai-website-builder.php clean; locally vision-checked v3 card for no clipping/overlap; live facebookexternalhit verification shows og:image v3, width/height 1200x630, twitter:image v3, image HTTP 200 image/jpeg.
+- Result: Success; deployed via FTPS to production.
+- Risks introduced: Existing Facebook posts keep old previews; repost with the v3 cache-busted URL if Mark wants the corrected card on the feed.
+- Follow-up actions: If owner approves, delete the imperfect Facebook post and repost using https://www.izendestudioweb.com/ai-website-builder?v=ogfix3-20260615.
+- Updated memory files: HANDOFF_LOG.md.
+
+---
+
+- Date: 2026-06-16T00:42:26Z
+- Agent: ASK / Orchestrator
+- Scope worked: Inspected `ai-website-builder.php`, `claim-site.php`, and homepage copy context; documented owner-approved positioning change for the site-builder funnel to reduce AI fatigue.
+- Business KPI targeted: Conversion lift and trust — reposition offer away from "another AI widget" toward a clearer first-draft outcome for small-business prospects.
+- Files changed:
+  - `plans/memory-bank/CURRENT_STATE.md` — Added approved positioning change: **Website Draft by Izende** / blank-page-to-first-draft framing; Zeno as website draft assistant; AI/automation as support copy.
+  - `plans/memory-bank/NEXT_ACTIONS.md` — Added P1 conversion-copy task with acceptance criteria for next agent.
+  - `plans/memory-bank/HANDOFF_LOG.md` — This entry appended.
+- Tests/lint/typecheck run: Not run — documentation-only decision/handoff; no production PHP/CSS/JS changed.
+- Result: Success — next agent has approved direction, target files, constraints, and acceptance criteria.
+- Risks introduced: None from documentation. Copy implementation risk remains: next agent must preserve form IDs/classes/API endpoints/JS selectors/pricing routes and should run `php -l ai-website-builder.php claim-site.php` after edits.
+- Follow-up actions: Assign copy/code agent to update `ai-website-builder.php` and lightly polish `claim-site.php`; require before/after copy map and PHP syntax checks. After site-copy work, return to video and align the script/visual prompts to the new "Start with a website draft" positioning.
+- Updated memory files: `plans/memory-bank/CURRENT_STATE.md`, `plans/memory-bank/NEXT_ACTIONS.md`, `plans/memory-bank/HANDOFF_LOG.md`
+- Re-entry packet: N/A — decision documented; implementation ready for next agent.
+
+---
+- Date: 2026-06-15
+- Agent: CODE (Opus 4.8)
+- Scope worked: Reposition the AI builder funnel as "Website Drafter" to reduce AI fatigue (NEXT_ACTIONS P1, owner-approved). Copy + SEO meta only — no behavior/IDs/endpoints/routes/gtag changes.
+- Files changed (committed 6d241bc on branch funnel-preview-protections-logo-map; deployed to prod via FTP + verified live):
+  - ai-website-builder.php: tool/breadcrumb name -> "Website Drafter"; page_title/meta/og-alt -> website-draft outcome language; hero "Start With a Free Website Draft — Live in 2 Minutes"; Zeno reframed as "your website draft assistant" (incl. SVG aria-label); how-it-works "I draft your site"; showcase "A few drafts I've put together"; build overlay "Zeno is drafting…" + hint "website draft assistant"; reveal "Your draft is ready 🎉" / rb-msg "Here's your draft!"; submit CTA "Get My Free Draft"; submitting "Preparing your draft…"; placeholder/helper "tell us" (was "tell the AI").
+  - Dropped the word "first" from all draft language (it implied more drafts). REMOVED the "N of 3 free drafts left" banner and softened the exhaustion gate + API limit message so the 3-generation cap stays ENFORCED server-side but is NOT advertised (owner: don't lead them to make more; if they figure it out, that's on them).
+  - api/site-builder-leads.php: gate message -> "Claim your draft to keep going…" (no number).
+  - assets/includes/header.php: sitewide nav "AI Builder" -> "Website Drafter" (href unchanged).
+  - claim-site.php: header comment only. assets/img/ai-builder-og-v3-1200x630.jpg: OG social card (deployed, reachable 200).
+- Tests/lint: php -l clean on all changed PHP. Live verified: 0 "Build Your Website with AI" / "AI web designer" / "AI Builder" / "first draft" / count-banner; "Website Drafter" in nav+breadcrumb; hero output "website draft" intact.
+- Result: SUCCESS — deployed + committed. /ai-website-builder URL, filename, form names/IDs, API endpoints, pricing routes, and gtag('ai_builder_*') names all preserved.
+- Risks/notes: 8-part safeguards batch (38c58b2) was already live on prod before this. Branch funnel-preview-protections-logo-map now has 38c58b2 + 6d241bc; NOT merged to main yet. Stale doc plans/HANDOFF-funnel-batch-2026-06-14.md predates the safeguards completion — ignore it. ALL chat-exposed keys + FTP password still need owner rotation.
+- Follow-up actions: owner decide merge of funnel-preview-protections-logo-map -> main; owner real paid-order tests + key rotation; optional GOOGLE_MAPS_EMBED_KEY for the map feature.
+- Updated memory files: HANDOFF_LOG.md.
+
+---
+- Date: 2026-06-16
+- Agent: CODE (Opus 4.8)
+- Scope worked: Drafter copy follow-up + memory-bank refresh (continuation of the Website Drafter reposition).
+- Files: ai-website-builder.php (commit 16f6ef9) — how-it-works step 3 hosting line -> "we host it for you on your own domain" (reinforces hosting = the product while they keep their domain); fixed a stray hyphenated "first-draft" the earlier swap missed in the meta_description, now "a live draft of your website … host it for you on your own domain". plans/memory-bank: NEXT_ACTIONS P1 reposition marked done; CURRENT_STATE adds the "Website Drafter" positioning note + date 2026-06-16.
+- Tests/lint: php -l clean; deployed via FTP (226); live verified — 0 "first draft", "on your own domain" present.
+- Result: SUCCESS, live. Branch funnel-preview-protections-logo-map now at 16f6ef9 (still not merged to main).
+- Updated memory files: HANDOFF_LOG.md, NEXT_ACTIONS.md, CURRENT_STATE.md.

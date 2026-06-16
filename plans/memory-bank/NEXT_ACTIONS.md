@@ -9,6 +9,9 @@ Last updated: 2026-06-14 (AI Website Builder funnel)
 - **[OWNER] Enable glm-5.2 access in z.ai**, then A/B vs glm-5. `todo`
 - **[OWNER/SECURITY] Rotate ALL chat-exposed keys** (Anthropic/GLM/Gemini/Supabase/**FTP ai-agent@**/WHM/SITE_BOOKING_SECRET). `todo` — FTP password was recovered from a prior transcript this session; rotate.
 
+### P1 — Conversion copy / positioning
+- **Reposition funnel to "Website Drafter" (reduce AI fatigue).** `done` 2026-06-15 (commits 6d241bc + 16f6ef9 on `funnel-preview-protections-logo-map`; deployed + verified live). Tool/nav/breadcrumb = **"Website Drafter"** (was "AI Builder"/"AI Website Builder"); output noun stays **"a website draft"**. Hero "Start With a Free Website Draft"; Zeno = "website draft assistant"; overlay "Zeno is drafting…" / reveal "Your draft is ready"; CTA "Get My Free Draft". Dropped the word **"first"** (implied more drafts) and **removed the "N of 3 free drafts left" banner** — the 3-gen cap is still enforced server-side but no longer advertised (owner: don't lead them to make more). Hosting line = "we host it for you on your own domain." Preserved all IDs/names/endpoints/routes/`gtag` names. NOTE: only on `funnel-preview-protections-logo-map`, **not merged to main**.
+
 ### P2 — Hardening / polish
 - **Resync / fix local working clone:** `git reset --hard origin/main` is blocked by Permission-denied unlinking FTP-written `previews/` files (owned by another uid). Needs sudo/chown or a fresh clone. Cosmetic — remote+prod authoritative. `todo`
 - Version-control the `previews/samples/*` HTML (currently prod-only, like all samples). `todo`

@@ -1,5 +1,5 @@
 # Current State — Izende Studio Web
-Last updated: 2026-06-14
+Last updated: 2026-06-16
 
 ## Product
 - What it does: Professional web design, hosting, and digital marketing services for businesses in St. Louis, Missouri, and Illinois. Includes consultation booking, portfolio showcase, blog integration, and client management.
@@ -57,7 +57,14 @@ Last updated: 2026-06-14
 
 ## AI Website Builder Funnel (added 2026-06-13)
 
-**Product:** Prospect describes their business → AI (GLM-5) generates a live single-page website preview (with a real Gemini hero photo + AI logo icon) → "Claim this site" → pays in WHMCS/PayPal → site auto-provisions onto Izende cPanel hosting. Static site = bait; recurring cPanel hosting = the product. Hard requirement: fully automated, no babysitting. Pilot: a massage therapist who owns a domain.
+**Public positioning (2026-06-15): "Website Drafter."** To reduce AI fatigue, the funnel is branded
+around the OUTCOME (a website draft), not the tech. Tool/nav/breadcrumb = "Website Drafter"; the prospect
+gets "a website draft" / "your draft" (NOT "first draft" — that implied more). GLM/Gemini still power it,
+but visible "AI" copy is minimized; Zeno is the "website draft assistant." The 3-generation cap is enforced
+server-side but NOT advertised (no count banner). Internals (file `ai-website-builder.php`, `/ai-website-builder`
+URL, form/IDs/endpoints, `gtag('ai_builder_*')`) are unchanged. Lives on branch `funnel-preview-protections-logo-map`.
+
+**Product:** Prospect describes their business → the Website Drafter (GLM-5) prepares a live single-page website draft (with a real Gemini hero photo + logo) → "Claim this site" → pays in WHMCS/PayPal → site auto-provisions onto Izende cPanel hosting. Draft = hook; recurring cPanel hosting = the product. Hard requirement: fully automated, no babysitting. Pilot: a massage therapist who owns a domain.
 
 ### Pipeline (as-built, NOT n8n)
 - Intake: `ai-website-builder.php` → `api/site-builder-leads.php` → Supabase `site_builder_leads` (status=pending).
@@ -88,3 +95,10 @@ Stages 1, 2, 3(static hook), 4(AI editor — presets + queued chat edits, live r
 - **Business name** strips legal suffixes (LLC/Inc) at client + server + generator. **Client emails** now use the office line (314) 312-6441 (886-6356 = AI booking agent; on-page web numbers unchanged).
 - **Showcase** now covers all 5 vibes (added Professional & Corporate → Coastal Tax sample in `previews/samples/`).
 - **Version control:** the entire previously-untracked funnel was checked into git — PR #1 (feature work) + PR #2 (funnel + working tree) merged to `main` (`34d8cc7`); `main` now reflects production. NOTE: a local working clone may sit behind `origin/main` because FTP-written `previews/` files (owned by another uid) block `git reset --hard` without elevated perms — cosmetic only; remote + prod are authoritative.
+
+### Approved positioning change — AI fatigue reduction (added 2026-06-16)
+- Owner approved repositioning the funnel away from front-facing "AI Website Builder" / "AI web designer" language and toward **Website Draft by Izende** / **Start with a website draft**.
+- Strategic rationale: prospects may have AI fatigue and interpret heavy AI/Zeno language as "another AI widget." The value proposition should lead with outcome: **stop staring at a blank page, get a usable first draft, then refine/launch with Izende**.
+- Zeno should stay, but be reframed as a **website draft assistant** that organizes ideas into a first version, not the primary product and not an "AI web designer" hero.
+- AI/automation can remain as lower-level support copy: "powered by smart automation" / "guided by Zeno" / "refined with human strategy." Do not hide technology, but do not make it the headline.
+- Main target files for copy pass: `ai-website-builder.php` (hero, meta, breadcrumbs, form helper text, Zeno sidebar/showcase, build overlay/reveal strings) and light polish in `claim-site.php` (draft language in plan context). Preserve form IDs/classes/JS selectors and funnel behavior.
