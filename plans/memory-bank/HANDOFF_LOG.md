@@ -794,3 +794,11 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Result: SUCCESS, live. WHMCS checkout now matches the Website Drafter funnel (no "AI"/"AI-built").
 - Note: plain hyphens used (not em-dash) to avoid the prior mojibake; product names render live from DB (no template cache to clear).
 - Updated memory files: HANDOFF_LOG.md.
+
+---
+- Date: 2026-06-16
+- Agent: CODE (Opus 4.8)
+- Scope worked: Finalize WHMCS product brand naming. Sequence this session: dropped "AI Website" -> generic (owner: missing brand) -> "Website Drafter -" (owner: should be Draft not Drafter) -> FINAL "Website Draft - <tier>". Live WHMCS DB via temp prod script (deleted):
+  - pid14 "Website Draft - Get Online", pid15 "Website Draft - Grow It Yourself (WordPress)", pid16 "Website Draft - We Run It For You (Managed WordPress)". Descriptions use "website draft" language. Read-back confirmed.
+- Brand convention settled: "Website Drafter" = the TOOL (nav/breadcrumb/Zeno = draft assistant); "a website draft" = the OUTPUT; PRODUCTS/plans = "Website Draft - <tier>". No "AI" anywhere customer-facing (site + WHMCS).
+- Updated memory files: HANDOFF_LOG.md.
