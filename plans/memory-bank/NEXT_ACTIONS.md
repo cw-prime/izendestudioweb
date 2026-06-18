@@ -4,6 +4,7 @@ Last updated: 2026-06-14 (AI Website Builder funnel)
 ## AI Website Builder Funnel — Active Queue (2026-06-14)
 
 ### Owner-gated (cannot complete without owner action)
+- **[OWNER] Verify the free-first-year-domain offer at a live checkout.** `todo` — WHMCS Free Domain was enabled on products 14/15/16 (freedomain='1', all billing terms incl. monthly, tld='.com'; .com is eNom-registrable). Test: claim-site → Choose Get Online → register a NEW .com → confirm first year shows **$0.00** + renewal price still visible; spot-check 15/16; confirm the existing-domain path still works. If $0.00 doesn't show: WHMCS → Utilities → System Cleanup (clear template cache) and re-test; if still off, toggle Free Domain once via the WHMCS product UI to capture the exact field encoding. (Copy already live: claim-site.php + configureproductdomain.tpl note.)
 - **[OWNER] Run one live paid order through WHMCS/PayPal — STATIC (pid14)** to prove the money loop end-to-end (account create → hook → site deploy + mailbox → converted). `todo` — still the only true end-to-end proof.
 - **[OWNER] Run one live paid order — WORDPRESS (pid15)** to prove auto WP install+seed + mailbox on a real domain. `todo`
 - **[OWNER] Enable glm-5.2 access in z.ai**, then A/B vs glm-5. `todo`

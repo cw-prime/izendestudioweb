@@ -768,3 +768,16 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Tests/lint: php -l clean; deployed via FTP (226); live verified — 0 "first draft", "on your own domain" present.
 - Result: SUCCESS, live. Branch funnel-preview-protections-logo-map now at 16f6ef9 (still not merged to main).
 - Updated memory files: HANDOFF_LOG.md, NEXT_ACTIONS.md, CURRENT_STATE.md.
+
+---
+- Date: 2026-06-16
+- Agent: CODE (Opus 4.8)
+- Scope worked: Site Drafter free-first-year-domain offer — enable WHMCS Free Domain on products 14/15/16 (per plans/claude-whmcs-site-drafter-domain-offer.md; Codex couldn't reach the DB). Owner chose: free domain eligible on MONTHLY (matches the cards), set via prod script.
+- What was already in place (copy): claim-site.php promise + adminIzende/templates/orderforms/standard_cart/configureproductdomain.tpl note ("First-year registration is included…").
+- Change made (LIVE WHMCS DB, via temp token-guarded prod script, deleted after): tblproducts 14/15/16 set freedomain='1', freedomainpaymentterms='monthly,quarterly,semiannually,annually,biennially,triennially', freedomaintlds='.com'. Read-back confirmed all 3. No other products touched.
+- Recon facts: freedomain/freedomainpaymentterms/freedomaintlds are TEXT cols; were all empty; no other product had it enabled (so no known-good format to copy — used WHMCS-standard values). .com IS registrable (tbldomainpricing autoreg='enom'), so a free .com can actually process. Cart DOES present a domain step for these products ("Choose a Domain").
+- DB access note (clears up confusion): editing WHMCS works the SAME way as the prior $20-addon/mojibake/showorder edits — a temp token-guarded PHP script ON PROD hitting the WHMCS DB. A shell `localhost` mysqli from the LOCAL box is denied (DB is on prod) — that was Codex's blocker, not bad creds. ModSecurity 406s non-browser UAs and the site 301s .php→extensionless, so prod scripts need a browser UA + curl -L. Token must be self-contained in the script (local PREVIEW_DEPLOY_SECRET != prod's).
+- Tests: read-back values confirmed written. NOT yet confirmed end-to-end: an actual checkout showing the .com at $0.00 (needs a real register-a-domain cart flow / eNom availability — left as a quick owner eyeball). The added .tpl note did not render on the confproduct dump (WHMCS Smarty template cache may need a System Cleanup, and/or it renders on a later step) — cosmetic; free pricing is driven by the DB config, not the note.
+- Result: SUCCESS (config applied). Verification of the live $0.00 pending an owner checkout test.
+- Follow-up: OWNER 30-sec test — claim-site → Choose Get Online (pid14) → register a new .com → confirm first year $0.00 and renewal price still visible; repeat-spot 15/16; confirm existing-domain path still works. If $0.00 doesn't show, WHMCS Utilities → System Cleanup (clear template cache) and re-test; if still off, the freedomain field encoding may need a tweak (set via the WHMCS product UI once to capture the exact format).
+- Updated memory files: HANDOFF_LOG.md, NEXT_ACTIONS.md.

@@ -178,6 +178,7 @@
 
                 {if $freedomaintlds}
                     <p>* <em>{$LANG.orderfreedomainregistration} {$LANG.orderfreedomainappliesto}: {$freedomaintlds}</em></p>
+                    <p><em>First-year registration is included with this website plan for eligible domains. Renewal is billed separately each year.</em></p>
                 {/if}
 
             </form>
