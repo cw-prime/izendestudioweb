@@ -66,3 +66,11 @@ After WHMCS product settings are updated:
 
 ## Notes From Codex
 Codex could not verify or update the WHMCS product flags from the shell because the local credentials in `adminIzende/configuration.php` were rejected by MySQL. This handoff assumes Claude will use WHMCS admin access or valid database credentials.
+
+---
+## STATUS: DONE + VERIFIED (2026-06-16)
+- WHMCS Free Domain enabled on products 14/15/16: "free registration/transfer only (renew as normal)" (first-year free, renewal billed), eligible terms incl. Monthly, TLD `.com`.
+- Fixed a pre-existing bad `.com` price ($177.98/yr) -> set register+renew to **$24.99/yr** (1yr 24.99 / 2yr 49.98 / 3yr 74.97). (Was briefly $18.99; bumped per owner.)
+- Verified live at checkout: Website Draft - Get Online ($39/mo) + new `.com` = **$0.00 first year, Renewal ~$24.99/yr**. Existing-domain path unaffected.
+- Copy already matched ("first-year registration included; renewals billed separately") — no copy change needed.
+- All WHMCS edits done via temp token-guarded prod scripts (deleted after); DB reachable only from prod, not the local box.

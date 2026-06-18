@@ -802,3 +802,11 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
   - pid14 "Website Draft - Get Online", pid15 "Website Draft - Grow It Yourself (WordPress)", pid16 "Website Draft - We Run It For You (Managed WordPress)". Descriptions use "website draft" language. Read-back confirmed.
 - Brand convention settled: "Website Drafter" = the TOOL (nav/breadcrumb/Zeno = draft assistant); "a website draft" = the OUTPUT; PRODUCTS/plans = "Website Draft - <tier>". No "AI" anywhere customer-facing (site + WHMCS).
 - Updated memory files: HANDOFF_LOG.md.
+
+---
+- Date: 2026-06-16
+- Agent: CODE (Opus 4.8)
+- Scope worked: Free-domain offer VERIFIED + finalized. Root cause of the earlier "Renewal $0.00" cart line was NOT the free-domain config (it was correctly "registration/transfer only - renew as normal" on 14/15/16) but a pre-existing junk `.com` price ($177.98/yr). Fixed `.com` register+renew in tblpricing (relid=1, USD): first to $18.99, then to $24.99/yr per owner (2yr 49.98, 3yr 74.97). Owner confirmed Free Domain tab on product 14 shows the correct middle radio + Monthly + .com.
+- Verified live: Website Draft - Get Online ($39/mo) + new .com -> $0.00 first year, Renewal ~$24.99/yr. Offer now matches the claim-page copy.
+- All via temp token-guarded prod scripts (deleted). plans/claude-whmcs-site-drafter-domain-offer.md updated with STATUS: DONE.
+- Updated memory files: HANDOFF_LOG.md, NEXT_ACTIONS.md, plans/claude-whmcs-site-drafter-domain-offer.md.
