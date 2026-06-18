@@ -781,3 +781,16 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Result: SUCCESS (config applied). Verification of the live $0.00 pending an owner checkout test.
 - Follow-up: OWNER 30-sec test — claim-site → Choose Get Online (pid14) → register a new .com → confirm first year $0.00 and renewal price still visible; repeat-spot 15/16; confirm existing-domain path still works. If $0.00 doesn't show, WHMCS Utilities → System Cleanup (clear template cache) and re-test; if still off, the freedomain field encoding may need a tweak (set via the WHMCS product UI once to capture the exact format).
 - Updated memory files: HANDOFF_LOG.md, NEXT_ACTIONS.md.
+
+---
+- Date: 2026-06-16
+- Agent: CODE (Opus 4.8)
+- Scope worked: Remove "AI" branding from the WHMCS store (completes the Website Drafter reposition per the plan doc's Site Drafter Language Requirement). Customer-facing product names/descriptions at checkout still said "AI Website".
+- Change (LIVE WHMCS DB via temp token-guarded prod script, deleted after; parameterized + utf8mb4):
+  - pid 14 name "AI Website" -> "Website Hosting - Get Online"; desc "built for you by AI" -> "the website draft we prepared for you ... go live on your own domain. Includes managed cPanel hosting."
+  - pid 15 name "AI Website - WordPress" -> "WordPress Website - Grow It Yourself"; desc dropped "custom AI-built" -> "Your website draft rebuilt as a WordPress site...".
+  - pid 16 name "AI Website - Managed WordPress" -> "Managed WordPress - We Run It For You"; desc unchanged (had no AI).
+  - Read-back confirmed; AI-branding count in 14/15/16 = 0. Product groups + addons had no AI wording. Hook gates by pid (not name), so renames are safe.
+- Result: SUCCESS, live. WHMCS checkout now matches the Website Drafter funnel (no "AI"/"AI-built").
+- Note: plain hyphens used (not em-dash) to avoid the prior mojibake; product names render live from DB (no template cache to clear).
+- Updated memory files: HANDOFF_LOG.md.
