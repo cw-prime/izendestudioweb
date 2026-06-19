@@ -204,6 +204,14 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     @keyframes izSpin{to{transform:rotate(360deg)}}
     @media (max-width:480px){.iz-analyze-row{flex-direction:column}}
     @media (prefers-reduced-motion: reduce){.iz-spin{animation:none}}
+    /* Free-draft counter pill + improvement chips */
+    .iz-draftcount{display:inline-flex;align-items:center;gap:7px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;border-radius:999px;padding:7px 16px;font-size:14px;font-weight:600;margin:0 0 16px}
+    .iz-draftcount strong{color:#047857}
+    .iz-improve{margin-top:10px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px}
+    .iz-improve-head{font-size:13px;font-weight:600;color:#475569;margin-bottom:8px}
+    .iz-chips{display:flex;flex-wrap:wrap;gap:8px}
+    .iz-chip{font-size:13px;font-weight:600;color:#1e293b;background:#fff;border:1px solid #cbd5e1;border-radius:999px;padding:6px 13px;cursor:pointer;transition:background .12s,border-color .12s}
+    .iz-chip:hover,.iz-chip:focus-visible{background:#eff6ff;border-color:#2563eb;color:#1d4ed8}
   </style>
 </head>
 
@@ -289,6 +297,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
         <div class="row">
           <div class="col-lg-7">
             <div class="section-title">
+              <div class="badge bg-success text-white px-3 py-2 rounded-pill mb-3" style="font-weight: 500; letter-spacing: 0.5px;">Free Preview &bull; No Credit Card Required</div>
               <h2>Start With a Free Website Draft — Live in 2 Minutes</h2>
               <p>Tell us about your business and we'll put together a real, live draft of your website — no page builders, no blank page to stare at. Like what you see? We host it for you, right here.</p>
             </div>
@@ -301,6 +310,14 @@ SEOHelper::outputMetaTags('ai-website-builder', [
               <a class="btn btn-primary btn-lg" href="claim-site.php"><i class="bi bi-magic"></i> Claim your site</a>
             </div></div>
 <?php else: ?>
+            <div class="iz-draftcount">
+              <i class="bi bi-stars"></i>
+              <?php if ((int) $genCap['used'] > 0): ?>
+                You have <strong><?= $genRemaining ?> of <?= IZ_GEN_LIMIT ?></strong> free drafts left
+              <?php else: ?>
+                <strong><?= IZ_GEN_LIMIT ?> free drafts</strong> included — refine yours until it feels right
+              <?php endif; ?>
+            </div>
             <div class="card shadow-sm">
               <div class="card-body p-4">
                 <form id="aiBuilderForm" novalidate>
@@ -325,7 +342,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                         <input type="text" inputmode="url" class="form-control" id="izAnalyzeUrl" placeholder="yourcurrentsite.com" autocomplete="off">
                         <button type="button" class="btn btn-outline-primary" id="izAnalyzeBtn"><i class="bi bi-magic"></i> Analyze</button>
                       </div>
-                      <small class="iz-analyze-note" id="izAnalyzeNote">Paste your current site and our AI will draft your description below — edit anything you like.</small>
+                      <small class="iz-analyze-note" id="izAnalyzeNote">Paste your current site and Site Drafter will draft your description below — edit anything you like.</small>
                     </div>
 
                     <div class="mb-3">
@@ -339,6 +356,18 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                       <textarea class="form-control" name="business_description" rows="7" style="min-height:160px;resize:vertical" maxlength="2000"
                         placeholder="e.g. We're a [type of business] in [city] offering [your main services or products]. Tell us anything you want on the site — services, hours, pricing, photos, online booking, contact info — plus the look or tone you're going for." required></textarea>
                       <small class="text-muted">Describe your business and tell us exactly what to include — the more detail, the better your draft.</small>
+<?php if ((int) $genCap['used'] > 0): ?>
+                      <div class="iz-improve">
+                        <div class="iz-improve-head">💡 Make this draft even better — tap to add detail:</div>
+                        <div class="iz-chips">
+                          <button type="button" class="iz-chip" data-add="We offer: [list your main services]. ">Your top services</button>
+                          <button type="button" class="iz-chip" data-add="We serve [your city / service area]. ">Your city / area</button>
+                          <button type="button" class="iz-chip" data-add="Hours: [your hours]. Call: [your phone]. ">Hours &amp; phone</button>
+                          <button type="button" class="iz-chip" data-add="Make the design bold and colorful. ">A bolder look</button>
+                          <button type="button" class="iz-chip" data-add="Include a short customer testimonial. ">A short testimonial</button>
+                        </div>
+                      </div>
+<?php endif; ?>
                     </div>
 
                     <div class="wiz-nav">
@@ -356,7 +385,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                           <span class="vibe-card-inner">
                             <span class="vibe-swatches"><span class="s1"></span><span class="s2"></span><span class="s3"></span><span class="s4"></span></span>
                             <span class="vibe-aa"><i class="bi bi-magic"></i></span>
-                            <span class="vibe-label">Let the AI choose</span>
+                            <span class="vibe-label">Let Site Drafter choose</span>
                           </span>
                         </label>
                       </div>
@@ -419,7 +448,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                       <input type="file" class="form-control" id="izLogoFile" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:300px">
                       <span id="izLogoSwatches" class="d-flex gap-1"></span>
                     </div>
-                    <small class="text-muted d-block mt-1" id="izLogoNote">We'll feature your logo on the site — and if you let the AI choose the style, we'll match your brand colors.</small>
+                    <small class="text-muted d-block mt-1" id="izLogoNote">We'll feature your logo on the site — and if you let Site Drafter choose the style, we'll match your brand colors.</small>
                   </div>
 
                     <div class="wiz-nav">
@@ -459,6 +488,9 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                       <i class="bi bi-magic"></i> Get My Free Draft
                     </button>
                   </div>
+                  <div class="text-center text-muted small mt-3">
+                    <i class="bi bi-shield-check text-success"></i> No credit card required. Free, fast preview.
+                  </div>
 
                   <div id="aiBuilderMessage" class="mt-3"></div>
                   </div>
@@ -472,7 +504,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
             <div class="card bg-light mt-4 mt-lg-0">
               <div class="card-body p-4">
                 <div class="ai-bot-wrap">
-                  <svg class="ai-bot" viewBox="0 0 48 48" role="img" aria-label="AI website builder">
+                  <svg class="ai-bot" viewBox="0 0 48 48" role="img" aria-label="Website draft assistant">
                     <line class="ai-bot-antenna" x1="24" y1="6" x2="24" y2="12"></line>
                     <circle class="ai-bot-dot" cx="24" cy="5" r="2.6"></circle>
                     <rect class="ai-bot-body" x="9" y="12" width="30" height="26" rx="7"></rect>
@@ -699,7 +731,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                     var swatch = '';
                     (j.brand_colors || []).forEach(function(c){ swatch += '<span style="display:inline-block;width:16px;height:16px;border-radius:4px;border:1px solid #cbd5e1;background:'+c+'"></span>'; });
                     if (sw) sw.innerHTML = swatch;
-                    note.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Logo added' + ((j.brand_colors && j.brand_colors.length) ? ' — we’ll match these colors if you let the AI choose the style.' : '.');
+                    note.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Logo added' + ((j.brand_colors && j.brand_colors.length) ? ' — we’ll match these colors if you let Site Drafter choose the style.' : '.');
                     note.className = 'text-muted d-block mt-1';
                 } else {
                     window.izLogoUrl = ''; window.izBrandColors = [];
@@ -711,6 +743,21 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                 note.textContent = 'Upload failed — please try again.';
                 note.className = 'text-danger d-block mt-1';
             });
+      });
+  })();
+
+  /* ---- "Make this draft better" chips -> append to the description ---- */
+  (function(){
+      var chipsWrap = document.querySelector('.iz-improve .iz-chips');
+      var desc = document.querySelector('[name="business_description"]');
+      if (!chipsWrap || !desc) { return; }
+      chipsWrap.addEventListener('click', function(e){
+          var chip = e.target.closest ? e.target.closest('.iz-chip') : null;
+          if (!chip) { return; }
+          var add = chip.getAttribute('data-add') || '';
+          var cur = desc.value.replace(/\s+$/, '');
+          desc.value = (cur ? cur + ' ' : '') + add;
+          try { desc.focus(); desc.setSelectionRange(desc.value.length, desc.value.length); } catch(_){}
       });
   })();
 
