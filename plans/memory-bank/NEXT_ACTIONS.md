@@ -33,7 +33,7 @@ Last updated: 2026-06-20 (Website Drafter funnel)
 - **Business name** legal-suffix strip (client+server+generator); **client emails** → office line (314) 312-6441; checkout font fix.
 - **Professional & Corporate showcase sample** added (all 5 vibes covered).
 - **Funnel checked into git** for the first time — PR #1 + PR #2 merged to `main` (`34d8cc7`).
-- **Generation/customize waiting UX + carryover fixes** — 2:00 countdowns on page generation and Customize edits; preview claim bar shows remaining free drafts; draft-count coaching copy only appears after one generation; hidden honeypot no longer renders visibly; Customize colour/font presets persist into `generated_html` before claim.
+- **Generation/customize waiting UX + carryover fixes** — 2:00 countdowns on page generation and Customize edits; builder form no longer shows draft-count/detail coaching UI; completed preview claim bar shows remaining free drafts plus "add more detail for better results"; hidden honeypot no longer renders visibly; Customize colour/font presets persist into `generated_html` before claim.
 
 ---
 

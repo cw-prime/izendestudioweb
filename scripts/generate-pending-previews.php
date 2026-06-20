@@ -608,7 +608,7 @@ function injectClaimBar($html, $slug = '', $createdAt = '') {
         . '<script>(function(){var el=document.getElementById("izende-claim-countdown");if(!el)return;var exp=' . $expiryMs . ';'
         . 'function tick(){var left=Math.max(0,exp-Date.now());var days=Math.max(0,Math.ceil(left/86400000));'
         . 'el.textContent="Reserved for you — "+days+" day"+(days===1?"":"s")+" left";}tick();'
-        . 'var dc=document.getElementById("izende-draft-count");if(dc&&window.fetch){fetch("/api/generation-count.php",{cache:"no-store",credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){if(j&&j.success){dc.textContent=j.remaining+" of "+j.limit+" free drafts left";}}).catch(function(){dc.textContent="Draft count on builder page";});}})();</script>';
+        . 'var dc=document.getElementById("izende-draft-count");if(dc&&window.fetch){fetch("/api/generation-count.php",{cache:"no-store",credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){if(j&&j.success){dc.textContent=j.remaining+" of "+j.limit+" free drafts left — add more detail for better results";}}).catch(function(){dc.textContent="Draft count available after preview";});}})();</script>';
     if (stripos($html, '</body>') !== false) {
         return preg_replace('/<\/body>/i', $bar . '</body>', $html, 1);
     }

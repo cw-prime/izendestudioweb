@@ -220,14 +220,6 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     @keyframes izSpin{to{transform:rotate(360deg)}}
     @media (max-width:480px){.iz-analyze-row{flex-direction:column}}
     @media (prefers-reduced-motion: reduce){.iz-spin{animation:none}}
-    /* Free-draft counter pill + improvement chips */
-    .iz-draftcount{display:inline-flex;align-items:center;gap:7px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;border-radius:999px;padding:7px 16px;font-size:14px;font-weight:600;margin:0 0 16px}
-    .iz-draftcount strong{color:#047857}
-    .iz-improve{margin-top:10px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px}
-    .iz-improve-head{font-size:13px;font-weight:600;color:#475569;margin-bottom:8px}
-    .iz-chips{display:flex;flex-wrap:wrap;gap:8px}
-    .iz-chip{font-size:13px;font-weight:600;color:#1e293b;background:#fff;border:1px solid #cbd5e1;border-radius:999px;padding:6px 13px;cursor:pointer;transition:background .12s,border-color .12s}
-    .iz-chip:hover,.iz-chip:focus-visible{background:#eff6ff;border-color:#2563eb;color:#1d4ed8}
     .form-field-hp{display:none!important;position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
   </style>
 </head>
@@ -335,12 +327,6 @@ SEOHelper::outputMetaTags('ai-website-builder', [
               <a class="btn btn-primary btn-lg" href="claim-site.php"><i class="bi bi-magic"></i> Claim your site</a>
             </div></div>
 <?php else: ?>
-<?php if ((int) $genCap['used'] > 0): ?>
-            <div class="iz-draftcount">
-              <i class="bi bi-stars"></i>
-              You have <strong><?= $genRemaining ?> of <?= IZ_GEN_LIMIT ?></strong> free drafts left — add more detail for better results
-            </div>
-<?php endif; ?>
             <div class="card shadow-sm">
               <div class="card-body p-4">
                 <form id="aiBuilderForm" novalidate>
@@ -379,16 +365,6 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                       <textarea class="form-control" name="business_description" rows="7" style="min-height:160px;resize:vertical" maxlength="2000"
                         placeholder="e.g. We're a [type of business] in [city] offering [your main services or products]. Tell us anything you want on the site — services, hours, pricing, photos, online booking, contact info — plus the look or tone you're going for." required></textarea>
                       <small class="text-muted">Describe your business and tell us exactly what to include — the more detail, the better your draft.</small>
-                      <div class="iz-improve">
-                        <div class="iz-improve-head">Make this draft better — tap to add detail:</div>
-                        <div class="iz-chips">
-                          <button type="button" class="iz-chip" data-add="We offer: [list your main services]. ">Your top services</button>
-                          <button type="button" class="iz-chip" data-add="We serve [your city / service area]. ">Your city / area</button>
-                          <button type="button" class="iz-chip" data-add="Hours: [your hours]. Call: [your phone]. ">Hours &amp; phone</button>
-                          <button type="button" class="iz-chip" data-add="Make the design bold and colorful. ">A bolder look</button>
-                          <button type="button" class="iz-chip" data-add="Include a short customer testimonial. ">A short testimonial</button>
-                        </div>
-                      </div>
                     </div>
 
                     <div class="wiz-nav">
@@ -764,21 +740,6 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                 note.textContent = 'Upload failed — please try again.';
                 note.className = 'text-danger d-block mt-1';
             });
-      });
-  })();
-
-  /* ---- "Make this draft better" chips -> append to the description ---- */
-  (function(){
-      var chipsWrap = document.querySelector('.iz-improve .iz-chips');
-      var desc = document.querySelector('[name="business_description"]');
-      if (!chipsWrap || !desc) { return; }
-      chipsWrap.addEventListener('click', function(e){
-          var chip = e.target.closest ? e.target.closest('.iz-chip') : null;
-          if (!chip) { return; }
-          var add = chip.getAttribute('data-add') || '';
-          var cur = desc.value.replace(/\s+$/, '');
-          desc.value = (cur ? cur + ' ' : '') + add;
-          try { desc.focus(); desc.setSelectionRange(desc.value.length, desc.value.length); } catch(_){}
       });
   })();
 

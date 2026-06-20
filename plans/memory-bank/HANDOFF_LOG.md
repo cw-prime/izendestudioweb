@@ -373,6 +373,19 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Updated memory files: `plans/memory-bank/CURRENT_STATE.md`, `plans/memory-bank/NEXT_ACTIONS.md`, `plans/memory-bank/HANDOFF_LOG.md`
 
 ---
+- Date: 2026-06-20
+- Agent: Codex
+- Scope worked: Follow-up correction to Website Drafter detail/coaching placement after owner clarified it should not appear on the builder form.
+- Files changed:
+  - `ai-website-builder.php` — removed the builder-side free-draft coaching/count pill and the "Make this draft better" quick-detail chip block/JS.
+  - `scripts/generate-pending-previews.php` — completed preview claim bar now appends "add more detail for better results" to the remaining-drafts line.
+  - `plans/memory-bank/CURRENT_STATE.md`, `plans/memory-bank/NEXT_ACTIONS.md`, `plans/memory-bank/HANDOFF_LOG.md` — corrected memory bank to reflect preview-only coaching.
+- Tests/lint/typecheck run: `php -l ai-website-builder.php`; `php -l scripts/generate-pending-previews.php`; live `/ai-website-builder` HTTP 200 and contains no `iz-draftcount`, `iz-improve`, `iz-chip`, `Make this draft better`, or `add more detail for better results`; live `/previews/aquarius-wellness-2/` HTTP 200 and contains `izende-draft-count` plus "add more detail for better results".
+- Result: SUCCESS. Deployed to production via FTPS.
+- Risks introduced: Low; normal textarea helper copy remains on the builder, but the separate draft-count/detail coaching UI is preview-only now.
+- Updated memory files: `plans/memory-bank/CURRENT_STATE.md`, `plans/memory-bank/NEXT_ACTIONS.md`, `plans/memory-bank/HANDOFF_LOG.md`
+
+---
 
 - Date: 2026-06-12T23:10:00Z
 - Agent: CODE (live session — state snapshot before context compaction)
