@@ -220,6 +220,8 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     @keyframes izSpin{to{transform:rotate(360deg)}}
     @media (max-width:480px){.iz-analyze-row{flex-direction:column}}
     @media (prefers-reduced-motion: reduce){.iz-spin{animation:none}}
+    .claim-card-icon{width:46px;height:46px;margin:0 auto 10px;border-radius:50%;display:grid;place-items:center;background:#eff6ff;color:#2563eb}
+    .claim-card-icon svg{width:24px;height:24px;display:block}
     .form-field-hp{display:none!important;position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
   </style>
 </head>
@@ -321,7 +323,12 @@ SEOHelper::outputMetaTags('ai-website-builder', [
 
 <?php if ($genExhausted): ?>
             <div class="card shadow-sm"><div class="card-body p-4 text-center">
-              <div style="font-size:42px;line-height:1" aria-hidden="true">🎉</div>
+              <div class="claim-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                  <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" fill="currentColor"/>
+                  <path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2zM5.5 14l.6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7-1.7-.6 1.7-.6.6-1.7z" fill="currentColor" opacity=".65"/>
+                </svg>
+              </div>
               <h3 class="mt-2">Ready to make it yours?</h3>
               <p class="text-muted mb-4">Claim your draft and you can edit and build as much as you like — hosting, your own domain, a free professional email and more, all set up for you.</p>
               <a class="btn btn-primary btn-lg" href="claim-site.php"><i class="bi bi-magic"></i> Claim your site</a>
@@ -963,7 +970,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer); clearInterval(countdownTimer);
       barFill.style.width = '100%';
       Array.prototype.forEach.call(document.querySelectorAll('#buildTasks .bt'), function (li) { li.classList.remove('active'); li.classList.add('done'); });
-      stepEl.textContent = 'Your draft is ready 🎉';
+      stepEl.textContent = 'Your draft is ready';
       if (countdownEl) { countdownEl.innerHTML = '<b>Ready now</b>'; }
       frame.src = url;
       frame.addEventListener('load', function () { frame.classList.add('sharp'); }, { once: true });
