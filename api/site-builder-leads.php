@@ -155,7 +155,7 @@ $spamCheck = SpamProtection::validateSubmission('site_builder', $data, [
 if ($spamCheck['is_spam']) {
     siteBuilderLog('Spam blocked submission', ['reason' => $spamCheck['reason'], 'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown']);
     http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Your submission was flagged as spam. Please call us directly if this is a mistake.']);
+    echo json_encode(['success' => false, 'message' => "Hmm — that didn't go through. Please give it another try, or call us at (314) 312-6441 and we'll get your draft started."]);
     exit;
 }
 
