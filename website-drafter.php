@@ -17,6 +17,12 @@ require_once __DIR__ . '/includes/gen-cap.php';
 initSecureSession();
 setSecurityHeaders();
 
+if (isset($_GET['reset_drafts'])) {
+    iz_gen_clear();
+    header('Location: /website-drafter', true, 302);
+    exit;
+}
+
 $nonce = getCSPNonce();
 $recaptchaSiteKey = getEnv('RECAPTCHA_SITE_KEY', '');
 $genCap = iz_gen_read();          // ['used'=>n,'remaining'=>r]

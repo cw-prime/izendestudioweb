@@ -53,3 +53,18 @@ function iz_gen_bump() {
     $_COOKIE['iz_genc'] = $val;
     return $used;
 }
+
+/** Clear the visitor's signed generation-count cookie. */
+function iz_gen_clear() {
+    $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+    if (!headers_sent()) {
+        setcookie('iz_genc', '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'secure'   => $secure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
+    unset($_COOKIE['iz_genc']);
+}
