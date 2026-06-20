@@ -120,6 +120,9 @@ brief.
 Output rules (CRITICAL):
 - Return ONE complete HTML document and NOTHING else. Start at <!DOCTYPE html> and
   end at </html>. No markdown code fences, no explanation, no preamble.
+- Keep the document compact and complete. Target 10k-18k characters. Do not overbuild
+  huge decorative SVGs, app mockups, long animations, or excessive sections that risk
+  truncation. A polished complete page is better than an ambitious broken page.
 - Everything inline in that one file: a single <style> block in <head>. No external
   build step, no JS frameworks. A small amount of vanilla JS is fine (mobile menu,
   smooth scroll) but the site must look and work with JS disabled.
@@ -143,7 +146,8 @@ arrangement):
 - A striking hero (headline + one-line subhead + primary CTA) built per the Hero
   style named in the Design Direction. The first viewport must never feel empty:
   include visible headline copy, supporting copy, and a CTA above the fold on both
-  desktop and mobile. Do not leave a blank 40-60% column beside an image.
+  desktop and mobile. Do not leave a blank 40-60% column beside an image. Avoid
+  clipped diagonal photo panels unless the headline is visibly overlaid on the image.
 - An about/story section in the business's voice (2-3 short paragraphs).
 - The services/offerings, presented in the layout named in the Design Direction.
   Include prices ONLY if the brief implies them; otherwise describe without inventing.
@@ -152,8 +156,9 @@ arrangement):
 - A contact or booking section (see ONLINE BOOKING below) with a click-to-call tel:
   link and a mailto: link.
 - A footer with copyright + the business name.
-You MAY add extra sections that fit (gallery, a "how it works"/process strip, an FAQ,
-a stats band). Use distinctive section dividers/shapes — not plain stacked grey blocks.
+You MAY add one extra section that fits (gallery, a "how it works"/process strip, an
+FAQ, a stats band). Use distinctive section dividers/shapes — not plain stacked grey
+blocks.
 
 Theming contract (REQUIRED):
 - Define ALL colors and fonts as CSS custom properties on :root, using EXACTLY
@@ -207,8 +212,13 @@ Accuracy & editability (CRITICAL — this is a preview the owner will personaliz
 - Never render legal suffixes (LLC, Inc., Corp., Ltd., Co.) in the brand name shown on the site — use the plain business name.
 PROMPT;
 
+    $description = (string) ($lead['business_description'] ?? '');
+    if (strlen($description) > 5200) {
+        $description = substr($description, 0, 5200) . "\n\n[Input trimmed for draft speed. Preserve the main services and offers above.]";
+    }
+
     $user = 'Business name: ' . $lead['business_name'] . "\n"
-        . 'What the business does: ' . $lead['business_description'] . "\n"
+        . 'What the business does: ' . $description . "\n"
         . 'Style / vibe: ' . (!empty($lead['style_vibe']) ? $lead['style_vibe'] : 'choose the most fitting style for this business') . "\n"
         . 'Contact email (for the mailto link): ' . $lead['contact_email'] . "\n"
         . (!empty($lead['contact_phone']) ? 'Contact phone (for the tel link): ' . $lead['contact_phone'] . "\n" : '');
@@ -221,9 +231,8 @@ PROMPT;
     // (and even re-rolls) diverge into genuinely different layouts, not one template.
     $heroArch = [
         'a full-bleed hero with the image behind a rich dark gradient and a large overlaid headline',
-        'a split hero: bold headline + CTA on one side, an image or richly-styled panel on the other',
-        'a centered editorial hero with oversized display type, a thin rule, and lots of whitespace',
-        'an asymmetric hero with an offset headline, floating accent shapes, and a layered/angled image',
+        'a compact editorial hero with oversized display type, a thin rule, and a visible CTA',
+        'an asymmetric hero with an offset headline, floating accent shapes, and a clearly visible CTA',
         'a minimalist statement hero: one huge typographic line, a short subhead, a single CTA',
     ];
     $svcLayout = [
@@ -252,7 +261,7 @@ PROMPT;
 
     if (!empty($heroUrl)) {
         $user .= "\nHERO IMAGE AVAILABLE (a real, on-brand photo was generated for this business): " . $heroUrl . "\n"
-            . "Use it as the hero ONLY if a photographic hero genuinely suits this business and the requested vibe. If a clean typographic / CSS / illustrative hero would look more premium for this brand (e.g. minimal, luxury, or text-forward concepts), prefer that and you may omit the photo entirely. When you DO use it, make it a full-bleed background with a dark gradient overlay so the headline stays legible, and give it a descriptive alt/aria-label. Do NOT place this photo as a split-screen side panel or oversized cropped rectangle beside empty space; if the chosen Hero style says split/asymmetric, use CSS/inline-SVG/typography for the visual side instead. Do not use any OTHER photographic image; for other visuals use CSS gradients/backgrounds and inline SVG.\n";
+            . "Use it as the hero ONLY if a photographic hero genuinely suits this business and the requested vibe. If a clean typographic / CSS / illustrative hero would look more premium for this brand (e.g. minimal, luxury, or text-forward concepts), prefer that and you may omit the photo entirely. When you DO use it, make it a full-bleed background with a dark gradient overlay so the headline stays legible, and give it a descriptive alt/aria-label. Do NOT place this photo as a split-screen side panel, clipped diagonal panel, or oversized cropped rectangle beside empty space. Do not use any OTHER photographic image; for other visuals use CSS gradients/backgrounds and small inline SVG icons only.\n";
     }
 
     if (!empty($logoUrl)) {
@@ -324,7 +333,8 @@ function enrichBrief($lead) {
 function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '') {
     global $glmKey;
     // Zeno expands a thin description into a real brief first (best-effort).
-    $brief = enrichBrief($lead);
+    $rawDescription = trim((string) ($lead['business_description'] ?? ''));
+    $brief = strlen($rawDescription) > 900 ? null : enrichBrief($lead);
     if ($brief !== null) {
         $lead['_brief'] = $brief;
         cronLog('Brief enriched', ['id' => $lead['id'] ?? '', 'chars' => strlen($brief)]);
@@ -332,7 +342,7 @@ function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '') {
     list($system, $user) = buildPrompts($lead, $heroUrl, $logoUrl);
     $payload = [
         'model' => 'glm-5',
-        'max_tokens' => 24000, // bolder layouts + motion = larger output; avoid truncation
+        'max_tokens' => 16000, // keep output complete; huge drafts risk truncation and bad first renders
         'stream' => true,
         'messages' => [
             ['role' => 'system', 'content' => $system],
@@ -379,9 +389,18 @@ function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '') {
     $html = preg_replace('/^\s*```[a-zA-Z]*\s*\n/', '', $html);
     $html = preg_replace('/\n```\s*$/', '', $html);
     $html = trim($html);
+    if (preg_match('/<\/html\s*>/i', $html, $m, PREG_OFFSET_CAPTURE)) {
+        $html = substr($html, 0, $m[0][1] + strlen($m[0][0]));
+    }
 
     if (strlen($html) < 1000 || stripos($html, '<html') === false || stripos(ltrim($html), '<!doctype html') !== 0) {
         return [null, 'output did not look like a complete HTML document (len=' . strlen($html) . ')'];
+    }
+    if (stripos($html, '</body>') === false || stripos($html, '</html>') === false) {
+        return [null, 'output was truncated before closing body/html (len=' . strlen($html) . ')'];
+    }
+    if (preg_match('/<script\b/i', $html) && stripos($html, '</script>') === false) {
+        return [null, 'output contained an unclosed script tag'];
     }
     return [$html, null];
 }
