@@ -80,7 +80,21 @@ SEOHelper::outputMetaTags('ai-website-builder', [
 
     /* ===== Watch-it-build overlay ===== */
     .build-overlay{position:fixed;inset:0;z-index:1080;display:none;background:linear-gradient(160deg,#0b1220 0%,#111c33 55%,#0b1220 100%);color:#fff;overflow:auto}
-    .build-overlay.show{display:block}
+    .build-overlay.show{display:block;animation:overlayIn .42s cubic-bezier(.2,.8,.25,1) both}
+    @keyframes overlayIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
+    @keyframes orbIgnite{0%{transform:scale(.4);box-shadow:0 0 0 0 rgba(56,189,248,.9)}55%{transform:scale(1.18);box-shadow:0 0 0 26px rgba(56,189,248,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,99,235,.45)}}
+    .build-overlay.show .build-orb{animation:orbIgnite .6s cubic-bezier(.2,.85,.3,1) both, orbPulse 2s ease-in-out .6s infinite}
+    /* build task checklist (checks off as the draft comes together) */
+    .build-tasks{list-style:none;margin:16px 0 14px;padding:0;display:inline-block;text-align:left}
+    .build-tasks .bt{display:flex;align-items:center;gap:11px;font-size:.95rem;line-height:1.25;color:#9fb0c9;padding:6px 0;opacity:.5;transition:opacity .35s,color .35s}
+    .build-tasks .bt-ico{flex:0 0 20px;width:20px;height:20px;border-radius:50%;border:2px solid #3a4a63;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;transition:background .3s,border-color .3s}
+    .build-tasks .bt.active{opacity:1;color:#dbe7f8}
+    .build-tasks .bt.active .bt-ico{border-color:#3a4a63;border-top-color:#38bdf8;animation:btSpin .7s linear infinite}
+    .build-tasks .bt.done{opacity:1;color:#e6eefb}
+    .build-tasks .bt.done .bt-ico{background:#16a34a;border-color:#16a34a;animation:checkPop .45s cubic-bezier(.2,.9,.3,1.3) both}
+    .build-tasks .bt.done .bt-ico::after{content:"\2713"}
+    @keyframes btSpin{to{transform:rotate(360deg)}}
+    @keyframes checkPop{0%{transform:scale(.3)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
     .build-close{position:fixed;top:16px;right:18px;z-index:3;background:rgba(255,255,255,.1);border:0;color:#cbd5e1;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer;line-height:1}
     .build-close:hover{background:rgba(255,255,255,.2);color:#fff}
     .build-stage{position:relative;min-height:100%;display:flex;align-items:center;justify-content:center;padding:40px 16px}
@@ -143,7 +157,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     .reveal-frame-wrap{flex:1;position:relative;background:#f8fafc}
     .reveal-frame-wrap iframe{width:100%;height:100%;border:0;display:block;filter:blur(22px);opacity:.4;transition:filter 1.1s ease,opacity 1.1s ease}
     .reveal-frame-wrap iframe.sharp{filter:blur(0);opacity:1}
-    @media (prefers-reduced-motion: reduce){.sk,.build-orb,.build-bar span,.reveal-frame-wrap iframe,.zeno-aura,.zeno,.zeno *,.z-spark{animation:none!important;transition:none!important;filter:none!important;opacity:1!important}.z-spark{opacity:.7!important}.iz-confetti-canvas{display:none!important}}
+    @media (prefers-reduced-motion: reduce){.sk,.build-orb,.build-overlay.show,.build-overlay.show .build-orb,.build-bar span,.reveal-frame-wrap iframe,.zeno-aura,.zeno,.zeno *,.z-spark,.build-tasks .bt,.build-tasks .bt-ico{animation:none!important;transition:none!important;filter:none!important;opacity:1!important}.z-spark{opacity:.7!important}.iz-confetti-canvas{display:none!important}}
 
     /* ===== Zeno sample-sites showcase (Swiper 3D coverflow) ===== */
     .zeno-showcase{margin-top:22px;border-top:1px solid #e2e8f0;padding-top:18px}
@@ -257,7 +271,14 @@ SEOHelper::outputMetaTags('ai-website-builder', [
           </svg>
         </div>
         <h2>Zeno is drafting <span class="build-biz" id="buildBiz">your website</span>…</h2>
-        <p class="build-step" id="buildStep">Warming up the design studio…</p>
+        <ul class="build-tasks" id="buildTasks">
+          <li class="bt"><span class="bt-ico"></span> Getting to know your business</li>
+          <li class="bt"><span class="bt-ico"></span> Picking colors &amp; fonts that fit you</li>
+          <li class="bt"><span class="bt-ico"></span> Writing your homepage copy</li>
+          <li class="bt"><span class="bt-ico"></span> Designing your services &amp; contact</li>
+          <li class="bt"><span class="bt-ico"></span> Making it perfect on phones</li>
+        </ul>
+        <p class="build-step" id="buildStep"></p>
         <div class="build-bar"><span id="buildBarFill"></span></div>
         <p class="build-hint">Hi, I'm <strong style="color:#7dd3fc">Zeno</strong> — your website draft assistant. This takes me about two minutes. Hang tight, I'm on it.</p>
       </div>
@@ -910,26 +931,24 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       document.body.style.overflow = 'hidden';
       overlay.focus && overlay.focus();
 
-      const steps = [
-        "Getting to know " + (biz || 'your business') + "…",
-        "I'm picking colors and fonts that fit you…",
-        "Writing your homepage — making it sound like you…",
-        "Designing your services section…",
-        "Laying out an easy way for customers to reach you…",
-        "Making sure it looks perfect on phones…",
-        "Almost there — adding the finishing touches…"
-      ];
-      let si = 0;
-      stepEl.textContent = steps[0];
-      stepTimer = setInterval(function () {
-        si = Math.min(si + 1, steps.length - 1);
-        stepEl.style.opacity = '0';
-        setTimeout(function () { stepEl.textContent = steps[si]; stepEl.style.opacity = '1'; }, 280);
-      }, 16000);
+      // Checklist: tasks check off as the fake-but-believable progress advances;
+      // the last task stays "in progress" until the real preview lands.
+      const tasks = Array.prototype.slice.call(document.querySelectorAll('#buildTasks .bt'));
+      const taskMarks = [15, 35, 55, 72]; // progress % at which tasks 0..3 complete (task 4 finishes on reveal)
+      function renderTasks(doneCount) {
+        tasks.forEach(function (li, i) {
+          li.classList.toggle('done', i < doneCount);
+          li.classList.toggle('active', i === doneCount);
+        });
+      }
+      renderTasks(0);
+      stepEl.textContent = '';
 
       // Fake-but-believable progress: eases toward 92%, real completion finishes it.
       progressTimer = setInterval(function () {
         if (progress < 92) { progress += Math.max(0.4, (92 - progress) * 0.04); barFill.style.width = progress.toFixed(1) + '%'; }
+        var dc = 0; for (var k = 0; k < taskMarks.length; k++) { if (progress >= taskMarks[k]) dc++; }
+        renderTasks(dc);
       }, 1000);
 
       // If we never got a lead id, fall back to the email path.
@@ -956,6 +975,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       building = false;
       clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer);
       barFill.style.width = '100%';
+      Array.prototype.forEach.call(document.querySelectorAll('#buildTasks .bt'), function (li) { li.classList.remove('active'); li.classList.add('done'); });
       stepEl.textContent = 'Your draft is ready 🎉';
       frame.src = url;
       frame.addEventListener('load', function () { frame.classList.add('sharp'); }, { once: true });
