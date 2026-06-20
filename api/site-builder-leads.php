@@ -130,7 +130,7 @@ if ($businessName === '' || !validateLength($businessName, 2, 120)) {
     exit;
 }
 
-if ($businessDescription === '' || !validateLength($businessDescription, 10, 2000)) {
+if ($businessDescription === '' || !validateLength($businessDescription, 10, 8000)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Please describe what your business does (at least a sentence).']);
     exit;

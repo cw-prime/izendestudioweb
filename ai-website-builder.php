@@ -351,7 +351,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                         <input type="text" inputmode="url" class="form-control" id="izAnalyzeUrl" placeholder="yourcurrentsite.com" autocomplete="off">
                         <button type="button" class="btn btn-outline-primary" id="izAnalyzeBtn"><i class="bi bi-magic"></i> Analyze</button>
                       </div>
-                      <small class="iz-analyze-note" id="izAnalyzeNote">Paste your current site and Site Drafter will draft your description below — edit anything you like.</small>
+                      <small class="iz-analyze-note" id="izAnalyzeNote">Paste your current site and Site Drafter will scan key pages for services, pricing, and contact details — edit anything you like.</small>
                     </div>
 
                     <div class="mb-3">
@@ -362,7 +362,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
 
                     <div class="mb-3">
                       <label class="form-label">Tell us about your business <span class="text-danger">*</span></label>
-                      <textarea class="form-control" name="business_description" rows="7" style="min-height:160px;resize:vertical" maxlength="2000"
+                      <textarea class="form-control" name="business_description" rows="7" style="min-height:160px;resize:vertical" maxlength="8000"
                         placeholder="e.g. We're a [type of business] in [city] offering [your main services or products]. Tell us anything you want on the site — services, hours, pricing, photos, online booking, contact info — plus the look or tone you're going for." required></textarea>
                       <small class="text-muted">Describe your business and tell us exactly what to include — the more detail, the better your draft.</small>
                     </div>
@@ -688,7 +688,8 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                   if (descEl){ descEl.value = j.description; }
                   if (nameEl && !nameEl.value.trim() && j.business_name){ nameEl.value = j.business_name; }
                   if (j.business_address){ window.izBusinessAddress = j.business_address; }
-                  setNote('<i class="bi bi-check-circle-fill"></i> Done — review and edit your description below.', 'ok');
+                  var pages = j.pages_crawled ? ' Scanned ' + j.pages_crawled + ' page' + (j.pages_crawled === 1 ? '.' : 's.') : '';
+                  setNote('<i class="bi bi-check-circle-fill"></i> Done — review and edit the services/pricing brief below.' + pages, 'ok');
                   if (descEl){ try { descEl.focus({ preventScroll: true }); } catch(_){} }
               } else {
                   setNote((j && j.message) || "Couldn't read that site — just tell us about your business below.", 'err');

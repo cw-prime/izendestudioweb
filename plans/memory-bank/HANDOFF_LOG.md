@@ -861,3 +861,24 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Tests/lint: php -l clean on all; prod files re-downloaded and confirmed they carry the fixes.
 - Result: SUCCESS, all live on prod.
 - Updated memory files: HANDOFF_LOG.md.
+
+---
+- Date: 2026-06-20
+- Agent: Codex
+- Scope worked: Deepened existing-site scan so redesign drafts preserve service menus/pricing instead of relying on customers to recreate missing content after claim.
+- Files changed:
+  - `api/analyze-site.php` — same-host crawl target increased from 3 to 8 pages with heavier scoring for services/pricing/menu/package/treatment pages; source text budget increased to 32k chars; GLM output changed from a short paragraph to a structured redesign brief with `Services and pricing to preserve`; output budget increased to avoid truncation; response now includes `pages_crawled`.
+  - `ai-website-builder.php` — analyzer helper copy now says it scans key pages for services/pricing/contact; description textarea max increased to 8000; success note reports pages scanned and says to review the services/pricing brief.
+  - `api/site-builder-leads.php` — business description validation max increased to 8000.
+  - `scripts/generate-pending-previews.php` — generation prompt now treats a `Services and pricing to preserve` section as authoritative and tells GLM not to collapse real service-heavy menus into generic cards.
+  - `plans/memory-bank/CURRENT_STATE.md`, `plans/memory-bank/HANDOFF_LOG.md` — memory updated.
+- Tests/lint/typecheck run:
+  - `php -l api/analyze-site.php`
+  - `php -l ai-website-builder.php`
+  - `php -l api/site-builder-leads.php`
+  - `php -l scripts/generate-pending-previews.php`
+  - `git diff --check` on changed source files
+  - Live analyzer POST against `https://aquariuswellness.com/services/` returned HTTP 200, `pages_crawled=6`, `desc_len=4776`, and included real categories/prices including Signature Massage `$135/$185/$235`, Deep Tissue, facial therapy, waxing services, treatment series, and spa packages.
+- Result: SUCCESS. Deployed to production via FTPS.
+- Risks introduced: Moderate token/time increase for URL analysis on service-heavy sites; endpoint is still rate-limited and optional. No lead was created during verification.
+- Updated memory files: `plans/memory-bank/CURRENT_STATE.md`, `plans/memory-bank/HANDOFF_LOG.md`

@@ -193,6 +193,11 @@ Accuracy & editability (CRITICAL — this is a preview the owner will personaliz
 - Use ONLY facts the owner actually provided. NEVER invent specific business hours,
   prices, street addresses, years in business, staff names, license numbers, or
   statistics. Inventing a wrong fact is worse than omitting it.
+- If the owner's description includes a structured "Services and pricing to preserve"
+  section from an existing-site scan, treat it as authoritative source content:
+  carry over the real service categories, named services/packages, durations, and
+  prices that fit the page. Do not reduce a service-heavy business to three generic
+  cards when real menu/pricing details were provided.
 - When a section would normally show such a detail but it wasn't provided, use a
   clearly-editable placeholder the owner will obviously swap — e.g. "Hours: add your
   hours here", "[Your address]", "Call for pricing" — never a fabricated specific.
