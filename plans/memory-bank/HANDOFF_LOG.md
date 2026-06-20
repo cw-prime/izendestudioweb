@@ -810,3 +810,16 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Verified live: Website Draft - Get Online ($39/mo) + new .com -> $0.00 first year, Renewal ~$24.99/yr. Offer now matches the claim-page copy.
 - All via temp token-guarded prod scripts (deleted). plans/claude-whmcs-site-drafter-domain-offer.md updated with STATUS: DONE.
 - Updated memory files: HANDOFF_LOG.md, NEXT_ACTIONS.md, plans/claude-whmcs-site-drafter-domain-offer.md.
+
+---
+- Date: 2026-06-16
+- Agent: CODE (Opus 4.8)
+- Scope worked: Funnel polish batch + a real spam-filter bug. All deployed to prod via FTP + committed on branch funnel-preview-protections-logo-map (NOT merged to main).
+- BBB seal (commit cd3c78d): added the BBB Accredited Business seal (white-text variant) to the site-wide footer (assets/includes/footer.php), in a centered flex row BESIDE the social icons; allowed https://seal-stlouis.bbb.org in CSP frame-src (enforced + report-only) in config/security.php so the iframe isn't blocked.
+- Draft counter + coaching chips (commit 8481d0d): owner reversed the earlier "hide the count" decision (drafts cost ~$0.25 each, ~$0.75 max/visitor). Green counter pill above the form — "3 free drafts included" for first-timers, "N of 3 free drafts left" once used>=1 (value + scarcity). Step-1 "Make this draft even better" chips (only when used>=1) append starter prompts (services/city/hours+phone/bolder look/testimonial) to the description. Uses includes/gen-cap.php used/remaining; CSP-safe; cap unchanged (3, still enforced + IP backstop).
+- Build-overlay animation (commit 91cca6d): #1 submit -> overlay scale/fades in (overlayIn) + orb ignites (orbIgnite) before settling; #2 replaced the single rotating caption with a 5-item self-checking task list (green check-pop as the progress bar advances; current task spins; all complete on reveal). Reduced-motion guarded. (Owner picked #1+#2; #3 reveal scan-wipe deferred.)
+- SPAM FILTER FALSE-POSITIVE FIX (commit caf20a0): a legitimate spa submission (Aquarius Wellness, no spam text) was blocked with "Spam keyword detected: xxx". Root cause: SpamProtection::detectSpamPatterns() imploded ALL POST fields (incl. CSRF/reCAPTCHA/timestamp/honeypot tokens) and substring-matched keywords, so "xxx" buried inside the ~500-char reCAPTCHA token (or "porn" inside "popcorn", "work from home" anywhere) false-flagged real customers. Fix: scan only human-entered text (skip token/honeypot fields, skip non-strings like brand_colors array), and match keywords WHOLE-WORD (\bkeyword\b). Verified: legit spa (xxx only in recaptcha token) -> not spam; "cheap viagra…" -> still caught. Affects ALL forms (contact/booking/lead-capture/site_builder) — net improvement.
+- Softened rejection copy (commit 1cb0f7e): site-builder-leads.php spam message "Your submission was flagged as spam. Please call us directly" -> "Hmm — that didn't go through. Please give it another try, or call us at (314) 312-6441 and we'll get your draft started." (the old wording made real prospects bail).
+- Tests/lint: php -l clean on all; prod files re-downloaded and confirmed they carry the fixes.
+- Result: SUCCESS, all live on prod.
+- Updated memory files: HANDOFF_LOG.md.
