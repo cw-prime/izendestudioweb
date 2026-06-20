@@ -1,5 +1,5 @@
 # Current State — Izende Studio Web
-Last updated: 2026-06-16
+Last updated: 2026-06-20
 
 ## Product
 - What it does: Professional web design, hosting, and digital marketing services for businesses in St. Louis, Missouri, and Illinois. Includes consultation booking, portfolio showcase, blog integration, and client management.
@@ -68,7 +68,7 @@ URL, form/IDs/endpoints, `gtag('ai_builder_*')`) are unchanged. Lives on branch 
 
 ### Pipeline (as-built, NOT n8n)
 - Intake: `ai-website-builder.php` → `api/site-builder-leads.php` → Supabase `site_builder_leads` (status=pending).
-- Generation: **cPanel cron** `scripts/generate-pending-previews.php` (GLM-5 streaming). Per lead: enrichBrief → Gemini hero image (`gemini-3.1-flash-image`, best-effort, un-forced) + Gemini logo icon → GLM builds site (CSS-var contract, no-fabrication) → injectBookingScript (wires any booking form) → writePreview (+ injectClaimBar) → email prospect. Images hosted at `/genmedia/<slug>/`. Previews at `/previews/<slug>/`. 14-day expiry (skips samples + claimed/converted; also clears genmedia).
+- Generation: **cPanel cron** `scripts/generate-pending-previews.php` (GLM-5 streaming). Per lead: enrichBrief → Gemini hero image (`gemini-3.1-flash-image`, best-effort, un-forced) + Gemini logo icon → GLM builds site (CSS-var contract, no-fabrication) → injectBookingScript (wires any booking form) → writePreview (+ injectClaimBar + Customize widget) → email prospect. Images hosted at `/genmedia/<slug>/`. Previews at `/previews/<slug>/`. 14-day expiry (skips samples + claimed/converted; also clears genmedia).
 - Claim: preview claim bar + reveal → `claim-site.php` (3-card chooser: Static $39 pid14 / WordPress $49 pid15 MOST POPULAR / Managed $149 pid16) → WHMCS `cart.php?a=add&pid=N`.
 - Provision: WHMCS `AfterModuleCreate` hook `adminIzende/includes/hooks/zeno_provision.php` (gated 14/15/16). pid14=static deploy (index.html via WHM→cPanel Fileman). pid15/16=WordPress via shared core `scripts/lib/wp-provision.php` (Softaculous install → canvas mu-plugin + seed.json → 1:1 themed render). pid16 auto-enables booking. Marks lead converted (+plan_kind, wp_admin_url).
 - Booking upsell: `api/site-booking.php` (cross-domain, per-site HMAC token, honeypot+rate-limit) → iz_bookings (multi-tenant: tenant_lead_id/tenant_business). Owner view `my-bookings.php` (tokenized, no login). Preview form returns upsell nudge until booking_enabled.
@@ -85,10 +85,13 @@ URL, form/IDs/endpoints, `gtag('ai_builder_*')`) are unchanged. Lives on branch 
 - No SSH — deploy via FTP (ai-agent@). Long HTTPS must run on prod (local network can't hold them).
 
 ### Status: BUILT + VERIFIED (to extent possible without live paid orders)
-Stages 1, 2, 3(static hook), 4(AI editor — presets + queued chat edits, live re-apply: static via Fileman + WordPress via versioned re-seed), 5(WordPress — dry-run PASS on throwaway), Booking upsell core ($20 "Online Booking" add-on live + auto-enable). Owner-gated: real paid order tests (static + WP) — the only true money-loop proof left; GLM-5.2 A/B; rotate all keys.
+Stages 1, 2, 3(static hook), 4(Customize editor — preset colour/font changes persist to `generated_html` before claim; queued text edits live re-apply: static via Fileman + WordPress via versioned re-seed), 5(WordPress — dry-run PASS on throwaway), Booking upsell core ($20 "Online Booking" add-on live + auto-enable). Owner-gated: real paid order tests (static + WP) — the only true money-loop proof left; GLM-5.2 A/B; rotate all keys.
 
 ### UX / offer pass + version control (added 2026-06-14)
 - **3-step wizard** on `ai-website-builder.php` (Business → Style → Send it): progress stepper, slide+fade transitions, per-step validation, and a "don't leave while generating" beforeunload guard.
+- **Generation UX hotfixes (2026-06-20):** build overlay now shows a 2:00 countdown (`Estimated reveal in 2:00` → `Finalizing your draft...`) so users know to keep the tab open; `api/preview-status.php` returns `preview_slug` so the browser can recover the preview route even if `preview_url` lags. The green draft-count coaching pill now appears only after the visitor has already used one draft and says "add more detail for better results."
+- **Preview/claim UX hotfixes (2026-06-20):** preview claim bar displays remaining free drafts through `api/generation-count.php`; Customize text requests show the same 2:00 countdown. Color/font/reset presets now call `api/site-builder-edit.php` with `action=theme`, save the selected CSS variables into `generated_html`, re-render the preview, and block "Claim this site" briefly until a pending theme save succeeds. Preview-only claim bar/customize UI is still excluded from the final provisioned customer site.
+- **Spam honeypot visibility fix (2026-06-20):** `SpamProtection::generateHoneypot()` now renders the "Website URL (leave blank)" trap as a hidden, non-focusable field and `ai-website-builder.php` has fallback CSS, preventing visible honeypot fields under strict CSP/browser conditions.
 - **Analyze-my-site** (`api/analyze-site.php`, NEW): optional Step-1 URL → SSRF-safe crawl of a few same-host inner pages → GLM drafts a description capturing real services, location, phone, email (never invents). Pre-fills the description field.
 - **Professional email on signup:** `zeno_create_mailbox()` auto-creates `hello@<domain>` on every paid tier at provisioning (cPanel UAPI `Email::add_pop`, best-effort, non-blocking); creds in the welcome emails. Proven via throwaway account.
 - **Benefit-led plan cards** (`claim-site.php`): outcome names, free-email perk on all tiers, Wix/GoDaddy framing; static scope = technical upkeep only (no content edits promised), managed = fair-use "everyday edits" (redesigns/custom quoted separately).

@@ -348,6 +348,31 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Updated memory files: HANDOFF_LOG.md.
 
 ---
+- Date: 2026-06-20
+- Agent: Codex
+- Scope worked: Website Drafter production hotfix batch after owner QA on Aquarius Wellness preview: page-generation hang perception, poor preview section, generation-count/tips visibility, Customize countdown/carryover, honeypot visibility, and final copy tweak.
+- Business KPI targeted: Increase funnel completion and claim confidence; prevent prospects from abandoning during generation/customization; ensure the claimed site matches the previewed/customized look.
+- Files changed:
+  - `ai-website-builder.php` — added a 2:00 build overlay countdown (`Estimated reveal in 2:00` -> finalizing state), resets overlay progress per run, recovers previews by `preview_slug`, hides the honeypot with fallback CSS, updates draft-count coaching text to "add more detail for better results", and only renders that green count/coaching pill after the visitor has already generated one draft.
+  - `api/preview-status.php` — returns `preview_slug` with status so the front-end can build `/previews/<slug>/` if `preview_url` is missing or delayed.
+  - `api/generation-count.php` — new same-origin JSON endpoint exposing signed-cookie `used/remaining/limit` counts for static preview pages without exposing the HttpOnly cookie value.
+  - `includes/SpamProtection.php` — honeypot wrapper is now `hidden aria-hidden="true"` so "Website URL (leave blank)" does not become visible/focusable for real users.
+  - `api/site-builder-edit.php` — added `action=theme` handling for Customize color/font/reset presets; validates allowed presets, updates CSS variables/font links in stored `generated_html`, preserves original theme for reset, and re-renders the preview without consuming a free AI edit.
+  - `scripts/generate-pending-previews.php` — prompt tightened to avoid empty/split hero layouts and blank walls; Supabase status/slug is patched before large `generated_html`; preview claim bar now shows draft count; Customize widget now has a 2:00 countdown and saves pending preset changes before claim navigation.
+  - `previews/aquarius-wellness-2/index.html` — production preview was re-rendered/uploaded with the updated trust panel and Customize widget, but it remains a generated preview artifact rather than source of truth.
+  - `plans/memory-bank/CURRENT_STATE.md`, `plans/memory-bank/NEXT_ACTIONS.md`, `plans/memory-bank/HANDOFF_LOG.md` — memory bank updated.
+- Tests/lint/typecheck run:
+  - `php -l ai-website-builder.php`
+  - `php -l api/site-builder-edit.php`
+  - `php -l scripts/generate-pending-previews.php`
+  - Live read-only checks: `/ai-website-builder` HTTP 200; `/api/generation-count.php` HTTP 200 with `{success:true,used:0,remaining:3,limit:3}`; `/previews/aquarius-wellness-2/` HTTP 200 and contains `action:'theme'`, `Saving your look before claim`, `waitEnd=Date.now()+120000`, and `izende-draft-count`.
+  - Builder no-cookie state verified: draft-count coaching banner absent. Used-one-draft signed-cookie state verified: "You have 2 of 3 free drafts left - add more detail for better results" rendered.
+- Result: SUCCESS. Deployed to production via FTPS; current Aquarius preview and future generated previews use the updated flow.
+- Risks introduced: Low. The state-changing live `action=theme` POST against the Aquarius production lead was not run because approval policy blocked mutating a real lead for verification; syntax and read-only live markers were verified. Unrelated dirty files existed before commit (`adminIzende/includes/hooks/zeno_provision.php`, `claim-site.php`, images/prototypes) and were intentionally left out.
+- Follow-up actions: Owner should hard-refresh the preview/browser if stale JS is cached. Still owner-gated: real paid static and WordPress order tests; rotate all chat-exposed/recovered keys.
+- Updated memory files: `plans/memory-bank/CURRENT_STATE.md`, `plans/memory-bank/NEXT_ACTIONS.md`, `plans/memory-bank/HANDOFF_LOG.md`
+
+---
 
 - Date: 2026-06-12T23:10:00Z
 - Agent: CODE (live session — state snapshot before context compaction)

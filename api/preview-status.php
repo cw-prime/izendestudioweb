@@ -47,7 +47,7 @@ if ($supabaseUrl === '' || $supabaseKey === '') {
 }
 
 $url = $supabaseUrl . '/rest/v1/site_builder_leads?id=eq.' . rawurlencode($id)
-     . '&select=status,preview_url';
+     . '&select=status,preview_url,preview_slug';
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'apikey: ' . $supabaseKey,
@@ -78,4 +78,5 @@ echo json_encode([
     'success'     => true,
     'status'      => $rows[0]['status'] ?? 'pending',
     'preview_url' => $rows[0]['preview_url'] ?? null,
+    'preview_slug' => $rows[0]['preview_slug'] ?? null,
 ]);

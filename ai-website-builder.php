@@ -144,6 +144,8 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     .build-step{min-height:1.5em;color:#cbd5e1;font-size:1.02rem;margin:0 0 22px;transition:opacity .3s}
     .build-bar{height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
     .build-bar span{display:block;height:100%;width:4%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#38bdf8);transition:width .9s ease}
+    .build-countdown{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:14px 0 0;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;font-size:.92rem;font-weight:700}
+    .build-countdown b{color:#7dd3fc;font-variant-numeric:tabular-nums}
     .build-hint{margin:18px 0 0;font-size:.86rem;color:#7c8aa3}
 
     /* reveal */
@@ -226,6 +228,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     .iz-chips{display:flex;flex-wrap:wrap;gap:8px}
     .iz-chip{font-size:13px;font-weight:600;color:#1e293b;background:#fff;border:1px solid #cbd5e1;border-radius:999px;padding:6px 13px;cursor:pointer;transition:background .12s,border-color .12s}
     .iz-chip:hover,.iz-chip:focus-visible{background:#eff6ff;border-color:#2563eb;color:#1d4ed8}
+    .form-field-hp{display:none!important;position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
   </style>
 </head>
 
@@ -280,7 +283,8 @@ SEOHelper::outputMetaTags('ai-website-builder', [
         </ul>
         <p class="build-step" id="buildStep"></p>
         <div class="build-bar"><span id="buildBarFill"></span></div>
-        <p class="build-hint">Hi, I'm <strong style="color:#7dd3fc">Zeno</strong> — your website draft assistant. This takes me about two minutes. Hang tight, I'm on it.</p>
+        <div class="build-countdown" id="buildCountdown" role="timer" aria-live="polite">Estimated reveal in <b>2:00</b></div>
+        <p class="build-hint">Hi, I'm <strong style="color:#7dd3fc">Zeno</strong> — keep this tab open for the live reveal. We'll email your draft too.</p>
       </div>
     </div>
 
@@ -331,14 +335,12 @@ SEOHelper::outputMetaTags('ai-website-builder', [
               <a class="btn btn-primary btn-lg" href="claim-site.php"><i class="bi bi-magic"></i> Claim your site</a>
             </div></div>
 <?php else: ?>
+<?php if ((int) $genCap['used'] > 0): ?>
             <div class="iz-draftcount">
               <i class="bi bi-stars"></i>
-              <?php if ((int) $genCap['used'] > 0): ?>
-                You have <strong><?= $genRemaining ?> of <?= IZ_GEN_LIMIT ?></strong> free drafts left
-              <?php else: ?>
-                <strong><?= IZ_GEN_LIMIT ?> free drafts</strong> included — refine yours until it feels right
-              <?php endif; ?>
+              You have <strong><?= $genRemaining ?> of <?= IZ_GEN_LIMIT ?></strong> free drafts left — add more detail for better results
             </div>
+<?php endif; ?>
             <div class="card shadow-sm">
               <div class="card-body p-4">
                 <form id="aiBuilderForm" novalidate>
@@ -377,9 +379,8 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                       <textarea class="form-control" name="business_description" rows="7" style="min-height:160px;resize:vertical" maxlength="2000"
                         placeholder="e.g. We're a [type of business] in [city] offering [your main services or products]. Tell us anything you want on the site — services, hours, pricing, photos, online booking, contact info — plus the look or tone you're going for." required></textarea>
                       <small class="text-muted">Describe your business and tell us exactly what to include — the more detail, the better your draft.</small>
-<?php if ((int) $genCap['used'] > 0): ?>
                       <div class="iz-improve">
-                        <div class="iz-improve-head">💡 Make this draft even better — tap to add detail:</div>
+                        <div class="iz-improve-head">Make this draft better — tap to add detail:</div>
                         <div class="iz-chips">
                           <button type="button" class="iz-chip" data-add="We offer: [list your main services]. ">Your top services</button>
                           <button type="button" class="iz-chip" data-add="We serve [your city / service area]. ">Your city / area</button>
@@ -388,7 +389,6 @@ SEOHelper::outputMetaTags('ai-website-builder', [
                           <button type="button" class="iz-chip" data-add="Include a short customer testimonial. ">A short testimonial</button>
                         </div>
                       </div>
-<?php endif; ?>
                     </div>
 
                     <div class="wiz-nav">
@@ -864,11 +864,12 @@ SEOHelper::outputMetaTags('ai-website-builder', [
     const stepEl   = document.getElementById('buildStep');
     const bizEl    = document.getElementById('buildBiz');
     const barFill  = document.getElementById('buildBarFill');
+    const countdownEl = document.getElementById('buildCountdown');
     const frame    = document.getElementById('revealFrame');
     const claimBtn = document.getElementById('claimBtn');
     const closeBtn = document.getElementById('buildClose');
 
-    let pollTimer = null, stepTimer = null, progressTimer = null, elapsed = 0, progress = 4;
+    let pollTimer = null, stepTimer = null, progressTimer = null, countdownTimer = null, countdownStartedAt = 0, elapsed = 0, progress = 4;
     let currentLeadId = null, currentBiz = '';
     let building = false;
 
@@ -914,7 +915,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
 
     function stopAndClose() {
       building = false;
-      clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer);
+      clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer); clearInterval(countdownTimer);
       overlay.classList.remove('show');
       reveal.classList.remove('show');
       document.body.style.overflow = '';
@@ -926,7 +927,10 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       building = true;
       currentLeadId = leadId;
       currentBiz = biz || 'your website';
+      elapsed = 0;
+      progress = 4;
       bizEl.textContent = currentBiz;
+      barFill.style.width = '4%';
       overlay.classList.add('show');
       document.body.style.overflow = 'hidden';
       overlay.focus && overlay.focus();
@@ -943,6 +947,7 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       }
       renderTasks(0);
       stepEl.textContent = '';
+      startCountdown(120);
 
       // Fake-but-believable progress: eases toward 92%, real completion finishes it.
       progressTimer = setInterval(function () {
@@ -958,6 +963,24 @@ SEOHelper::outputMetaTags('ai-website-builder', [
       poll(leadId);
     };
 
+    function startCountdown(seconds) {
+      clearInterval(countdownTimer);
+      countdownStartedAt = Date.now();
+      function render() {
+        if (!countdownEl) { return; }
+        var left = Math.max(0, seconds - Math.floor((Date.now() - countdownStartedAt) / 1000));
+        if (left > 0) {
+          var m = Math.floor(left / 60);
+          var s = String(left % 60).padStart(2, '0');
+          countdownEl.innerHTML = 'Estimated reveal in <b>' + m + ':' + s + '</b>';
+        } else {
+          countdownEl.innerHTML = '<b>Finalizing your draft…</b>';
+        }
+      }
+      render();
+      countdownTimer = setInterval(render, 1000);
+    }
+
     function poll(leadId) {
       elapsed += 3.5;
       if (elapsed > 360) { return fallbackToEmail(); } // ~6 min ceiling
@@ -965,7 +988,9 @@ SEOHelper::outputMetaTags('ai-website-builder', [
         .then(function (r) { return r.json(); })
         .then(function (res) {
           if (!res || !res.success) { return; }
-          if (res.status === 'preview_live' && res.preview_url) { revealSite(res.preview_url); }
+          const recoveredUrl = res.preview_url || (res.preview_slug ? '/previews/' + encodeURIComponent(res.preview_slug) + '/' : '');
+          if (recoveredUrl && ['preview_live', 'claimed', 'converted'].includes(res.status)) { revealSite(recoveredUrl); }
+          else if (res.preview_url && res.status !== 'failed') { revealSite(res.preview_url); }
           else if (res.status === 'failed') { fallbackToEmail(true); }
         })
         .catch(function () { /* transient — keep polling */ });
@@ -973,10 +998,11 @@ SEOHelper::outputMetaTags('ai-website-builder', [
 
     function revealSite(url) {
       building = false;
-      clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer);
+      clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer); clearInterval(countdownTimer);
       barFill.style.width = '100%';
       Array.prototype.forEach.call(document.querySelectorAll('#buildTasks .bt'), function (li) { li.classList.remove('active'); li.classList.add('done'); });
       stepEl.textContent = 'Your draft is ready 🎉';
+      if (countdownEl) { countdownEl.innerHTML = '<b>Ready now</b>'; }
       frame.src = url;
       frame.addEventListener('load', function () { frame.classList.add('sharp'); }, { once: true });
       setTimeout(function () { reveal.classList.add('show'); burstConfetti(); }, 450);
@@ -1040,10 +1066,11 @@ SEOHelper::outputMetaTags('ai-website-builder', [
 
     function fallbackToEmail(failed) {
       building = false;
-      clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer);
+      clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer); clearInterval(countdownTimer);
       panel.querySelector('h2').textContent = failed ? 'Almost there' : 'Still polishing…';
       stepEl.textContent = "I'll email your draft the moment it's ready — check your inbox shortly. — Zeno";
       barFill.style.width = '100%';
+      if (countdownEl) { countdownEl.innerHTML = '<b>Email fallback active</b>'; }
       const hint = panel.querySelector('.build-hint');
       if (hint) { hint.innerHTML = 'You can close this window. <a href="#" id="buildDone" style="color:#7dd3fc">Back to site</a>'; }
       const done = document.getElementById('buildDone');

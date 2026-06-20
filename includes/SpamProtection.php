@@ -17,9 +17,11 @@ class SpamProtection {
         // Store field name in session for validation
         $_SESSION['honeypot_field_' . $formId] = $fieldName;
 
-        // Return hidden field with CSS to make it invisible
+        // Return a honeypot that submits normally but is not visible/focusable for people.
+        // `hidden` is intentional here: simple spam bots still tend to fill every input,
+        // while browsers keep it out of the visible layout even under strict CSP.
         return '
-        <div class="form-field-hp" style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true" tabindex="-1">
+        <div class="form-field-hp" hidden aria-hidden="true">
             <label for="' . $fieldName . '">Website URL (leave blank)</label>
             <input type="text" name="' . $fieldName . '" id="' . $fieldName . '" value="" autocomplete="off" tabindex="-1">
         </div>';

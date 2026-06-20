@@ -1,5 +1,5 @@
 # Next Actions (Execution Queue)
-Last updated: 2026-06-14 (AI Website Builder funnel)
+Last updated: 2026-06-20 (Website Drafter funnel)
 
 ## AI Website Builder Funnel — Active Queue (2026-06-14)
 
@@ -20,7 +20,7 @@ Last updated: 2026-06-14 (AI Website Builder funnel)
 - Version-control the `previews/samples/*` HTML (currently prod-only, like all samples). `todo`
 - Async WP provisioning queue — only if synchronous Softaculous install in the hook causes delays (low risk now). `todo`
 - Localize hero/logo images into the provisioned account (currently referenced from izende.com /genmedia). `todo`
-- Persist editor PRESET colour/font choices to the lead so they carry to the provisioned site (currently localStorage-only; AI content edits already carry). `todo`
+- Persist editor PRESET colour/font choices to the lead so they carry to the provisioned site. `done` 2026-06-20 — `api/site-builder-edit.php` now supports `action=theme`, updates the lead's `generated_html`, re-renders the preview, and the preview Customize widget saves pending theme changes before the claim link navigates away. AI/text content edits already carried over through the edit queue.
 - Optional: Gemini logo as transparent PNG (currently white-bg in a rounded tile — works). `todo`
 
 ### Done (funnel) — see HANDOFF_LOG.md for evidence
@@ -33,6 +33,7 @@ Last updated: 2026-06-14 (AI Website Builder funnel)
 - **Business name** legal-suffix strip (client+server+generator); **client emails** → office line (314) 312-6441; checkout font fix.
 - **Professional & Corporate showcase sample** added (all 5 vibes covered).
 - **Funnel checked into git** for the first time — PR #1 + PR #2 merged to `main` (`34d8cc7`).
+- **Generation/customize waiting UX + carryover fixes** — 2:00 countdowns on page generation and Customize edits; preview claim bar shows remaining free drafts; draft-count coaching copy only appears after one generation; hidden honeypot no longer renders visibly; Customize colour/font presets persist into `generated_html` before claim.
 
 ---
 

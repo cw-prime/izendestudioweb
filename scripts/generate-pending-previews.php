@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Website Builder — Preview Generator (cPanel cron)
+ * Site Drafter — Preview Generator (cPanel cron)
  *
  * Polls Supabase for pending site_builder_leads, generates a single-file site
  * with GLM-5 (streaming), writes it to the previews dir, marks the lead
@@ -81,7 +81,7 @@ $glmKey      = trim((string) envOr('GLM_API_KEY', ''));
 $deployRoot  = rtrim((string) envOr('PREVIEW_DEPLOY_DIR', dirname(__DIR__) . '/previews'), '/');
 $baseUrl     = rtrim((string) envOr('PREVIEW_BASE_URL', 'https://izendestudioweb.com/previews'), '/');
 
-if ($supabaseUrl === '' || $supabaseKey === '' || $glmKey === '') {
+if ($supabaseUrl === '' || $supabaseKey === '' || (!defined('IZ_GEN_LIB') && $glmKey === '')) {
     cronLog('Missing config', ['supabase' => $supabaseUrl !== '', 'sb_key' => $supabaseKey !== '', 'glm_key' => $glmKey !== '']);
     if (!$isCli) { echo "misconfigured\n"; }
     exit(1);
@@ -141,7 +141,9 @@ arrangement):
   raster image, and never attempt a photorealistic logo — keep it crisp and
   brand-appropriate using the theme colors.
 - A striking hero (headline + one-line subhead + primary CTA) built per the Hero
-  style named in the Design Direction.
+  style named in the Design Direction. The first viewport must never feel empty:
+  include visible headline copy, supporting copy, and a CTA above the fold on both
+  desktop and mobile. Do not leave a blank 40-60% column beside an image.
 - An about/story section in the business's voice (2-3 short paragraphs).
 - The services/offerings, presented in the layout named in the Design Direction.
   Include prices ONLY if the brief implies them; otherwise describe without inventing.
@@ -165,7 +167,7 @@ Design rules (MAKE IT DISTINCT — do not produce a cookie-cutter template):
   type scale, spacing rhythm, and section shapes. Two different businesses must yield
   visibly different LAYOUTS — not the same template recolored.
 - Match the requested STYLE/VIBE in palette, type, and imagery mood.
-- Avoid generic "AI slop": no Inter/Roboto/Arial-only stacks, no purple-on-white
+- Avoid generic generated-site cliches: no Inter/Roboto/Arial-only stacks, no purple-on-white
   gradient cliché, no identical three-equal-cards-and-done. Use a confident type scale,
   strong visual hierarchy, asymmetry where it fits, and generous, intentional spacing.
 - Real, specific copy derived from the brief — never lorem ipsum.
@@ -245,7 +247,7 @@ PROMPT;
 
     if (!empty($heroUrl)) {
         $user .= "\nHERO IMAGE AVAILABLE (a real, on-brand photo was generated for this business): " . $heroUrl . "\n"
-            . "Use it as the hero ONLY if a photographic hero genuinely suits this business and the requested vibe. If a clean typographic / CSS / illustrative hero would look more premium for this brand (e.g. minimal, luxury, or text-forward concepts), prefer that and you may omit the photo entirely. When you DO use it, make it a full-bleed background with a dark gradient overlay so the headline stays legible, and give it a descriptive alt/aria-label. Do not use any OTHER photographic image; for other visuals use CSS gradients/backgrounds and inline SVG.\n";
+            . "Use it as the hero ONLY if a photographic hero genuinely suits this business and the requested vibe. If a clean typographic / CSS / illustrative hero would look more premium for this brand (e.g. minimal, luxury, or text-forward concepts), prefer that and you may omit the photo entirely. When you DO use it, make it a full-bleed background with a dark gradient overlay so the headline stays legible, and give it a descriptive alt/aria-label. Do NOT place this photo as a split-screen side panel or oversized cropped rectangle beside empty space; if the chosen Hero style says split/asymmetric, use CSS/inline-SVG/typography for the visual side instead. Do not use any OTHER photographic image; for other visuals use CSS gradients/backgrounds and inline SVG.\n";
     }
 
     if (!empty($logoUrl)) {
@@ -257,7 +259,7 @@ PROMPT;
         }
     }
 
-    // Brand colors from the customer's uploaded logo — only steer the palette when they let the AI choose the style.
+    // Brand colors from the customer's uploaded logo — only steer the palette when they choose automatic style direction.
     $autoVibe = empty($lead['style_vibe']);
     $bc = [];
     if (!empty($lead['brand_colors'])) { $decoded = json_decode((string) $lead['brand_colors'], true); if (is_array($decoded)) { $bc = $decoded; } }
@@ -454,7 +456,7 @@ function generateHeroImage($lead, $slug, $isCli) {
         . ($vibe ? ' Visual mood and style: ' . $vibe . '.' : '')
         . ' Landscape 16:9 composition designed to work as a FULL-BLEED website background behind overlaid white text:'
         . ' keep it visually calm with reasonably even tones, avoid a single hard-edged focal point dead-center,'
-        . ' and do NOT leave a large flat empty panel on one side (the layout adds its own dark gradient scrim for legibility).'
+        . ' and do NOT leave a large flat empty panel or blank wall on one side (the layout adds its own dark gradient scrim for legibility).'
         . ' Natural, flattering light; authentic, editorial, professional quality.'
         . ' Depict authentic, respectful people consistent with the clientele and community this business describes serving —'
         . ' reflect any cues in the description about the people served (e.g. ethnicity, age group, families, profession).'
@@ -467,7 +469,7 @@ function generateHeroImage($lead, $slug, $isCli) {
 
 /** Premium icon-only logo mark (no text — letters in raster logos misrender). */
 function generateLogoMark($lead, $slug, $isCli) {
-    // Customer uploaded their own logo? Use it as-is (skip AI generation).
+    // Customer uploaded their own logo? Use it as-is.
     $uploaded = trim((string) ($lead['logo_url'] ?? ''));
     if ($uploaded !== '' && preg_match('~^https://izendestudioweb\.com/genmedia/uploads/[\w-]+\.(?:png|jpe?g|webp|gif)$~i', $uploaded)) {
         if (!$isCli) { echo " [using uploaded logo] "; flush(); }
@@ -519,7 +521,7 @@ function slugForLead($lead) {
  * the customer's real provisioned site never carries it.
  */
 /**
- * Wire any booking form (#izBookingForm) the AI built to the tenant booking
+ * Wire any booking form (#izBookingForm) in the generated draft to the tenant booking
  * endpoint. Baked into generated_html so it persists onto the live static/WP
  * site. No-op if the site has no booking form. The per-site token is public by
  * design (the endpoint is honeypot + rate-limit + enable-gated).
@@ -589,7 +591,9 @@ function injectClaimBar($html, $slug = '', $createdAt = '') {
         . 'font-size:14px;line-height:1.3;box-shadow:0 2px 14px rgba(0,0,0,.28)">'
         . '<span style="display:flex;align-items:center;gap:8px">✨ <strong>Built for you by Izende Studio Web</strong>'
         . '<span style="opacity:.8"> — love it? Make it yours.</span></span>'
-        . '<span id="izende-claim-countdown" style="margin-left:auto;opacity:.92;font-weight:700;white-space:nowrap">Reserved for you — 7 days left</span>'
+        . '<span id="izende-preview-status" style="margin-left:auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;opacity:.92;font-weight:700;white-space:nowrap">'
+        . '<span id="izende-claim-countdown">Reserved for you — 7 days left</span>'
+        . '<span id="izende-draft-count" style="opacity:.86">Checking drafts left…</span></span>'
         . '<a href="https://izendestudioweb.com/claim-site.php?slug=' . rawurlencode($slug) . '" class="izende-claim-btn" '
         . 'style="background:#2563eb;color:#fff;text-decoration:none;font-weight:700;padding:9px 22px;'
         . 'border-radius:999px;white-space:nowrap">Claim this site →</a></div>'
@@ -599,11 +603,12 @@ function injectClaimBar($html, $slug = '', $createdAt = '') {
         . '.izende-claim-btn:hover{background:#1d4ed8!important;transform:scale(1.04)}'
         . '@keyframes izClaimPulse{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.7),0 0 12px rgba(56,189,248,.5)}'
         . '50%{box-shadow:0 0 0 10px rgba(37,99,235,0),0 0 26px rgba(56,189,248,.95)}}'
-        . '@media(max-width:680px){#izende-claim-countdown{margin-left:0;font-size:13px;flex-basis:100%}}'
+        . '@media(max-width:680px){#izende-preview-status{margin-left:0;font-size:13px;flex-basis:100%}}'
         . '@media(prefers-reduced-motion:reduce){.izende-claim-btn{animation:none}}</style>'
         . '<script>(function(){var el=document.getElementById("izende-claim-countdown");if(!el)return;var exp=' . $expiryMs . ';'
         . 'function tick(){var left=Math.max(0,exp-Date.now());var days=Math.max(0,Math.ceil(left/86400000));'
-        . 'el.textContent="Reserved for you — "+days+" day"+(days===1?"":"s")+" left";}tick();})();</script>';
+        . 'el.textContent="Reserved for you — "+days+" day"+(days===1?"":"s")+" left";}tick();'
+        . 'var dc=document.getElementById("izende-draft-count");if(dc&&window.fetch){fetch("/api/generation-count.php",{cache:"no-store",credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){if(j&&j.success){dc.textContent=j.remaining+" of "+j.limit+" free drafts left";}}).catch(function(){dc.textContent="Draft count on builder page";});}})();</script>';
     if (stripos($html, '</body>') !== false) {
         return preg_replace('/<\/body>/i', $bar . '</body>', $html, 1);
     }
@@ -612,9 +617,9 @@ function injectClaimBar($html, $slug = '', $createdAt = '') {
 
 /**
  * Stage 4 editor (presets) — a "Customize" widget injected into the PREVIEW only.
- * Instantly re-themes the live page by overriding the CSS-variable contract on
- * :root (accent colour + font pairing). Zero AI, zero backend, free + instant —
- * the "make it yours" hook. Choices persist in localStorage per slug.
+ * Re-themes the visible page instantly, then saves the selected CSS-variable
+ * preset back to generated_html so a later claim/provision uses the same look.
+ * Browser localStorage keeps the preview responsive while the server save finishes.
  */
 function injectEditorWidget($html, $slug, $leadId = '') {
     $token = ($leadId !== '') ? substr(hash_hmac('sha256', 'site:' . $leadId, (string) envOr('SITE_BOOKING_SECRET', '')), 0, 40) : '';
@@ -638,10 +643,10 @@ function injectEditorWidget($html, $slug, $leadId = '') {
 <div id="izFonts" style="display:flex;flex-direction:column;gap:7px;margin:6px 0 16px"></div>
 <button id="izReset" style="width:100%;background:#f1f5f9;border:0;border-radius:8px;padding:10px;font-weight:600;font-size:14px;color:#334155;cursor:pointer;margin-bottom:16px">Reset look</button>
 <div id="izAskWrap" style="border-top:1px solid #e2e8f0;padding-top:14px">
-<div class="iz-h">Ask AI to change anything</div>
+	<div class="iz-h">Ask Site Drafter to change anything</div>
 <div class="iz-sub" style="margin-bottom:9px">e.g. "shorten the hero", "use a warmer tone", "add an FAQ"</div>
 <textarea id="izAsk" rows="4" placeholder="Describe a change…" style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:8px;padding:10px;font-family:inherit;font-size:14px;line-height:1.45;color:#0f172a;min-height:88px;resize:vertical"></textarea>
-<button id="izSend" style="width:100%;background:#2563eb;color:#fff;border:0;border-radius:8px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;margin-top:9px">Send to AI</button>
+	<button id="izSend" style="width:100%;background:#2563eb;color:#fff;border:0;border-radius:8px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;margin-top:9px">Send to Site Drafter</button>
 <div id="izMsg" style="margin-top:12px;font-size:13.5px;line-height:1.5;color:#334155"></div>
 </div>
 <div style="text-align:center;margin-top:14px;color:#475569;font-size:12.5px">Like it? <strong>Claim your site</strong> to keep editing.</div>
@@ -656,17 +661,28 @@ function applyColor(c){R.style.setProperty('--c-accent',c);R.style.setProperty('
 function applyFont(f){gf(f.h);gf(f.b);R.style.setProperty('--font-heading',"'"+f.h+"',serif");R.style.setProperty('--font-body',"'"+f.b+"',sans-serif");}
 function save(s){try{localStorage.setItem(K,JSON.stringify(s))}catch(e){}}
 function load(){try{return JSON.parse(localStorage.getItem(K)||'{}')}catch(e){return{}}}
+var send=document.getElementById('izSend'),ask=document.getElementById('izAsk'),msg=document.getElementById('izMsg'),lbl='Send to Site Drafter',waitTimer=null,waitEnd=0,themeTimer=null,themeDirty=false,themeResetPending=false;
+function setMsg(t,c){if(!msg)return;msg.style.color=c||'#334155';msg.innerHTML=t;}
+function persistTheme(reset,done){
+ if(!LEAD){if(done)done(true);return;}
+ var ok=false;
+ fetch(EP,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lead_id:LEAD,token:TOKEN,action:'theme',theme:reset?{reset:true}:{color:st.color||'',font:st.font||''}})})
+  .then(function(r){return r.json();})
+  .then(function(j){ok=!!(j&&j.success);if(ok){themeDirty=false;themeResetPending=false;if(send&&!send.disabled)setMsg('✓ Look saved for claim.','#15803d');}else if(send&&!send.disabled){setMsg((j&&j.message)||'Look changed here, but could not save yet.','#b45309');}})
+  .catch(function(){if(send&&!send.disabled)setMsg('Look changed here, but could not save yet.','#b45309');})
+  .finally(function(){if(done)done(ok);});
+}
+function queueTheme(reset){themeDirty=true;themeResetPending=!!reset;clearTimeout(themeTimer);themeTimer=setTimeout(function(){persistTheme(themeResetPending);},350);}
 var st=load();if(st.color)applyColor(st.color);if(st.font){var ff=FONTS.filter(function(x){return x.n==st.font})[0];if(ff)applyFont(ff);}
-var cw=document.getElementById('izColors');COLORS.forEach(function(c){var b=document.createElement('button');b.style.cssText='width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #cbd5e1;cursor:pointer;background:'+c;b.onclick=function(){applyColor(c);st.color=c;save(st);};cw.appendChild(b);});
-var fw=document.getElementById('izFonts');FONTS.forEach(function(f){var b=document.createElement('button');b.textContent=f.n;b.style.cssText='text-align:left;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:9px 11px;cursor:pointer;font-weight:600;font-size:14px;color:#334155';b.onclick=function(){applyFont(f);st.font=f.n;save(st);};fw.appendChild(b);});
+var cw=document.getElementById('izColors');COLORS.forEach(function(c){var b=document.createElement('button');b.style.cssText='width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #cbd5e1;cursor:pointer;background:'+c;b.onclick=function(){applyColor(c);st.color=c;save(st);queueTheme(false);};cw.appendChild(b);});
+var fw=document.getElementById('izFonts');FONTS.forEach(function(f){var b=document.createElement('button');b.textContent=f.n;b.style.cssText='text-align:left;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:9px 11px;cursor:pointer;font-weight:600;font-size:14px;color:#334155';b.onclick=function(){applyFont(f);st.font=f.n;save(st);queueTheme(false);};fw.appendChild(b);});
 document.getElementById('izEditBtn').onclick=function(){var p=document.getElementById('izEditPanel');p.style.display=p.style.display=='none'?'block':'none';};
-document.getElementById('izReset').onclick=function(){['--c-accent','--c-accent-2','--c-accent-contrast','--font-heading','--font-body'].forEach(function(v){R.style.removeProperty(v)});try{localStorage.removeItem(K)}catch(e){}st={};};
-var send=document.getElementById('izSend'),ask=document.getElementById('izAsk'),msg=document.getElementById('izMsg'),lbl='Send to AI',waitTimer=null,waitEnd=0;
+document.getElementById('izReset').onclick=function(){['--c-accent','--c-accent-2','--c-accent-contrast','--font-heading','--font-body'].forEach(function(v){R.style.removeProperty(v)});try{localStorage.removeItem(K)}catch(e){}st={};queueTheme(true);};
+Array.prototype.forEach.call(document.querySelectorAll('.izende-claim-btn'),function(a){a.addEventListener('click',function(e){if(!LEAD||!themeDirty)return;e.preventDefault();var href=a.href;clearTimeout(themeTimer);setMsg('<span class="izspin"></span>Saving your look before claim…','#334155');persistTheme(themeResetPending,function(ok){if(ok){location.href=href;}else{setMsg('Could not save your look yet. Try Claim again in a moment.','#b91c1c');}});});});
 if(!LEAD){document.getElementById('izAskWrap').style.display='none';}
-function setMsg(t,c){msg.style.color=c||'#334155';msg.innerHTML=t;}
 function stopWait(){if(waitTimer){clearInterval(waitTimer);waitTimer=null;}}
 function reset(){stopWait();send.disabled=false;send.textContent=lbl;}
-function startWait(freeLeft){stopWait();waitEnd=Date.now()+60000;function draw(){var left=Math.max(0,Math.ceil((waitEnd-Date.now())/1000));var pct=Math.max(0,Math.min(100,(left/60)*100));setMsg('<span class="izspin"></span>Building your change — ready in ~'+left+'s…'+(freeLeft!=null?' <span style="color:#64748b">('+freeLeft+' free left)</span>':'')+'<div class="izwaitbar" aria-hidden="true"><span style="width:'+pct+'%"></span></div><div style="color:#64748b">No need to refresh — we will refresh for you when it is done.</div>','#334155');}draw();waitTimer=setInterval(draw,1000);}
+function startWait(freeLeft){stopWait();waitEnd=Date.now()+120000;function draw(){var left=Math.max(0,Math.ceil((waitEnd-Date.now())/1000));var pct=Math.max(0,Math.min(100,(left/120)*100));var mm=Math.floor(left/60),ss=String(left%60).padStart(2,'0');var label=left>0?('Estimated update in <strong style="color:#2563eb">'+mm+':'+ss+'</strong>'):('<strong style="color:#2563eb">Finalizing your change…</strong>');setMsg('<span class="izspin"></span>'+label+(freeLeft!=null?' <span style="color:#64748b">('+freeLeft+' free left)</span>':'')+'<div class="izwaitbar" aria-hidden="true"><span style="width:'+pct+'%"></span></div><div style="color:#64748b">Keep this panel open — we will refresh the preview when it is done.</div>','#334155');}draw();waitTimer=setInterval(draw,1000);}
 function poll(eid,tries){
  if(tries<=0){setMsg('Still working — refresh the page in a moment to see your change.','#475569');reset();return;}
  fetch(EP+'?eid='+encodeURIComponent(eid)+'&lead_id='+encodeURIComponent(LEAD)+'&token='+encodeURIComponent(TOKEN)).then(function(r){return r.json();}).then(function(s){
@@ -703,7 +719,7 @@ function writePreview($slug, $html, $leadId = '', $createdAt = '') {
     }
     $fileHtml = injectPreviewRobotsMeta($html);                  // preview only; stored generated_html stays indexable
     $fileHtml = injectClaimBar($fileHtml, $slug, $createdAt);    // preview gets the claim bar; stored generated_html stays clean
-    $fileHtml = injectEditorWidget($fileHtml, $slug, $leadId);   // + the "Customize" widget (presets + AI chat), preview only
+    $fileHtml = injectEditorWidget($fileHtml, $slug, $leadId);   // + the "Customize" widget (presets + text change requests), preview only
     $tmp = $dir . '/.index.' . bin2hex(random_bytes(4)) . '.tmp';
     if (@file_put_contents($tmp, $fileHtml, LOCK_EX) === false || !@rename($tmp, $dir . '/index.html')) {
         @unlink($tmp);
@@ -738,7 +754,7 @@ function sendPreviewEmail($lead, $previewUrl) {
 </body></html>
 HTML;
 
-    $text = "Your AI-built website preview for {$lead['business_name']} is ready!\n\n"
+    $text = "Your website draft for {$lead['business_name']} is ready!\n\n"
         . "View it here: $previewUrl\n\n"
         . "Like what you see? Reply to this email or call (314) 312-6441 and Izende Studio Web will put it live on your own domain with managed hosting.\n\n"
         . "— Izende Studio Web\n";
@@ -843,10 +859,20 @@ foreach ($leads as $lead) {
         'status' => 'preview_live',
         'preview_url' => $previewUrl,
         'preview_slug' => $slug,
+    ]);
+    if ($ucode < 200 || $ucode >= 300) {
+        cronLog('Status PATCH failed after preview write', ['id' => $id, 'url' => $previewUrl, 'patch_http' => $ucode]);
+        if (!$isCli) { echo "\nSTATUS PATCH FAILED: $ucode (preview exists at $previewUrl)\n"; }
+        continue;
+    }
+    list($hcode) = supabaseRequest('PATCH', '/rest/v1/site_builder_leads?id=eq.' . $id, [
         'generated_html' => $html,
     ]);
+    if ($hcode < 200 || $hcode >= 300) {
+        cronLog('generated_html PATCH failed', ['id' => $id, 'patch_http' => $hcode, 'bytes' => strlen($html)]);
+    }
     $emailed = sendPreviewEmail($lead, $previewUrl);
-    cronLog('Lead complete', ['id' => $id, 'url' => $previewUrl, 'bytes' => strlen($html), 'patch_http' => $ucode, 'emailed' => $emailed]);
+    cronLog('Lead complete', ['id' => $id, 'url' => $previewUrl, 'bytes' => strlen($html), 'patch_http' => $ucode, 'html_patch_http' => $hcode, 'emailed' => $emailed]);
     if (!$isCli) { echo "\nDONE: $previewUrl (emailed: " . ($emailed ? 'yes' : 'NO') . ")\n"; flush(); }
 }
 
