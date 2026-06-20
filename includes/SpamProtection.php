@@ -150,7 +150,18 @@ class SpamProtection {
      * @return array ['is_spam' => bool, 'reason' => string]
      */
     public static function detectSpamPatterns($data) {
-        $content = implode(' ', array_values($data));
+        // Scan ONLY human-entered text. Skip CSRF / reCAPTCHA / timestamp / honeypot
+        // tokens — they're opaque random strings that can contain spam substrings
+        // (e.g. "xxx") by chance and would false-flag legitimate submissions.
+        $skip = ['csrf_token', 'form_timestamp', 'g-recaptcha-response', 'h-captcha-response'];
+        $parts = [];
+        foreach ($data as $k => $v) {
+            if (!is_string($v)) { continue; }                  // arrays (e.g. brand_colors), nested, etc.
+            if (in_array($k, $skip, true)) { continue; }
+            if (strpos((string) $k, 'website_url_') === 0) { continue; } // session-named honeypot
+            $parts[] = $v;
+        }
+        $content = implode(' ', $parts);
 
         // Common spam keywords
         $spamKeywords = [
@@ -161,7 +172,8 @@ class SpamProtection {
         ];
 
         foreach ($spamKeywords as $keyword) {
-            if (stripos($content, $keyword) !== false) {
+            // Whole-word match so "xxx" inside a token or "porn" inside "popcorn" don't false-trigger.
+            if (preg_match('/\b' . preg_quote($keyword, '/') . '\b/i', $content)) {
                 return ['is_spam' => true, 'reason' => 'Spam keyword detected: ' . $keyword];
             }
         }
