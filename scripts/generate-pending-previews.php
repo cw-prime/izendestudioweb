@@ -613,7 +613,7 @@ function injectClaimBar($html, $slug = '', $createdAt = '') {
         . '<script>(function(){var el=document.getElementById("izende-claim-countdown");if(!el)return;var exp=' . $expiryMs . ';'
         . 'function tick(){var left=Math.max(0,exp-Date.now());var days=Math.max(0,Math.ceil(left/86400000));'
         . 'el.textContent="Reserved for you — "+days+" day"+(days===1?"":"s")+" left";}tick();'
-        . 'var dc=document.getElementById("izende-draft-count");if(dc&&window.fetch){fetch("/api/generation-count.php",{cache:"no-store",credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){if(j&&j.success){dc.textContent=j.remaining+" of "+j.limit+" free drafts left — add more detail for better results";}}).catch(function(){dc.textContent="Draft count available after preview";});}})();</script>';
+        . 'var dc=document.getElementById("izende-draft-count");if(dc&&window.fetch){fetch("/api/generation-count.php",{cache:"no-store",credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){if(j&&j.success){var rem=Math.max(0,parseInt(j.remaining,10)||0);var limit=Math.max(1,parseInt(j.limit,10)||3);dc.textContent=rem>0?rem+" of "+limit+" free drafts left — add more detail for better results":"All "+limit+" free drafts used — claim this site to keep editing";}}).catch(function(){dc.textContent="Draft count available after preview";});}})();</script>';
     if (stripos($html, '</body>') !== false) {
         return preg_replace('/<\/body>/i', $bar . '</body>', $html, 1);
     }
