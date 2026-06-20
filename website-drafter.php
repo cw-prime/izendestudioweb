@@ -18,6 +18,12 @@ initSecureSession();
 setSecurityHeaders();
 
 if (isset($_GET['reset_drafts'])) {
+    $resetToken = substr(hash_hmac('sha256', 'website-drafter-reset', iz_gen_secret()), 0, 24);
+    if (!hash_equals($resetToken, (string) $_GET['reset_drafts'])) {
+        http_response_code(404);
+        exit;
+    }
+
     iz_gen_clear();
     header('Location: /website-drafter', true, 302);
     exit;
