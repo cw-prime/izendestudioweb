@@ -120,7 +120,7 @@ brief.
 Output rules (CRITICAL):
 - Return ONE complete HTML document and NOTHING else. Start at <!DOCTYPE html> and
   end at </html>. No markdown code fences, no explanation, no preamble.
-- Keep the document compact and complete. Target 10k-18k characters. Do not overbuild
+- Keep the document compact and complete. Target 12k-22k characters. Do not overbuild
   huge decorative SVGs, app mockups, long animations, or excessive sections that risk
   truncation. A polished complete page is better than an ambitious broken page.
 - Everything inline in that one file: a single <style> block in <head>. No external
@@ -203,6 +203,9 @@ Accuracy & editability (CRITICAL — this is a preview the owner will personaliz
   carry over the real service categories, named services/packages, durations, and
   prices that fit the page. Do not reduce a service-heavy business to three generic
   cards when real menu/pricing details were provided.
+- For dense scanned content, preserve context by grouping details into concise sections
+  such as Services, Plans, Shop/Categories, Offers, App/Tools, FAQs, and Disclosures.
+  Summarize long category lists, but do not drop whole business-critical groups.
 - When a section would normally show such a detail but it wasn't provided, use a
   clearly-editable placeholder the owner will obviously swap — e.g. "Hours: add your
   hours here", "[Your address]", "Call for pricing" — never a fabricated specific.
@@ -213,8 +216,8 @@ Accuracy & editability (CRITICAL — this is a preview the owner will personaliz
 PROMPT;
 
     $description = (string) ($lead['business_description'] ?? '');
-    if (strlen($description) > 5200) {
-        $description = substr($description, 0, 5200) . "\n\n[Input trimmed for draft speed. Preserve the main services and offers above.]";
+    if (strlen($description) > 8000) {
+        $description = substr($description, 0, 8000) . "\n\n[Input trimmed for draft speed. Preserve the main services, plans, offers, and disclosure notes above.]";
     }
 
     $user = 'Business name: ' . $lead['business_name'] . "\n"
@@ -342,7 +345,7 @@ function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '') {
     list($system, $user) = buildPrompts($lead, $heroUrl, $logoUrl);
     $payload = [
         'model' => 'glm-5',
-        'max_tokens' => 16000, // keep output complete; huge drafts risk truncation and bad first renders
+        'max_tokens' => 20000, // enough for rich scanned context, while still discouraging giant broken pages
         'stream' => true,
         'messages' => [
             ['role' => 'system', 'content' => $system],
