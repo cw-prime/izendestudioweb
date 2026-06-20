@@ -61,13 +61,13 @@ Last updated: 2026-06-20
 around the OUTCOME (a website draft), not the tech. Tool/nav/breadcrumb = "Website Drafter"; the prospect
 gets "a website draft" / "your draft" (NOT "first draft" — that implied more). GLM/Gemini still power it,
 but visible "AI" copy is minimized; Zeno is the "website draft assistant." The 3-generation cap is enforced
-server-side but NOT advertised (no count banner). Internals (file `ai-website-builder.php`, `/ai-website-builder`
-URL, form/IDs/endpoints, `gtag('ai_builder_*')`) are unchanged. Lives on branch `funnel-preview-protections-logo-map`.
+server-side. Public URL is `/website-drafter`; legacy `/ai-website-builder` and `/ai-website-builder.php`
+301 to it. Internal form/IDs/endpoints and `gtag('ai_builder_*')` names are intentionally unchanged. Lives on branch `funnel-preview-protections-logo-map`.
 
 **Product:** Prospect describes their business → the Website Drafter (GLM-5) prepares a live single-page website draft (with a real Gemini hero photo + logo) → "Claim this site" → pays in WHMCS/PayPal → site auto-provisions onto Izende cPanel hosting. Draft = hook; recurring cPanel hosting = the product. Hard requirement: fully automated, no babysitting. Pilot: a massage therapist who owns a domain.
 
 ### Pipeline (as-built, NOT n8n)
-- Intake: `ai-website-builder.php` → `api/site-builder-leads.php` → Supabase `site_builder_leads` (status=pending).
+- Intake: `website-drafter.php` (`/website-drafter`) → `api/site-builder-leads.php` → Supabase `site_builder_leads` (status=pending).
 - Generation: **cPanel cron** `scripts/generate-pending-previews.php` (GLM-5 streaming). Per lead: enrichBrief → Gemini hero image (`gemini-3.1-flash-image`, best-effort, un-forced) + Gemini logo icon → GLM builds site (CSS-var contract, no-fabrication) → injectBookingScript (wires any booking form) → writePreview (+ injectClaimBar + Customize widget) → email prospect. Images hosted at `/genmedia/<slug>/`. Previews at `/previews/<slug>/`. 14-day expiry (skips samples + claimed/converted; also clears genmedia).
 - Claim: preview claim bar + reveal → `claim-site.php` (3-card chooser: Static $39 pid14 / WordPress $49 pid15 MOST POPULAR / Managed $149 pid16) → WHMCS `cart.php?a=add&pid=N`.
 - Provision: WHMCS `AfterModuleCreate` hook `adminIzende/includes/hooks/zeno_provision.php` (gated 14/15/16). pid14=static deploy (index.html via WHM→cPanel Fileman). pid15/16=WordPress via shared core `scripts/lib/wp-provision.php` (Softaculous install → canvas mu-plugin + seed.json → 1:1 themed render). pid16 auto-enables booking. Marks lead converted (+plan_kind, wp_admin_url).

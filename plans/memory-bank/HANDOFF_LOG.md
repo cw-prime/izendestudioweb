@@ -882,3 +882,15 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Result: SUCCESS. Deployed to production via FTPS.
 - Risks introduced: Moderate token/time increase for URL analysis on service-heavy sites; endpoint is still rate-limited and optional. No lead was created during verification.
 - Updated memory files: `plans/memory-bank/CURRENT_STATE.md`, `plans/memory-bank/HANDOFF_LOG.md`
+
+---
+- Date: 2026-06-20
+- Agent: Codex
+- Scope worked: Renamed the public Website Drafter route to reduce AI fatigue in the URL and visible links.
+- Files changed:
+  - `website-drafter.php` — new canonical public intake page copied from the existing builder page, with page key `website-drafter` and canonical URL `https://izendestudioweb.com/website-drafter`.
+  - `ai-website-builder.php` — converted to a small 301 fallback redirect to `/website-drafter` for hosts/tools that bypass `.htaccess`.
+  - `.htaccess` — added 301 redirects from `/ai-website-builder` and `/ai-website-builder.php` to `/website-drafter`.
+  - `assets/includes/header.php`, `hosting.php`, `sitemap.php`, `sitemap.xml.php` — updated public links/copy/sitemap entries to Website Drafter.
+  - `plans/memory-bank/CURRENT_STATE.md`, `plans/memory-bank/NEXT_ACTIONS.md`, `plans/memory-bank/HANDOFF_LOG.md` — memory updated.
+- Decision: keep internal API/form/analytics names (`site-builder-*`, `ai_builder_*`) unchanged because they are not customer-facing and renaming them adds risk without reducing public AI fatigue.
