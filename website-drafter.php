@@ -519,7 +519,7 @@ SEOHelper::outputMetaTags('website-drafter', [
                     <line class="ai-bot-antenna" x1="32" y1="38" x2="32" y2="42"></line>
                   </svg>
                   <div class="ai-bot-text">
-                    <strong>Hi, I'm Zeno 👋</strong>
+                    <strong>Hi, I'm Zeno <i class="bi bi-stars text-primary" aria-hidden="true"></i></strong>
                     <span>Your website draft assistant — tell me about your business and I'll put together your draft</span>
                   </div>
                 </div>

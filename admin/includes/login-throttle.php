@@ -9,9 +9,37 @@ if (!defined('ADMIN_PAGE')) {
 
 require_once __DIR__ . '/../config/database.php';
 
+if (!function_exists('ensureLoginAttemptsTable')) {
+    function ensureLoginAttemptsTable(mysqli $conn): void
+    {
+        static $checked = false;
+        if ($checked) {
+            return;
+        }
+
+        $sql = "
+            CREATE TABLE IF NOT EXISTS login_attempts (
+                id int(11) NOT NULL AUTO_INCREMENT,
+                ip_address varbinary(16) NOT NULL,
+                username varchar(100) DEFAULT NULL,
+                attempted_at datetime NOT NULL,
+                was_successful tinyint(1) NOT NULL DEFAULT 0,
+                PRIMARY KEY (id),
+                KEY idx_login_attempts_ip_time (ip_address, attempted_at),
+                KEY idx_login_attempts_username_time (username, attempted_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ";
+
+        mysqli_query($conn, $sql);
+        $checked = true;
+    }
+}
+
 if (!function_exists('recordLoginAttempt')) {
     function recordLoginAttempt(mysqli $conn, string $ip, string $username = null, bool $success = false): void
     {
+        ensureLoginAttemptsTable($conn);
+
         $stmt = mysqli_prepare($conn, '
             INSERT INTO login_attempts (ip_address, username, attempted_at, was_successful)
             VALUES (INET6_ATON(?), ?, NOW(), ?)
@@ -29,6 +57,8 @@ if (!function_exists('recordLoginAttempt')) {
 if (!function_exists('tooManyFailures')) {
     function tooManyFailures(mysqli $conn, string $ip, string $username = null, int $limit = 5, int $windowMinutes = 15): bool
     {
+        ensureLoginAttemptsTable($conn);
+
         $stmt = mysqli_prepare($conn, '
             SELECT COUNT(*) AS failures
             FROM login_attempts
@@ -72,6 +102,8 @@ if (!function_exists('tooManyFailures')) {
 if (!function_exists('clearLoginAttempts')) {
     function clearLoginAttempts(mysqli $conn, string $ip, string $username = null): void
     {
+        ensureLoginAttemptsTable($conn);
+
         $stmt = mysqli_prepare($conn, '
             DELETE FROM login_attempts
             WHERE ip_address = INET6_ATON(?)
