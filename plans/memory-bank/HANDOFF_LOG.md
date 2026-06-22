@@ -894,3 +894,16 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
   - `assets/includes/header.php`, `hosting.php`, `sitemap.php`, `sitemap.xml.php` — updated public links/copy/sitemap entries to Website Drafter.
   - `plans/memory-bank/CURRENT_STATE.md`, `plans/memory-bank/NEXT_ACTIONS.md`, `plans/memory-bank/HANDOFF_LOG.md` — memory updated.
 - Decision: keep internal API/form/analytics names (`site-builder-*`, `ai_builder_*`) unchanged because they are not customer-facing and renaming them adds risk without reducing public AI fatigue.
+
+---
+- Date: 2026-06-22
+- Agent: Claude (Opus 4.8) / DEBUG
+- Scope worked: Fixed the build-overlay "hang" on `/website-drafter`. The in-page poll gave up after ~6 min (`elapsed > 360`) and `fallbackToEmail()` cleared the poll timer, so drafts that finished after the ceiling (email already delivered) never revealed in-page — overlay stuck on "Still polishing…" forever.
+- Business KPI targeted: Draft-reveal completion rate / first-draft satisfaction (the in-page reveal is the funnel hook). Eliminates a dead-end where the customer who got the email still sees a frozen page.
+- Files changed:
+  - `website-drafter.php` — `poll()` now: soft timeout at ~5 min reassures the visitor but KEEPS polling at a slower 9s cadence so the draft still reveals in-page when ready; true 20-min hard stop as backstop. Added `softNotified`/`pollEvery` state (declared + reset in `startBuildExperience`).
+- Tests/lint/typecheck run: `php -l website-drafter.php` (clean). Deployed via FTPS (226). Verified live: prod HTML contains `elapsed > 1200`, `Soft timeout (~5 min)`, "This one's taking a little longer", `20-min hard stop`.
+- Result: SUCCESS. Live on production. Commit 00aa046.
+- Risks introduced: Low. Background poll now runs up to 20 min against `api/preview-status.php` (cheap status read, no-store). Cadence slows to 9s after the soft timeout to limit request volume.
+- Follow-up actions: Generator filler-visual quality — generated drafts use intentional CSS-gradient + inline-SVG fallbacks for non-hero visual spots (e.g. a clock icon in a flat blue gradient), which read as placeholder-y. Owner-gated: improve `scripts/generate-pending-previews.php` prompt for richer filler visuals (awaiting go-ahead).
+- Updated memory files: `plans/memory-bank/HANDOFF_LOG.md`
