@@ -111,7 +111,7 @@ function supabaseRequest($method, $path, $body = null) {
     return [$code, $resp === false ? null : json_decode($resp, true)];
 }
 
-function buildPrompts($lead, $heroUrl = '', $logoUrl = '') {
+function buildPrompts($lead, $heroUrl = '', $logoUrl = '', $supportUrls = []) {
     $system = <<<'PROMPT'
 You are a senior web designer at a professional web studio. You build a complete,
 production-ready, single-page marketing website for a small business from a short
@@ -264,7 +264,19 @@ PROMPT;
 
     if (!empty($heroUrl)) {
         $user .= "\nHERO IMAGE AVAILABLE (a real, on-brand photo was generated for this business): " . $heroUrl . "\n"
-            . "Use it as the hero ONLY if a photographic hero genuinely suits this business and the requested vibe. If a clean typographic / CSS / illustrative hero would look more premium for this brand (e.g. minimal, luxury, or text-forward concepts), prefer that and you may omit the photo entirely. When you DO use it, make it a full-bleed background with a dark gradient overlay so the headline stays legible, and give it a descriptive alt/aria-label. Do NOT place this photo as a split-screen side panel, clipped diagonal panel, or oversized cropped rectangle beside empty space. Do not use any OTHER photographic image; for other visuals use CSS gradients/backgrounds and small inline SVG icons only.\n";
+            . "Use it as the hero ONLY if a photographic hero genuinely suits this business and the requested vibe. If a clean typographic / CSS / illustrative hero would look more premium for this brand (e.g. minimal, luxury, or text-forward concepts), prefer that and you may omit the photo entirely. When you DO use it, make it a full-bleed background with a dark gradient overlay so the headline stays legible, and give it a descriptive alt/aria-label. Do NOT place this photo as a split-screen side panel, clipped diagonal panel, or oversized cropped rectangle beside empty space.\n";
+    }
+
+    if (!empty($supportUrls)) {
+        $list = '';
+        foreach (array_values($supportUrls) as $i => $u) { $list .= '  ' . ($i + 1) . '. ' . $u . "\n"; }
+        $user .= "\nSUPPORTING PHOTOS AVAILABLE (real, on-brand photographs generated for THIS business — use them to make the page feel alive and credible instead of empty gradient panels):\n" . $list
+            . "Place these REAL photos in the content sections where a photo genuinely helps a visitor understand the business — e.g. About, Services, a feature/'why us' band, or a small gallery — with descriptive alt text. Style them responsively (width:100%, object-fit:cover, a sensible aspect-ratio, border-radius) so they crop cleanly on any screen. Use each one where it adds meaning; do NOT force all of them in if the design is stronger without one, and never stretch, distort, or tile them.\n";
+    }
+
+    // Other-visuals policy: only the real URLs above are allowed; everything else must be CSS/SVG so nothing breaks.
+    if (!empty($heroUrl) || !empty($supportUrls)) {
+        $user .= "\nOTHER VISUALS: Besides the real image URL(s) provided above (hero / logo / supporting photos), do NOT use, invent, or hotlink ANY other photographic image URLs — they break and look unprofessional. For every other visual (backgrounds, accents, icons, decorative panels) use CSS gradients/backgrounds and small inline SVG only.\n";
     }
 
     if (!empty($logoUrl)) {
@@ -333,7 +345,7 @@ function enrichBrief($lead) {
     return ($text !== '' && strlen($text) > 40) ? $text : null;
 }
 
-function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '') {
+function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '', $supportUrls = []) {
     global $glmKey;
     // Zeno expands a thin description into a real brief first (best-effort).
     $rawDescription = trim((string) ($lead['business_description'] ?? ''));
@@ -342,7 +354,7 @@ function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '') {
         $lead['_brief'] = $brief;
         cronLog('Brief enriched', ['id' => $lead['id'] ?? '', 'chars' => strlen($brief)]);
     }
-    list($system, $user) = buildPrompts($lead, $heroUrl, $logoUrl);
+    list($system, $user) = buildPrompts($lead, $heroUrl, $logoUrl, $supportUrls);
     $payload = [
         'model' => 'glm-5',
         'max_tokens' => 20000, // enough for rich scanned context, while still discouraging giant broken pages
@@ -492,6 +504,40 @@ function generateHeroImage($lead, $slug, $isCli) {
     $url = geminiImageToFile($prompt, $slug, 'hero');
     if ($url !== '' && !$isCli) { echo " [hero image ok] "; flush(); }
     return $url;
+}
+
+/** Two real, on-brand supporting photos (people/service + space/detail) for the content
+ *  sections, so non-hero spots show a real image instead of an empty gradient+icon panel.
+ *  Best-effort; any '' simply isn't offered to GLM (it falls back to CSS/SVG for that spot). */
+function generateSupportImages($lead, $slug, $isCli) {
+    $name = (string) $lead['business_name'];
+    $desc = trim((string) ($lead['business_description'] ?? ''));
+    $vibe = trim((string) ($lead['style_vibe'] ?? ''));
+    $common = ($vibe ? ' Visual mood and style: ' . $vibe . '.' : '')
+        . ' Natural, flattering light; authentic, candid, editorial and professional quality — real, never stocky.'
+        . ' Depict authentic, respectful people consistent with the clientele and community this business describes serving —'
+        . ' reflect any cues in the description about the people served (e.g. ethnicity, age group, families, profession);'
+        . ' if the description gives no such cues, show people naturally relevant to the service.'
+        . ' Photorealistic, versatile 4:3 composition that still reads well when cropped into a card or column.'
+        . ' Absolutely NO text, NO words, NO logos, NO watermarks, and NO user-interface elements in the image.';
+    $prompts = [
+        'support-1' => 'Create a warm, authentic photograph for the website of "' . $name . '". The business: ' . $desc . '.'
+            . ' Show this business\'s work actually happening — the service being delivered or a customer/client being helped —'
+            . ' so a visitor instantly understands what they get.' . $common,
+        'support-2' => 'Create a tasteful, editorial photograph for the website of "' . $name . '". The business: ' . $desc . '.'
+            . ' Focus on the space, product, tools or craft (the environment or the result), conveying quality and care;'
+            . ' people optional and secondary here.' . $common,
+    ];
+    $model    = trim((string) envOr('GEMINI_LOGO_MODEL', 'nano-banana-pro-preview'));      // higher-fidelity model
+    $fallback = trim((string) envOr('GEMINI_IMAGE_MODEL', 'gemini-3.1-flash-image'));
+    $urls = [];
+    foreach ($prompts as $base => $prompt) {
+        $u = geminiImageToFile($prompt, $slug, $base, $model);
+        if ($u === '') { $u = geminiImageToFile($prompt, $slug, $base, $fallback); }
+        if ($u !== '') { $urls[] = $u; }
+    }
+    if (!empty($urls) && !$isCli) { echo ' [' . count($urls) . ' support image' . (count($urls) === 1 ? '' : 's') . ' ok] '; flush(); }
+    return $urls;
 }
 
 /** Premium icon-only logo mark (no text — letters in raster logos misrender). */
@@ -862,8 +908,9 @@ foreach ($leads as $lead) {
     $slug = slugForLead($lead);
     $heroUrl = generateHeroImage($lead, $slug, $isCli); // best-effort; '' falls back to CSS/SVG
     $logoUrl = generateLogoMark($lead, $slug, $isCli);  // best-effort; '' falls back to SVG monogram
+    $supportUrls = generateSupportImages($lead, $slug, $isCli); // best-effort real content photos; missing spots fall back to CSS/SVG
 
-    list($html, $err) = generateWithGlm($lead, $isCli, $heroUrl, $logoUrl);
+    list($html, $err) = generateWithGlm($lead, $isCli, $heroUrl, $logoUrl, $supportUrls);
     if ($html === null) {
         cronLog('Generation FAILED', ['id' => $id, 'err' => $err]);
         supabaseRequest('PATCH', '/rest/v1/site_builder_leads?id=eq.' . $id, ['status' => 'failed']);
