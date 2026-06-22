@@ -78,6 +78,7 @@ if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
 $supabaseUrl = rtrim((string) envOr('SUPABASE_URL', ''), '/');
 $supabaseKey = trim((string) envOr('SUPABASE_SERVICE_ROLE_KEY', ''));
 $glmKey      = trim((string) envOr('GLM_API_KEY', ''));
+$glmModel    = trim((string) envOr('GLM_MODEL', 'glm-5.2')) ?: 'glm-5.2'; // override via GLM_MODEL env (e.g. glm-5 to roll back)
 $deployRoot  = rtrim((string) envOr('PREVIEW_DEPLOY_DIR', dirname(__DIR__) . '/previews'), '/');
 $baseUrl     = rtrim((string) envOr('PREVIEW_BASE_URL', 'https://izendestudioweb.com/previews'), '/');
 
@@ -325,14 +326,14 @@ PROMPT;
  * failure we silently fall back to the raw description.
  */
 function enrichBrief($lead) {
-    global $glmKey;
+    global $glmKey, $glmModel;
     $sys = "You are a brand strategist briefing a web designer. From a short business description, write a tight, concrete creative brief. Infer and include: core services/offerings (short list), the ideal customer, the brand tone/personality in a few adjectives, 2-3 realistic selling points or differentiators, and obvious trust signals (e.g. licensed, family-owned, years in business, local) ONLY if implied. Be specific and believable. Do NOT invent prices, street addresses, phone numbers, awards, or statistics. Keep it under 170 words, plain text.";
     $usr = "Business name: " . $lead['business_name'] . "\n"
          . "Their words: \"" . $lead['business_description'] . "\"\n"
          . "Desired vibe: " . (!empty($lead['style_vibe']) ? $lead['style_vibe'] : 'designer\'s choice');
 
     $payload = json_encode([
-        'model' => 'glm-5',
+        'model' => $glmModel,
         'max_tokens' => 3000, // GLM-5 spends budget on reasoning first; leave room or content comes back empty
         'messages' => [
             ['role' => 'system', 'content' => $sys],
@@ -357,7 +358,7 @@ function enrichBrief($lead) {
 }
 
 function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '', $supportUrls = []) {
-    global $glmKey;
+    global $glmKey, $glmModel;
     // Zeno expands a thin description into a real brief first (best-effort).
     $rawDescription = trim((string) ($lead['business_description'] ?? ''));
     $brief = strlen($rawDescription) > 900 ? null : enrichBrief($lead);
@@ -367,7 +368,7 @@ function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '', $supportUr
     }
     list($system, $user) = buildPrompts($lead, $heroUrl, $logoUrl, $supportUrls);
     $payload = [
-        'model' => 'glm-5',
+        'model' => $glmModel,
         'max_tokens' => 20000, // enough for rich scanned context, while still discouraging giant broken pages
         'stream' => true,
         'messages' => [

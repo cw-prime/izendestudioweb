@@ -36,7 +36,7 @@ function out($s) { global $isCli; echo $s . "\n"; @flush(); }
 /** GLM chat (streaming, accumulated) — returns [text|null, err]. */
 function glmChat($system, $user) {
     global $glmKey;
-    $payload = ['model' => 'glm-5', 'max_tokens' => 16000, 'stream' => true,
+    $payload = ['model' => (trim((string) envOr('GLM_MODEL', 'glm-5.2')) ?: 'glm-5.2'), 'max_tokens' => 16000, 'stream' => true,
         'messages' => [['role' => 'system', 'content' => $system], ['role' => 'user', 'content' => $user]]];
     $sse = '';
     $ch = curl_init('https://api.z.ai/api/paas/v4/chat/completions');
