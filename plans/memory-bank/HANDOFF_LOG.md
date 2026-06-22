@@ -941,3 +941,18 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Risks introduced: Low. Build overlay JS additive (cycler torn down with existing timers). Claim-page countdown is display-only and truthful (matches enforced 7-day expiry). No backend/endpoint/checkout changes.
 - Follow-up actions: FUTURE (own plans, not started) — (1) seasonal/occasion theme variants (restyle their own site; plumbing exists via izende_wp_reseed()/static redeploy; preview-then-apply + revert; gate by plan); (2) post-payment provisioning value screen. Owner deferred both pre-traction.
 - Updated memory files: `plans/memory-bank/HANDOFF_LOG.md`
+
+---
+- Date: 2026-06-22
+- Agent: Claude (Opus 4.8) / CODE
+- Scope worked: Reconciled the owner's revised claim-page spec against the shipped funnel work. Adopted the new tagline + agency positioning; extended the comparison with competitor detail; kept the cost row out.
+- Business KPI targeted: Claim conversion / value perception.
+- Files changed:
+  - `claim-site.php` — added tagline eyebrow "We build it. You claim it." + "we drafted your site, you approve & go live" subline; added a detailed IONOS/Wix/Squarespace/Izende feature comparison table (`.cw-vs`/`.cw-table`, headline "Why not just use IONOS for $1/mo?") BELOW the existing 3-way designer-anchor cards — Izende column accented, horizontally scrollable on mobile. Deliberately omitted the "Real cost year 1" head-to-head row.
+  - `website-drafter.php` — build-overlay value panel: title to agency voice ("While we draft your site…") and tagline woven into the foot line.
+- Decisions (owner, 2026-06-22): adopt tagline + "AI never in customer-facing copy" rule (Izende = site-drafting agency); KEEP the designer/$2,000–$5,000 anchor (strongest lever) AND add competitor detail; LEAVE OUT the year-1 cost row (avoids the $588-vs-$144 sticker that resurrects the "it adds up / can't justify $2,000" worry). Verified no AI word in visible copy of either page (only internal CSS class names .ai-bot/.ai-builder-section remain).
+- Tests/lint/typecheck run: `php -l` both (clean); FTPS deploy both (226). Verified live: claim page shows tagline, subline, competitor table (headers + rows incl. honest "AI-assisted, you still direct it"), and NO "Real cost year 1" row; overlay shows the tagline. Earlier 3-way cards + 7-day countdown intact.
+- Result: SUCCESS. Live on production. Commit 427b60c.
+- Risks introduced: Low. Additive copy/markup/CSS; checkout + plan cards untouched. Detailed table scrolls horizontally on small screens (standard pattern); 3-way cards remain the mobile-scannable summary.
+- Follow-up actions: Optional broader sitewide AI-language audit (hero/sections beyond these two pages) if the owner wants the "no AI in customer copy" rule enforced everywhere. Seasonal themes + provisioning value screen still future/deferred.
+- Updated memory files: `plans/memory-bank/HANDOFF_LOG.md`; memory `izende-positioning-old-way-broken` (tagline + no-AI rule).
