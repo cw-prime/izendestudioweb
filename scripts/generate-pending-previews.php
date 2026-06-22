@@ -700,6 +700,8 @@ function injectEditorWidget($html, $slug, $leadId = '') {
 <style>#izEditPanel{font-size:14px;line-height:1.45;color:#1e293b}
 #izEditPanel .iz-h{font-weight:700;color:#0f172a;margin-bottom:6px}
 #izEditPanel .iz-sub{color:#475569}
+#izEditPanel #izAsk{background:#fff !important;color:#0f172a !important;-webkit-text-fill-color:#0f172a !important;caret-color:#0f172a;border:1px solid #cbd5e1 !important;opacity:1 !important;filter:none !important}
+#izEditPanel #izAsk::placeholder{color:#94a3b8 !important;-webkit-text-fill-color:#94a3b8 !important;opacity:1}
 .izspin{display:inline-block;width:14px;height:14px;border:2px solid #c7d2fe;border-top-color:#2563eb;border-radius:50%;animation:izspin .7s linear infinite;vertical-align:-2px;margin-right:7px}
 .izwaitbar{height:7px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin:9px 0 7px}
 .izwaitbar span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#2563eb,#38bdf8);transition:width 1s linear}
