@@ -109,7 +109,7 @@ SEOHelper::outputMetaTags('website-drafter', [
     @keyframes checkPop{0%{transform:scale(.3)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
     .build-close{position:fixed;top:16px;right:18px;z-index:3;background:rgba(255,255,255,.1);border:0;color:#cbd5e1;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer;line-height:1}
     .build-close:hover{background:rgba(255,255,255,.2);color:#fff}
-    .build-stage{position:relative;min-height:100%;display:flex;align-items:center;justify-content:center;padding:40px 16px}
+    .build-stage{position:relative;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:40px 16px}
 
     /* shimmering skeleton behind the panel */
     .build-skeleton{position:absolute;inset:0;display:flex;flex-direction:column;gap:18px;padding:6vh 8vw;filter:blur(7px);opacity:.32;pointer-events:none}
@@ -159,6 +159,29 @@ SEOHelper::outputMetaTags('website-drafter', [
     .build-countdown{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:14px 0 0;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;font-size:.92rem;font-weight:700}
     .build-countdown b{color:#7dd3fc;font-variant-numeric:tabular-nums}
     .build-hint{margin:18px 0 0;font-size:.86rem;color:#7c8aa3}
+
+    /* build-wait value education (the captive ~2-min wait sells the value) */
+    .build-value{width:min(760px,94vw);margin:0 auto}
+    .bv-flash{min-height:3.6em;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;text-align:center;margin:0 0 20px;transition:opacity .4s ease}
+    .bv-flash.fade{opacity:0}
+    .bv-flash-action{font-size:.9rem;color:#9fb0c9}
+    .bv-flash-value{font-size:1.1rem;font-weight:700;color:#fbbf24;line-height:1.3}
+    .bv-title{text-align:center;font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:#7c8aa3;margin:0 0 14px}
+    .bv-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .bv-col{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px 14px}
+    .bv-col.bv-win{background:linear-gradient(180deg,rgba(201,169,106,.18),rgba(201,169,106,.05));border-color:rgba(251,191,36,.55);box-shadow:0 10px 32px rgba(0,0,0,.4)}
+    .bv-h{font-weight:700;font-size:.95rem;color:#dbe7f8;margin-bottom:5px}
+    .bv-win .bv-h{color:#fbbf24}
+    .bv-price{font-size:1.28rem;font-weight:800;color:#fff;margin-bottom:11px;line-height:1.05}
+    .bv-price span{display:block;font-size:.72rem;font-weight:600;color:#9fb0c9;margin-top:3px}
+    .bv-col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+    .bv-col li{font-size:.84rem;line-height:1.3;color:#c3d0e4;padding-left:19px;position:relative}
+    .bv-win li::before{content:"\2713";color:#34d399;position:absolute;left:0;font-weight:700}
+    .bv-col:not(.bv-win) li::before{content:"\2022";color:#64748b;position:absolute;left:5px}
+    .bv-foot{text-align:center;font-size:.92rem;color:#cbd5e1;margin:18px auto 0;max-width:580px;line-height:1.45}
+    .bv-foot b{color:#fbbf24}
+    @media(max-width:620px){.bv-cols{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){.bv-flash{transition:none}}
 
     /* reveal */
     .build-reveal{position:fixed;inset:0;z-index:4;display:none;flex-direction:column;background:#0b1220}
@@ -291,6 +314,44 @@ SEOHelper::outputMetaTags('website-drafter', [
         <div class="build-bar"><span id="buildBarFill"></span></div>
         <div class="build-countdown" id="buildCountdown" role="timer" aria-live="polite">Estimated reveal in <b>2:00</b></div>
         <p class="build-hint">Hi, I'm <strong style="color:#7dd3fc">Zeno</strong> — keep this tab open for the live reveal. We'll email your draft too.</p>
+      </div>
+
+      <div class="build-value" id="buildValue">
+        <div class="bv-flash" id="bvFlash" aria-live="polite">
+          <span class="bv-flash-action"></span>
+          <span class="bv-flash-value"></span>
+        </div>
+        <p class="bv-title">While Zeno works — here's why owners choose Izende</p>
+        <div class="bv-cols">
+          <div class="bv-col">
+            <div class="bv-h">Hire a designer</div>
+            <div class="bv-price">$2,000&ndash;$5,000<span>upfront</span></div>
+            <ul>
+              <li>2&ndash;3 months of back-and-forth</li>
+              <li>then you're on your own</li>
+              <li>hosting &amp; edits cost extra</li>
+            </ul>
+          </div>
+          <div class="bv-col">
+            <div class="bv-h">DIY builder</div>
+            <div class="bv-price">$12&ndash;$17<span>/mo</span></div>
+            <ul>
+              <li>a blank canvas &mdash; you build it</li>
+              <li>hours of your time</li>
+              <li>and it still looks DIY</li>
+            </ul>
+          </div>
+          <div class="bv-col bv-win">
+            <div class="bv-h">Izende</div>
+            <div class="bv-price">$39<span>/mo</span></div>
+            <ul>
+              <li>ready in 2 minutes &mdash; already built</li>
+              <li>hosting, email, SSL &amp; support included</li>
+              <li>no upfront wall &middot; cancel anytime</li>
+            </ul>
+          </div>
+        </div>
+        <p class="bv-foot">A designer would charge <b>$2,000&ndash;$5,000</b> and take months. Yours is built in <b>2 minutes</b> — and we host, secure &amp; keep it online for <b>$39/mo</b>.</p>
       </div>
     </div>
 
@@ -851,6 +912,18 @@ SEOHelper::outputMetaTags('website-drafter', [
     const closeBtn = document.getElementById('buildClose');
 
     let pollTimer = null, stepTimer = null, progressTimer = null, countdownTimer = null, countdownStartedAt = 0, elapsed = 0, progress = 4, softNotified = false, pollEvery = 3.5;
+    let valueTimer = null, valueIdx = 0;
+    const bvFlash  = document.getElementById('bvFlash');
+    const VALUE_FLASHES = [
+      ['Picking your fonts…', 'This used to be a $2,000 designer job — and weeks of waiting'],
+      ['Writing your homepage copy…', 'IONOS gives you a blank page. We write it for you.'],
+      ['Optimizing for mobile…', 'Works on every device, automatically'],
+      ['Setting up your SEO…', 'Google-ready before you launch'],
+      ['Adding your contact info…', 'Professional email @ your domain, included'],
+      ['Securing your site…', 'SSL, backups, and uptime monitoring, included'],
+      ['Almost ready…', 'Built & supported in St. Louis'],
+      ['Your site is ready.', 'Claim it for $39/mo — cancel anytime']
+    ];
     let currentLeadId = null, currentBiz = '';
     let building = false;
 
@@ -896,7 +969,7 @@ SEOHelper::outputMetaTags('website-drafter', [
 
     function stopAndClose() {
       building = false;
-      clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer); clearInterval(countdownTimer);
+      clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer); clearInterval(countdownTimer); clearInterval(valueTimer);
       overlay.classList.remove('show');
       reveal.classList.remove('show');
       document.body.style.overflow = '';
@@ -931,6 +1004,7 @@ SEOHelper::outputMetaTags('website-drafter', [
       renderTasks(0);
       stepEl.textContent = '';
       startCountdown(120);
+      startValueFlash();
 
       // Fake-but-believable progress: eases toward 92%, real completion finishes it.
       progressTimer = setInterval(function () {
@@ -945,6 +1019,29 @@ SEOHelper::outputMetaTags('website-drafter', [
       pollTimer = setInterval(function () { poll(leadId); }, 3500);
       poll(leadId);
     };
+
+    function renderFlash(i) {
+      if (!bvFlash) { return; }
+      const m = VALUE_FLASHES[i % VALUE_FLASHES.length];
+      const a = bvFlash.querySelector('.bv-flash-action');
+      const v = bvFlash.querySelector('.bv-flash-value');
+      if (a) { a.textContent = m[0]; }
+      if (v) { v.textContent = m[1]; }
+    }
+
+    function startValueFlash() {
+      if (!bvFlash) { return; }
+      valueIdx = 0;
+      renderFlash(0);
+      clearInterval(valueTimer);
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      valueTimer = setInterval(function () {
+        valueIdx++;
+        if (reduce) { renderFlash(valueIdx); return; }
+        bvFlash.classList.add('fade');
+        setTimeout(function () { renderFlash(valueIdx); bvFlash.classList.remove('fade'); }, 400);
+      }, 6000);
+    }
 
     function startCountdown(seconds) {
       clearInterval(countdownTimer);
@@ -990,7 +1087,7 @@ SEOHelper::outputMetaTags('website-drafter', [
 
     function revealSite(url) {
       building = false;
-      clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer); clearInterval(countdownTimer);
+      clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer); clearInterval(countdownTimer); clearInterval(valueTimer);
       barFill.style.width = '100%';
       Array.prototype.forEach.call(document.querySelectorAll('#buildTasks .bt'), function (li) { li.classList.remove('active'); li.classList.add('done'); });
       stepEl.textContent = 'Your draft is ready';
@@ -1058,7 +1155,7 @@ SEOHelper::outputMetaTags('website-drafter', [
 
     function fallbackToEmail(failed) {
       building = false;
-      clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer); clearInterval(countdownTimer);
+      clearInterval(pollTimer); clearInterval(stepTimer); clearInterval(progressTimer); clearInterval(countdownTimer); clearInterval(valueTimer);
       panel.querySelector('h2').textContent = failed ? 'Almost there' : 'Still polishing…';
       stepEl.textContent = "I'll email your draft the moment it's ready — check your inbox shortly. — Zeno";
       barFill.style.width = '100%';
