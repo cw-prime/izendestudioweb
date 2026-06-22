@@ -956,3 +956,22 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Risks introduced: Low. Additive copy/markup/CSS; checkout + plan cards untouched. Detailed table scrolls horizontally on small screens (standard pattern); 3-way cards remain the mobile-scannable summary.
 - Follow-up actions: Optional broader sitewide AI-language audit (hero/sections beyond these two pages) if the owner wants the "no AI in customer copy" rule enforced everywhere. Seasonal themes + provisioning value screen still future/deferred.
 - Updated memory files: `plans/memory-bank/HANDOFF_LOG.md`; memory `izende-positioning-old-way-broken` (tagline + no-AI rule).
+
+---
+- Date: 2026-06-22
+- Agent: Claude (Opus 4.8) / DEBUG + CODE
+- Scope worked: Draft-quality + reliability fixes surfaced while the owner tested live drafts (MDA Angel Care).
+- Business KPI targeted: First-draft quality (the conversion hook) + generation reliability (failed drafts = lost customers).
+- Files changed (all scripts/generate-pending-previews.php unless noted):
+  - Film-grain overlay: prompt rule forbidding full-screen feTurbulence/fractalNoise overlays + deterministic `stripGrainOverlay()` post-process (commit 8ed6cf6). Also hot-patched the existing MDA preview in place.
+  - Empty image-placeholder blocks: prompt rules to design around the photos actually available and use icon-and-text cards (not big gradient+icon boxes) for photoless items (commit aa52aa0).
+  - Content-aware support photos: `generateSupportImages()` now scales 2..7 (IZ_SUPPORT_MAX, default 7) from a pool of 7 distinct shot concepts, sized to the business (heuristic on description) (commit afc19e0). Verified: MDA -> 7 photos, all used, no empty boxes.
+  - GLM model: switched glm-5 -> glm-5.2 via new GLM_MODEL env (default glm-5.2) across all 3 call sites (generator enrichBrief+main, apply-pending-edits.php, api/analyze-site.php). Verified glm-5.2 valid on the z.ai account (HTTP 200). Set GLM_MODEL=glm-5 to roll back (commit fe9fc18).
+  - CONCURRENCY (P0): atomic lead claim (pending->generating CAS via conditional PATCH + return=representation) so overlapping cron runs can't double-process a lead. A 7-photo glm-5.2 draft can exceed the 5-min cron interval; without the lock the next run re-picked the same pending lead, wasted image spend, and clobbered the winner's status. Stale 'generating' locks >20 min are returned to pending. New 'generating' status is transparent to the in-page poll (commit 14be0ee).
+- Tests/lint/typecheck run: `php -l` clean each change; FTPS deploy (226) each. Verified live MDA draft: 7 support photos + hero + logo all used, feTurbulence=0, zero empty placeholder blocks, generated on glm-5.2. Diagnosed the race from logs/site-builder-cron.log (two interleaved runs 21:15 & 21:20; the overlap's GLM returned len=0 and clobbered the successful run to 'failed' — restored to preview_live).
+- Result: SUCCESS. All live on production.
+- Risks / follow-ups:
+  - Balance: the z.ai GLM account ran dry mid-session (today's repeated test regens + usage) — owner recharged. Watch balance; heavy testing drains it.
+  - glm-5.2 occasionally returns empty output (len=0) -> the lead is marked 'failed' with no retry (customer gets no draft). The concurrency fix removes the main trigger (simultaneous calls), but consider a single retry on empty GLM output for robustness.
+  - Per-draft cost rose (up to 9 Gemini images on service-heavy sites + slower glm-5.2). Bounded by 3 free drafts/visitor and the content-aware count.
+- Updated memory files: plans/memory-bank/HANDOFF_LOG.md
