@@ -129,7 +129,12 @@ Output rules (CRITICAL):
 - You MAY use Google Fonts via <link>. For photography, use ONLY image URLs that are
   explicitly provided in this brief. NEVER invent, guess, or use stock/Unsplash/picsum
   placeholder image URLs — they break and look unprofessional. If no image URL is
-  provided for a spot, use tasteful CSS gradients/backgrounds and inline SVG instead.
+  provided for a spot, use tasteful CSS gradients/backgrounds and inline SVG instead — but keep those
+  fillers SMALL and clearly decorative (subtle section backgrounds, small icons inside content). NEVER
+  render a large photo-sized rectangle whose only content is a centered icon on a gradient: that reads as
+  a broken/missing image. If a section or card has no real photo, choose a layout that looks complete
+  without one (icon-and-text cards with a small icon badge, bold type, columns) rather than an empty
+  image placeholder.
 - Do NOT add a film-grain or noise texture overlay over the page. Never place a fixed or
   absolutely-positioned full-screen layer of SVG feTurbulence/fractalNoise (or any repeating
   noise image) on top of the site — it makes the whole page look grainy and ruins legibility over
@@ -276,7 +281,8 @@ PROMPT;
         $list = '';
         foreach (array_values($supportUrls) as $i => $u) { $list .= '  ' . ($i + 1) . '. ' . $u . "\n"; }
         $user .= "\nSUPPORTING PHOTOS AVAILABLE (real, on-brand photographs generated for THIS business — use them to make the page feel alive and credible instead of empty gradient panels):\n" . $list
-            . "Place these REAL photos in the content sections where a photo genuinely helps a visitor understand the business — e.g. About, Services, a feature/'why us' band, or a small gallery — with descriptive alt text. Style them responsively (width:100%, object-fit:cover, a sensible aspect-ratio, border-radius) so they crop cleanly on any screen. Use each one where it adds meaning; do NOT force all of them in if the design is stronger without one, and never stretch, distort, or tile them.\n";
+            . "Place these REAL photos in the content sections where a photo genuinely helps a visitor understand the business — e.g. About, Services, a feature/'why us' band, or a small gallery — with descriptive alt text. Style them responsively (width:100%, object-fit:cover, a sensible aspect-ratio, border-radius) so they crop cleanly on any screen. Use each one where it adds meaning; do NOT force all of them in if the design is stronger without one, and never stretch, distort, or tile them.\n"
+            . "CRITICAL — design the layout around EXACTLY the images you have (the hero plus the " . count($supportUrls) . " supporting photo(s) above), and no more. Do NOT build a section that needs one photo per item (e.g. a services or features list with a large image beside every row/card) and then leave the slots you can't fill as a big gradient box containing a single centered icon — that looks like a broken/missing image. For any item WITHOUT a real photo, use a compact icon-and-text card (a small icon badge next to the heading and copy) or a clean typographic/columned layout that looks complete WITHOUT imagery. Large photo-sized blocks are allowed ONLY where you place one of the real photos above.\n";
     }
 
     // Other-visuals policy: only the real URLs above are allowed; everything else must be CSS/SVG so nothing breaks.
