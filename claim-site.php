@@ -107,6 +107,21 @@ SEOHelper::outputMetaTags('claim-site', [
     .cw-win li::before{content:"\2713";color:#16a34a;position:absolute;left:0;font-weight:700}
     .cw-col li.no{color:#64748b}
     .cw-col li.no::before{content:"\2715";color:#cbd5e1;position:absolute;left:0;font-weight:700}
+    .claim-eyebrow{display:inline-block;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#2563eb;margin-bottom:10px}
+    /* detailed competitor comparison (proof, below the 3-way cards) */
+    .cw-vs{margin-top:40px}
+    .cw-vs-head{text-align:center;font-size:clamp(19px,2.2vw,24px);font-weight:800;color:#0f172a;margin:0 0 6px}
+    .cw-vs-sub{text-align:center;max-width:700px;margin:0 auto 20px;color:#475569;font-size:15px;line-height:1.5}
+    .cw-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px}
+    .cw-table{width:100%;min-width:620px;border-collapse:collapse;font-size:14px;background:#fff}
+    .cw-table th,.cw-table td{padding:11px 13px;text-align:left;border-bottom:1px solid #eef2f7;color:#334155;vertical-align:top}
+    .cw-table thead th{font-weight:800;color:#0f172a;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;border-bottom:2px solid #e2e8f0}
+    .cw-table th.izc,.cw-table td.izc{background:#eff4ff}
+    .cw-table thead th.izc{color:#2563eb;border-bottom-color:#2563eb}
+    .cw-table td.izc{font-weight:700;color:#1e3a8a}
+    .cw-table td.y{color:#16a34a;font-weight:800}
+    .cw-table td.x{color:#cbd5e1;font-weight:800}
+    .cw-table tbody tr:last-child td{border-bottom:0}
   </style>
 </head>
 <body>
@@ -114,8 +129,9 @@ SEOHelper::outputMetaTags('claim-site', [
 
   <main class="claim-wrap">
     <div class="claim-head">
+      <div class="claim-eyebrow">We build it. You claim it.</div>
       <h1><?= $bizName !== '' ? 'Make ' . htmlspecialchars($bizName, ENT_QUOTES) . ' yours' : 'Make it yours' ?></h1>
-      <p>Pick how you want to run your new site. Every plan includes hosting, SSL, real support, professional email setup, and first-year standard domain registration when you register a new domain during checkout.</p>
+      <p>We drafted your site — you just approve and go live. Pick how you want to run it. Every plan includes hosting, SSL, real support, professional email setup, and first-year standard domain registration when you register a new domain during checkout.</p>
     </div>
 
 <?php if ($claimExpiryMs > 0): ?>
@@ -155,6 +171,29 @@ SEOHelper::outputMetaTags('claim-site', [
             <li>Want changes? Edit it yourself ($49) or we do it ($149)</li>
             <li>Never left on your own</li>
           </ul>
+        </div>
+      </div>
+
+      <div class="cw-vs">
+        <h3 class="cw-vs-head">Why not just use IONOS for $1/mo?</h3>
+        <p class="cw-vs-sub">Every builder hands you tools and a blank canvas. We removed the friction — you get a finished, professional site, ready to claim.</p>
+        <div class="cw-table-wrap">
+          <table class="cw-table">
+            <thead>
+              <tr><th>Feature</th><th>IONOS</th><th>Wix</th><th>Squarespace</th><th class="izc">Izende</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Getting online</td><td>You learn it, you build it</td><td>You learn it, you build it</td><td>You learn it, you build it</td><td class="izc">We build it, you claim it</td></tr>
+              <tr><td>Who does the work</td><td>You</td><td>You</td><td>You</td><td class="izc">We draft it</td></tr>
+              <tr><td>Site ready in 2 minutes</td><td class="x">&#10007;</td><td class="x">&#10007;</td><td class="x">&#10007;</td><td class="izc y">&#10003;</td></tr>
+              <tr><td>Copy written for you</td><td>AI-assisted, you still direct it</td><td>AI assist only</td><td>AI assist only</td><td class="izc">We draft it for you</td></tr>
+              <tr><td>Mobile-ready on day 1</td><td>DIY required</td><td>DIY required</td><td>DIY required</td><td class="izc y">&#10003;</td></tr>
+              <tr><td>Professional email</td><td class="y">&#10003;</td><td>Add-on cost</td><td>Add-on cost</td><td class="izc y">&#10003;</td></tr>
+              <tr><td>SSL + daily backups</td><td class="y">&#10003;</td><td class="y">&#10003;</td><td class="y">&#10003;</td><td class="izc y">&#10003;</td></tr>
+              <tr><td>Local St. Louis support</td><td class="x">&#10007;</td><td class="x">&#10007;</td><td class="x">&#10007;</td><td class="izc y">&#10003;</td></tr>
+              <tr><td>Online booking</td><td class="x">&#10007;</td><td>$16+/mo add-on</td><td>$16+/mo add-on</td><td class="izc">Included on top plan</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>

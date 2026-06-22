@@ -321,7 +321,7 @@ SEOHelper::outputMetaTags('website-drafter', [
           <span class="bv-flash-action"></span>
           <span class="bv-flash-value"></span>
         </div>
-        <p class="bv-title">While Zeno works — here's why owners choose Izende</p>
+        <p class="bv-title">While we draft your site — here's why owners choose Izende</p>
         <div class="bv-cols">
           <div class="bv-col">
             <div class="bv-h">Hire a designer</div>
@@ -351,7 +351,7 @@ SEOHelper::outputMetaTags('website-drafter', [
             </ul>
           </div>
         </div>
-        <p class="bv-foot">A designer would charge <b>$2,000&ndash;$5,000</b> and take months. Yours is built in <b>2 minutes</b> — and we host, secure &amp; keep it online for <b>$39/mo</b>.</p>
+        <p class="bv-foot"><b>We build it. You claim it.</b> A designer would charge $2,000&ndash;$5,000 and take months. Yours is built in 2 minutes — and we host, secure &amp; keep it online for $39/mo.</p>
       </div>
     </div>
 
