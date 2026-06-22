@@ -373,69 +373,83 @@ function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '', $supportUr
         cronLog('Brief enriched', ['id' => $lead['id'] ?? '', 'chars' => strlen($brief)]);
     }
     list($system, $user) = buildPrompts($lead, $heroUrl, $logoUrl, $supportUrls);
-    $payload = [
-        'model' => $glmModel,
-        'max_tokens' => 20000, // enough for rich scanned context, while still discouraging giant broken pages
-        'stream' => true,
-        'messages' => [
-            ['role' => 'system', 'content' => $system],
-            ['role' => 'user', 'content' => $user],
-        ],
-    ];
+    // One streaming GLM call → validated HTML, as a single retryable unit.
+    $callOnce = function () use ($system, $user, $glmModel, $glmKey, $isCli) {
+        $payload = [
+            'model' => $glmModel,
+            'max_tokens' => 20000, // enough for rich scanned context, while still discouraging giant broken pages
+            'stream' => true,
+            'messages' => [
+                ['role' => 'system', 'content' => $system],
+                ['role' => 'user', 'content' => $user],
+            ],
+        ];
 
-    $sse = '';
-    $ch = curl_init('https://api.z.ai/api/paas/v4/chat/completions');
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Authorization: Bearer ' . $glmKey,
-        'Content-Type: application/json',
-        'Accept: text/event-stream',
-    ]);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 900);
-    curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$sse, $isCli) {
-        $sse .= $chunk;
-        if (!$isCli) { echo '.'; flush(); } // keepalive bytes for web invocations
-        return strlen($chunk);
-    });
-    $ok = curl_exec($ch);
-    $err = curl_error($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+        $sse = '';
+        $ch = curl_init('https://api.z.ai/api/paas/v4/chat/completions');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $glmKey,
+            'Content-Type: application/json',
+            'Accept: text/event-stream',
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 900);
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$sse, $isCli) {
+            $sse .= $chunk;
+            if (!$isCli) { echo '.'; flush(); } // keepalive bytes for web invocations
+            return strlen($chunk);
+        });
+        $ok = curl_exec($ch);
+        $err = curl_error($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-    if ($ok === false || $code !== 200) {
-        return [null, "curl failed (http=$code): $err — first bytes: " . substr($sse, 0, 200)];
-    }
-
-    $html = '';
-    foreach (explode("\n", $sse) as $line) {
-        $line = trim($line);
-        if (strpos($line, 'data: ') !== 0) { continue; }
-        $data = substr($line, 6);
-        if ($data === '[DONE]') { continue; }
-        $j = json_decode($data, true);
-        if (isset($j['choices'][0]['delta']['content'])) {
-            $html .= $j['choices'][0]['delta']['content'];
+        if ($ok === false || $code !== 200) {
+            return [null, "curl failed (http=$code): $err — first bytes: " . substr($sse, 0, 200)];
         }
-    }
-    $html = preg_replace('/^\s*```[a-zA-Z]*\s*\n/', '', $html);
-    $html = preg_replace('/\n```\s*$/', '', $html);
-    $html = trim($html);
-    if (preg_match('/<\/html\s*>/i', $html, $m, PREG_OFFSET_CAPTURE)) {
-        $html = substr($html, 0, $m[0][1] + strlen($m[0][0]));
-    }
 
-    if (strlen($html) < 1000 || stripos($html, '<html') === false || stripos(ltrim($html), '<!doctype html') !== 0) {
-        return [null, 'output did not look like a complete HTML document (len=' . strlen($html) . ')'];
+        $html = '';
+        foreach (explode("\n", $sse) as $line) {
+            $line = trim($line);
+            if (strpos($line, 'data: ') !== 0) { continue; }
+            $data = substr($line, 6);
+            if ($data === '[DONE]') { continue; }
+            $j = json_decode($data, true);
+            if (isset($j['choices'][0]['delta']['content'])) {
+                $html .= $j['choices'][0]['delta']['content'];
+            }
+        }
+        $html = preg_replace('/^\s*```[a-zA-Z]*\s*\n/', '', $html);
+        $html = preg_replace('/\n```\s*$/', '', $html);
+        $html = trim($html);
+        if (preg_match('/<\/html\s*>/i', $html, $m, PREG_OFFSET_CAPTURE)) {
+            $html = substr($html, 0, $m[0][1] + strlen($m[0][0]));
+        }
+
+        if (strlen($html) < 1000 || stripos($html, '<html') === false || stripos(ltrim($html), '<!doctype html') !== 0) {
+            return [null, 'output did not look like a complete HTML document (len=' . strlen($html) . ')'];
+        }
+        if (stripos($html, '</body>') === false || stripos($html, '</html>') === false) {
+            return [null, 'output was truncated before closing body/html (len=' . strlen($html) . ')'];
+        }
+        if (preg_match('/<script\b/i', $html) && stripos($html, '</script>') === false) {
+            return [null, 'output contained an unclosed script tag'];
+        }
+        return [$html, null];
+    };
+
+    // glm-5.2 (a reasoning model) occasionally returns empty/truncated output. One retry rescues those.
+    $lastErr = null;
+    for ($attempt = 1; $attempt <= 2; $attempt++) {
+        list($html, $err) = $callOnce();
+        if ($html !== null) { return [$html, null]; }
+        $lastErr = $err;
+        cronLog('GLM attempt failed', ['id' => $lead['id'] ?? '', 'attempt' => $attempt, 'err' => $err]);
+        if (!$isCli) { echo " [glm attempt $attempt failed: $err] "; flush(); }
     }
-    if (stripos($html, '</body>') === false || stripos($html, '</html>') === false) {
-        return [null, 'output was truncated before closing body/html (len=' . strlen($html) . ')'];
-    }
-    if (preg_match('/<script\b/i', $html) && stripos($html, '</script>') === false) {
-        return [null, 'output contained an unclosed script tag'];
-    }
-    return [$html, null];
+    return [null, $lastErr];
 }
 
 /**
