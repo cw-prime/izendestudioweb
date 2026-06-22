@@ -907,3 +907,22 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Risks introduced: Low. Background poll now runs up to 20 min against `api/preview-status.php` (cheap status read, no-store). Cadence slows to 9s after the soft timeout to limit request volume.
 - Follow-up actions: Generator filler-visual quality — generated drafts use intentional CSS-gradient + inline-SVG fallbacks for non-hero visual spots (e.g. a clock icon in a flat blue gradient), which read as placeholder-y. Owner-gated: improve `scripts/generate-pending-previews.php` prompt for richer filler visuals (awaiting go-ahead).
 - Updated memory files: `plans/memory-bank/HANDOFF_LOG.md`
+
+---
+- Date: 2026-06-22
+- Agent: Claude (Opus 4.8) / CODE + DEBUG
+- Scope worked: Website Drafter generated-draft quality + customizer bug, following the poll-hang fix logged above.
+- Business KPI targeted: First-draft satisfaction / claim conversion — the draft is the funnel hook; placeholder-looking visuals and a broken customizer field hurt conversion.
+- Files changed:
+  - `scripts/generate-pending-previews.php`:
+    1. Supporting photos — new `generateSupportImages()` generates two real on-brand photos (people/service + space/detail) via nano-banana-pro (fallback to the standard image model); URLs passed through `generateWithGlm()`/`buildPrompts()` with placement guidance for About/Services/feature sections. Non-hero spots now show a real photo instead of a gradient+SVG-icon filler. Other-visuals policy still forbids inventing/hotlinking any other image URLs.
+    2. Hero default — flipped the hero instruction so the generated hero photo is used full-bleed BY DEFAULT (dark gradient overlay for legibility); CSS-only heroes reserved for genuinely text-forward/luxury-minimal brands. Previously GLM omitted the photo for ordinary service businesses, leaving bare heroes and wasting the generated hero image.
+    3. Customizer field — added high-specificity `!important` rules (`#izEditPanel #izAsk` + `::placeholder`) forcing white background + dark text + caret so the "Ask Site Drafter" textarea is readable on dark-themed drafts (was dark-on-dark, invisible typing).
+- Tests/lint/typecheck run: `php -l scripts/generate-pending-previews.php` (clean) on each change; FTPS deploy (226) each time. End-to-end verified with a throwaway Supabase lead "Riverbend Massage & Wellness" (id 63511dc6-...), regenerated three times:
+  - light run: support-1 in About, support-2 in Booking, good alt text; hero omitted (old default).
+  - after hero fix: hero.jpg used in a hero-bg/overlay/gradient stack; all four images (hero, logo, support-1, support-2) used.
+  - dark run (style_vibe forced dark, --c-bg #0a0a0a): customizer hardening rules present; field forced white-with-dark-text over the near-black page.
+- Result: SUCCESS. All three deployed to production. Commits 9bcff8b (support photos), 0fe6995 (hero default), 02f0787 (customizer field).
+- Risks introduced: Per-draft image cost roughly doubles (hero + logo + 2 support = 4 Gemini images vs 2) and generation runs longer; the poll-hang fix (commit 00aa046) keeps the build overlay revealing past the longer wait, and the free-draft cap (3) bounds exposure. nano-banana-pro support images fall back to the standard image model if unavailable.
+- Follow-up actions: Delete throwaway test lead 63511dc6-... + its /previews/riverbend-massage-wellness/ and /genmedia/riverbend-massage-wellness/ media once the owner finishes reviewing. Existing already-generated dark drafts won't get the customizer fix unless regenerated.
+- Updated memory files: `plans/memory-bank/HANDOFF_LOG.md`
