@@ -850,7 +850,7 @@ SEOHelper::outputMetaTags('website-drafter', [
     const claimBtn = document.getElementById('claimBtn');
     const closeBtn = document.getElementById('buildClose');
 
-    let pollTimer = null, stepTimer = null, progressTimer = null, countdownTimer = null, countdownStartedAt = 0, elapsed = 0, progress = 4;
+    let pollTimer = null, stepTimer = null, progressTimer = null, countdownTimer = null, countdownStartedAt = 0, elapsed = 0, progress = 4, softNotified = false, pollEvery = 3.5;
     let currentLeadId = null, currentBiz = '';
     let building = false;
 
@@ -910,6 +910,8 @@ SEOHelper::outputMetaTags('website-drafter', [
       currentBiz = biz || 'your website';
       elapsed = 0;
       progress = 4;
+      softNotified = false;
+      pollEvery = 3.5;
       bizEl.textContent = currentBiz;
       barFill.style.width = '4%';
       overlay.classList.add('show');
@@ -963,8 +965,17 @@ SEOHelper::outputMetaTags('website-drafter', [
     }
 
     function poll(leadId) {
-      elapsed += 3.5;
-      if (elapsed > 360) { return fallbackToEmail(); } // ~6 min ceiling
+      elapsed += pollEvery;
+      if (elapsed > 1200) { clearInterval(pollTimer); return; } // 20-min hard stop; email path still delivers
+      if (elapsed > 300 && !softNotified) {
+        // Soft timeout (~5 min): reassure, but KEEP polling at a slower cadence so the
+        // draft still reveals in-page the moment it finishes — don't strand the visitor.
+        softNotified = true;
+        panel.querySelector('h2').textContent = 'Still polishing…';
+        stepEl.textContent = "This one's taking a little longer — I'll reveal it here the moment it's ready, and I've emailed it to you too. — Zeno";
+        if (countdownEl) { countdownEl.innerHTML = '<b>Almost done…</b>'; }
+        clearInterval(pollTimer); pollEvery = 9; pollTimer = setInterval(function () { poll(leadId); }, 9000);
+      }
       fetch('api/preview-status.php?id=' + encodeURIComponent(leadId), { cache: 'no-store' })
         .then(function (r) { return r.json(); })
         .then(function (res) {
