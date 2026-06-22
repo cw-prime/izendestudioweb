@@ -916,7 +916,7 @@ SEOHelper::outputMetaTags('website-drafter', [
     const bvFlash  = document.getElementById('bvFlash');
     const VALUE_FLASHES = [
       ['Picking your fonts…', 'This used to be a $2,000 designer job — and weeks of waiting'],
-      ['Writing your homepage copy…', 'IONOS gives you a blank page. We write it for you.'],
+      ['Writing your homepage copy…', 'Most site builders hand you a blank page. We write yours for you.'],
       ['Optimizing for mobile…', 'Works on every device, automatically'],
       ['Setting up your SEO…', 'Google-ready before you launch'],
       ['Adding your contact info…', 'Professional email @ your domain, included'],
