@@ -130,6 +130,11 @@ Output rules (CRITICAL):
   explicitly provided in this brief. NEVER invent, guess, or use stock/Unsplash/picsum
   placeholder image URLs — they break and look unprofessional. If no image URL is
   provided for a spot, use tasteful CSS gradients/backgrounds and inline SVG instead.
+- Do NOT add a film-grain or noise texture overlay over the page. Never place a fixed or
+  absolutely-positioned full-screen layer of SVG feTurbulence/fractalNoise (or any repeating
+  noise image) on top of the site — it makes the whole page look grainy and ruins legibility over
+  photos and text. If you want subtle texture, confine it to a single section's own background and
+  keep it nearly invisible (opacity <= 0.04); never layer noise above hero photos or body copy.
 - Mobile-first and fully responsive. Must look great at 375px and 1280px.
 - Accessible: semantic landmarks, alt text, sufficient color contrast, focus states.
 
@@ -627,6 +632,21 @@ JS;
     return $html . $js;
 }
 
+/**
+ * Belt-and-suspenders: GLM sometimes adds a heavy full-screen film-grain overlay (an SVG
+ * feTurbulence/fractalNoise texture used as a CSS background) that makes the whole page look
+ * grainy and hurts legibility over photos and text. Neutralize any such noise data-URI
+ * background so it can never ship, regardless of what the model generated. Quoted data URIs
+ * only (GLM always quotes them; matching to the quote is safe because the encoded SVG itself
+ * contains literal ")" characters that would break a naive [^)] match).
+ */
+function stripGrainOverlay($html) {
+    if ($html === '' || stripos($html, 'feTurbulence') === false) { return $html; }
+    $html = preg_replace('~url\(\s*"data:image/svg\+xml,[^"]*(?:feTurbulence|fractalNoise)[^"]*"\s*\)~i', 'none', $html);
+    $html = preg_replace("~url\(\s*'data:image/svg\\+xml,[^']*(?:feTurbulence|fractalNoise)[^']*'\s*\)~i", 'none', $html);
+    return $html;
+}
+
 function injectMap($html, $lead) {
     $placeholder = '<!--IZ_MAP-->';
     $key = trim((string) envOr('GOOGLE_MAPS_EMBED_KEY', ''));
@@ -920,6 +940,7 @@ foreach ($leads as $lead) {
         continue;
     }
 
+    $html = stripGrainOverlay($html); // kill any heavy full-screen film-grain/noise overlay GLM may add
     $html = injectMap($html, $lead); // replace the placeholder server-side so the Maps key never goes to GLM
     $html = injectBookingScript($html, $id); // wire any booking form to the endpoint (persisted into generated_html)
 
