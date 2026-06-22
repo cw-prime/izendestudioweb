@@ -1,5 +1,5 @@
 # Next Actions (Execution Queue)
-Last updated: 2026-06-20 (Website Drafter funnel)
+Last updated: 2026-06-22 (Website Drafter funnel)
 
 ## AI Website Builder Funnel — Active Queue (2026-06-14)
 
@@ -7,17 +7,19 @@ Last updated: 2026-06-20 (Website Drafter funnel)
 - **Free-first-year-domain offer — DONE + verified 2026-06-16.** WHMCS Free Domain on 14/15/16 set to "registration/transfer only (renew as normal)", eligible terms incl. Monthly, TLD .com. Fixed a junk .com price ($177.98/yr) -> register+renew $24.99/yr (2yr 49.98, 3yr 74.97). Live cart confirmed: Website Draft - Get Online + new .com = $0.00 first year, Renewal ~$24.99/yr. Existing-domain path unaffected.
 - **[OWNER] Run one live paid order through WHMCS/PayPal — STATIC (pid14)** to prove the money loop end-to-end (account create → hook → site deploy + mailbox → converted). `todo` — still the only true end-to-end proof.
 - **[OWNER] Run one live paid order — WORDPRESS (pid15)** to prove auto WP install+seed + mailbox on a real domain. `todo`
-- **[OWNER] Enable glm-5.2 access in z.ai**, then A/B vs glm-5. `todo`
+- **Enable glm-5.2** — `done` 2026-06-22. glm-5.2 verified valid on the z.ai account and set as the live model via a new `GLM_MODEL` env (default `glm-5.2`) across all 3 call sites (generator, apply-pending-edits, analyze-site; commit fe9fc18). Roll back / A/B by setting `GLM_MODEL=glm-5`. NOTE: z.ai balance ran dry mid-session from repeated test regens — owner recharged; watch balance during heavy testing.
 - **[OWNER/SECURITY] Rotate ALL chat-exposed keys** (Anthropic/GLM/Gemini/Supabase/**FTP ai-agent@**/WHM/SITE_BOOKING_SECRET). `todo` — FTP password was recovered from a prior transcript this session; rotate.
 
 ### P1 — Conversion copy / positioning
 - **Reposition funnel to "Website Drafter" (reduce AI fatigue).** `done` 2026-06-20. Public page/URL is now `website-drafter.php` / `/website-drafter`; legacy `/ai-website-builder` and `/ai-website-builder.php` 301 to it. Tool/nav/breadcrumb = **"Website Drafter"**; output noun stays **"a website draft"**. Internal API/form IDs/endpoints and `gtag('ai_builder_*')` names are intentionally preserved.
 - **[NEW] Website Drafter Landing Page Conversion Tweaks.** `todo` — Apply future conversion tweaks to `website-drafter.php`: push the CTA higher (above fold on mobile), add the text "Free Preview • No Credit Card Required" as a green badge above the H1, and add a small secondary trust note under the "Get My Free Draft" submit button ("No credit card required. Free, fast preview.").
 - **[NEW] Execute Approved Video Reels.** `todo` — Owner approved all 3 reel concepts from `reel_concepts_2026-W24.md`. Generate prompts via Higgsfield and distribute them staggered across platforms (YouTube Shorts, Facebook Reels, LinkedIn).
+- **[PLANNED — APPROVED 2026-06-22] Social links + customer photo uploads.** `todo` — Owner-approved, ready to build later this week (NIGHT-SHIFT can pick up). Full executable plan: `plans/social-links-photo-uploads-2026-06-22.md`. Two independent PRs: (1) **Social links** — Step-2 intake for 7 platforms (FB/IG/X/LinkedIn/TikTok/YouTube/Google Business) → `social_links` JSON → server-injected footer icons via a new `injectSocial()`/`<!--IZ_SOCIAL-->` placeholder (mirror `injectMap()`). (2) **Photo uploads** — new `api/upload-photo.php` (clone `upload-logo.php` + ≥1000px gate), Step-2 multi-file picker (cap 7) → `uploaded_photos` JSON → in `generateSupportImages()` use uploads first toward the 2–7 content-aware target and generate only the remainder (cost saving). HERO ALWAYS GENERATED (uploads never reach `$heroUrl`). Add Supabase columns `social_links`, `uploaded_photos`. Reuse the upload/CSRF/rate-limit/MIME pattern + the uploaded-asset whitelist regex.
 
 ### P2 — Hardening / polish
 - **Resync / fix local working clone:** `git reset --hard origin/main` is blocked by Permission-denied unlinking FTP-written `previews/` files (owned by another uid). Needs sudo/chown or a fresh clone. Cosmetic — remote+prod authoritative. `todo`
 - Version-control the `previews/samples/*` HTML (currently prod-only, like all samples). `todo`
+- **Post-claim multi-page expansion path.** `todo` — Keep the free Website Drafter preview single-page for speed/conversion, but plan a paid-site expansion step after claim: split the approved draft into real Home / Services / About / Contact / FAQ or Offers pages. For static tier this means writing multiple files and updating nav links; for WordPress tiers this means creating actual WP pages from the draft instead of only the canvas-style single page. Do not change the first-preview generator until the paid-order loop is proven.
 - Async WP provisioning queue — only if synchronous Softaculous install in the hook causes delays (low risk now). `todo`
 - Localize hero/logo images into the provisioned account (currently referenced from izende.com /genmedia). `todo`
 - Persist editor PRESET colour/font choices to the lead so they carry to the provisioned site. `done` 2026-06-20 — `api/site-builder-edit.php` now supports `action=theme`, updates the lead's `generated_html`, re-renders the preview, and the preview Customize widget saves pending theme changes before the claim link navigates away. AI/text content edits already carried over through the edit queue.

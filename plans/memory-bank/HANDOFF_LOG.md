@@ -975,3 +975,22 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
   - glm-5.2 occasionally returns empty output (len=0) -> the lead is marked 'failed' with no retry (customer gets no draft). The concurrency fix removes the main trigger (simultaneous calls), but consider a single retry on empty GLM output for robustness.
   - Per-draft cost rose (up to 9 Gemini images on service-heavy sites + slower glm-5.2). Bounded by 3 free drafts/visitor and the content-aware count.
 - Updated memory files: plans/memory-bank/HANDOFF_LOG.md
+
+---
+- Date: 2026-06-22
+- Agent: Claude (Opus 4.8) / ARCHITECT (planning only — NO code yet)
+- Scope worked: Designed + got owner approval for two new intake features. Documented for night-shift agents to execute later this week.
+- Business KPI targeted: Personalization/conversion (social proof) + lower image-gen cost per draft.
+- NIGHT-SHIFT HANDOFF — APPROVED, READY TO BUILD (not started):
+  - Full executable plan: `plans/social-links-photo-uploads-2026-06-22.md` (in this repo). Branch `funnel-preview-protections-logo-map`. Splittable into 2 independent PRs (social links · photo uploads).
+  - **Feature 1 — Social links:** Step-2 intake fields for 7 platforms (Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Google Business); store `social_links` JSON; generator emits a `<!--IZ_SOCIAL-->` footer placeholder that a new `injectSocial()` replaces with server-side inline brand-SVG icons (mirror the existing `injectMap()`/`<!--IZ_MAP-->` pattern — do NOT let GLM draw the glyphs).
+  - **Feature 2 — Customer photo uploads:** new `api/upload-photo.php` (clone `api/upload-logo.php` + a ≥1000px min-dimension gate); Step-2 multi-file picker (cap 7); store `uploaded_photos` JSON; in `generateSupportImages()` use uploads FIRST toward the content-aware target (2–7) and generate only the remainder (cost saving). HERO ALWAYS GENERATED — uploads must never reach `$heroUrl`.
+  - **Schema:** add 2 nullable text columns to `site_builder_leads`: `social_links`, `uploaded_photos` (via Supabase MCP `apply_migration`, project `ocgearsjyqeoscjvcdrz`).
+  - **Reuse:** `api/upload-logo.php` (CSRF + rate-limit + MIME + storage), the uploaded-asset regex `^https://izendestudioweb\.com/genmedia/uploads/...`, the `<!--IZ_MAP-->` injection pattern, the existing SUPPORTING PHOTOS prompt block (needs no change — it already styles all real photos with object-fit:cover).
+  - **Verify:** insert a throwaway pending lead with both fields → cron generates → footer icons correct + content uses uploads then generated + hero is generated + generated count == target − uploads; reject a <1000px upload; throwaway-clean after. Deploy via FTPS (226), `php -l`, commit, log.
+- Files changed THIS entry: `plans/social-links-photo-uploads-2026-06-22.md` (new), `plans/memory-bank/HANDOFF_LOG.md`, `plans/memory-bank/NEXT_ACTIONS.md`.
+- Tests/lint: none (planning only).
+- Result: Plan approved by owner; queued. No production change.
+- Risks: none yet (no code). When built: keep hero generated; server-inject social icons; enforce upload min-size + whitelist; watch z.ai balance during generation testing.
+- Re-entry packet: N/A (new feature, ARCHITECT-approved plan in `plans/social-links-photo-uploads-2026-06-22.md`).
+- Updated memory files: HANDOFF_LOG.md, NEXT_ACTIONS.md
