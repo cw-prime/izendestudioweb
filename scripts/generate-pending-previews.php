@@ -531,23 +531,39 @@ function generateSupportImages($lead, $slug, $isCli) {
         . ' if the description gives no such cues, show people naturally relevant to the service.'
         . ' Photorealistic, versatile 4:3 composition that still reads well when cropped into a card or column.'
         . ' Absolutely NO text, NO words, NO logos, NO watermarks, and NO user-interface elements in the image.';
-    $prompts = [
-        'support-1' => 'Create a warm, authentic photograph for the website of "' . $name . '". The business: ' . $desc . '.'
-            . ' Show this business\'s work actually happening — the service being delivered or a customer/client being helped —'
-            . ' so a visitor instantly understands what they get.' . $common,
-        'support-2' => 'Create a tasteful, editorial photograph for the website of "' . $name . '". The business: ' . $desc . '.'
-            . ' Focus on the space, product, tools or craft (the environment or the result), conveying quality and care;'
-            . ' people optional and secondary here.' . $common,
+    // Content-aware count: a service-heavy business needs more real photos than a simple one.
+    // Estimate distinct offerings from the description, map to [2..IZ_SUPPORT_MAX]. The layout
+    // rule ("design around the photos you have") is the safety net for any leftover slots.
+    $supportMax = (int) envOr('IZ_SUPPORT_MAX', 7);
+    if ($supportMax < 2) { $supportMax = 2; }
+    if ($supportMax > 7) { $supportMax = 7; }
+    $chunks = preg_split('/[,;\n\x{2022}]+|\band\b/iu', $desc) ?: [];
+    $items  = 0;
+    foreach ($chunks as $c) { if (strlen(trim((string) $c)) >= 3) { $items++; } }
+    $photoCount = (int) max(2, min($supportMax, (int) ceil($items / 2)));
+
+    // Pool of distinct shot concepts (varied so multiple photos never look repetitive); take the first N.
+    $concepts = [
+        'Show this business\'s work actually happening — the service being delivered or a customer/client being helped — so a visitor instantly understands what they get.',
+        'Focus on the space or environment (interior, setting, or welcoming entrance), conveying quality, cleanliness and care; people optional and secondary.',
+        'Show the team / staff at work — warm, competent professionals engaged in their craft.',
+        'A close, editorial detail of a signature service, product, tool, or result that conveys expertise and attention to detail.',
+        'A genuine, happy customer / client enjoying the outcome or result of this business\'s work — candid and natural, not posed.',
+        'A second distinct service or offering this business provides, depicted authentically in context.',
+        'A lifestyle / context shot that captures the feeling and value of choosing this business — calm, trustworthy, aspirational.',
     ];
     $model    = trim((string) envOr('GEMINI_LOGO_MODEL', 'nano-banana-pro-preview'));      // higher-fidelity model
     $fallback = trim((string) envOr('GEMINI_IMAGE_MODEL', 'gemini-3.1-flash-image'));
     $urls = [];
-    foreach ($prompts as $base => $prompt) {
+    for ($i = 0; $i < $photoCount; $i++) {
+        $base   = 'support-' . ($i + 1);
+        $prompt = 'Create a warm, authentic, editorial photograph for the website of "' . $name . '". The business: ' . $desc . '. '
+            . $concepts[$i] . $common;
         $u = geminiImageToFile($prompt, $slug, $base, $model);
         if ($u === '') { $u = geminiImageToFile($prompt, $slug, $base, $fallback); }
         if ($u !== '') { $urls[] = $u; }
     }
-    if (!empty($urls) && !$isCli) { echo ' [' . count($urls) . ' support image' . (count($urls) === 1 ? '' : 's') . ' ok] '; flush(); }
+    if (!empty($urls) && !$isCli) { echo ' [' . count($urls) . ' support image' . (count($urls) === 1 ? '' : 's') . " of $photoCount] "; flush(); }
     return $urls;
 }
 
