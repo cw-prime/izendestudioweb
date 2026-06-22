@@ -154,6 +154,12 @@ arrangement):
   simple inline-SVG monogram of the initials. NEVER render text/letters inside a
   raster image, and never attempt a photorealistic logo — keep it crisp and
   brand-appropriate using the theme colors.
+  If the header has a call-to-action BUTTON, it must look like a real button with
+  comfortable padding (around .7rem vertical / 1.5-1.8rem horizontal). CRITICAL: make
+  sure a generic nav-link rule (e.g. `.nav-links a { padding: ... }`) does NOT override
+  the button's padding — either keep the CTA out of the plain-link list, or give the CTA
+  rule enough specificity (e.g. `.nav-links a.nav-cta`) so its padding always wins. A
+  header CTA must never collapse to tight plain-link padding.
 - A striking hero (headline + one-line subhead + primary CTA) built per the Hero
   style named in the Design Direction. The first viewport must never feel empty:
   include visible headline copy, supporting copy, and a CTA above the fold on both
