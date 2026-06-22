@@ -934,6 +934,10 @@ function expireOldPreviews($isCli) {
 // ---- Main --------------------------------------------------------------------
 if (!defined('IZ_GEN_LIB')) {
 expireOldPreviews($isCli);
+// Recover stale locks: a run that died mid-generation leaves the lead stuck in 'generating'.
+// Anything still 'generating' after 20 min is presumed dead — return it to the pending queue.
+$staleCutoff = gmdate('c', time() - 1200);
+supabaseRequest('PATCH', '/rest/v1/site_builder_leads?status=eq.generating&updated_at=lt.' . rawurlencode($staleCutoff), ['status' => 'pending']);
 list($code, $leads) = supabaseRequest('GET', '/rest/v1/site_builder_leads?select=*&status=eq.pending&order=created_at.asc&limit=3');
 if ($code !== 200 || !is_array($leads)) {
     cronLog('Poll failed', ['http' => $code]);
@@ -947,6 +951,15 @@ if (count($leads) === 0) {
 
 foreach ($leads as $lead) {
     $id = $lead['id'];
+    // Atomic claim: flip pending -> generating ONLY if it's still pending. With Prefer:
+    // return=representation, a matched row comes back; an empty array means another cron run
+    // (this generation can exceed the 5-min cron interval) already claimed it — skip to avoid
+    // duplicate image generation, races, and one run clobbering the other's result.
+    list($claimCode, $claimed) = supabaseRequest('PATCH', '/rest/v1/site_builder_leads?id=eq.' . rawurlencode($id) . '&status=eq.pending', ['status' => 'generating', 'updated_at' => gmdate('c')]);
+    if ($claimCode !== 200 || !is_array($claimed) || count($claimed) === 0) {
+        cronLog('Skip — lead already claimed by another run', ['id' => $id, 'http' => $claimCode]);
+        continue;
+    }
     cronLog('Processing lead', ['id' => $id, 'business' => $lead['business_name']]);
     if (!$isCli) { echo "\nlead $id ({$lead['business_name']}) generating"; flush(); }
 
