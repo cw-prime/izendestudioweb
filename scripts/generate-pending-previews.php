@@ -263,8 +263,8 @@ PROMPT;
         . "- Pick a section order and composition that suits THIS direction — not a generic top-to-bottom stack.\n";
 
     if (!empty($heroUrl)) {
-        $user .= "\nHERO IMAGE AVAILABLE (a real, on-brand photo was generated for this business): " . $heroUrl . "\n"
-            . "Use it as the hero ONLY if a photographic hero genuinely suits this business and the requested vibe. If a clean typographic / CSS / illustrative hero would look more premium for this brand (e.g. minimal, luxury, or text-forward concepts), prefer that and you may omit the photo entirely. When you DO use it, make it a full-bleed background with a dark gradient overlay so the headline stays legible, and give it a descriptive alt/aria-label. Do NOT place this photo as a split-screen side panel, clipped diagonal panel, or oversized cropped rectangle beside empty space.\n";
+        $user .= "\nHERO IMAGE AVAILABLE (a real, on-brand photo was generated specifically for this business): " . $heroUrl . "\n"
+            . "Use this photo as the hero by DEFAULT — a strong photographic hero makes the page far more compelling, and a bare CSS/gradient hero on a service or local business looks empty and unfinished. Make it a FULL-BLEED background with a dark gradient overlay so the headline stays legible, and give it a descriptive alt/aria-label. Only fall back to a clean typographic / CSS hero (omitting the photo) when a photo would genuinely look LESS premium for THIS specific brand — i.e. a strictly minimalist luxury or text-forward concept; that is the rare exception, not the default. Do NOT place this photo as a split-screen side panel, clipped diagonal panel, or oversized cropped rectangle beside empty space.\n";
     }
 
     if (!empty($supportUrls)) {
