@@ -67,9 +67,11 @@ placeholder, the uploaded-logo detection branch, and the SUPPORTING PHOTOS promp
   for the existing SUPPORTING PHOTOS block (already styles all "real photos" with object-fit:cover — no
   prompt change needed). `generateHeroImage`/logo untouched; uploads never reach `$heroUrl`.
 
-## Supabase schema
-Add two nullable text columns to `site_builder_leads`: `social_links`, `uploaded_photos` (JSON strings,
-like `brand_colors`). Apply via Supabase MCP `apply_migration` (project `ocgearsjyqeoscjvcdrz`).
+## Supabase schema — ✅ DONE 2026-06-22
+Both nullable text columns `social_links` and `uploaded_photos` are already added to
+`public.site_builder_leads` (migration `add_social_links_and_uploaded_photos_to_site_builder_leads`,
+PostgREST schema reloaded). Store JSON strings (like `brand_colors`). No migration needed — just write to
+these columns from `api/site-builder-leads.php`.
 
 ## Files to modify
 - `website-drafter.php` — Step 2 optional social + photo inputs; nonce'd JS to upload photos + collect URLs.
