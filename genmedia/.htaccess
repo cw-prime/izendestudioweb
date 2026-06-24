@@ -1,0 +1,19 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTP_REFERER} !^$
+  RewriteCond %{HTTP_REFERER} !^https?://([^/]+\.)?izendestudioweb\.com(/|$) [NC]
+  RewriteRule \.(?:png|jpe?g|gif|webp|avif)$ - [F,NC]
+</IfModule>
+
+<FilesMatch "\.(?:php|phtml|phar|cgi|pl|py|sh|shtml)$">
+  Require all denied
+</FilesMatch>
+
+RemoveHandler .php .phtml .phar .cgi .pl .py .sh .shtml
+RemoveType .php .phtml .phar .cgi .pl .py .sh .shtml
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+

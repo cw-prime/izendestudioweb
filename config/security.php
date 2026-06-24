@@ -495,7 +495,7 @@ function setSecurityHeaders() {
     $csp .= "img-src 'self' data: https: http:; ";
     $csp .= "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; ";
     $csp .= "connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 https://www.google-analytics.com https://unpkg.com https://tile.openstreetmap.org; ";
-    $csp .= "frame-src 'self' https://www.google.com; ";
+    $csp .= "frame-src 'self' https://www.google.com https://seal-stlouis.bbb.org; ";
     $csp .= "frame-ancestors 'self'; ";
     $csp .= "form-action 'self'; ";
     $csp .= "base-uri 'self'; ";
@@ -515,7 +515,7 @@ function setSecurityHeaders() {
         $cspRo .= "img-src 'self' data: https: http:; ";
         $cspRo .= "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; ";
         $cspRo .= "connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 https://www.google-analytics.com https://unpkg.com https://tile.openstreetmap.org; ";
-        $cspRo .= "frame-src 'self' https://www.google.com; ";
+        $cspRo .= "frame-src 'self' https://www.google.com https://seal-stlouis.bbb.org; ";
         $cspRo .= "frame-ancestors 'self'; ";
         $cspRo .= "form-action 'self'; ";
         $cspRo .= "base-uri 'self'; ";

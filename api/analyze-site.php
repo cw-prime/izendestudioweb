@@ -3,7 +3,7 @@
  * AI Website Builder — Analyze an existing site (Step 1 helper).
  *
  * Takes a URL the prospect already has, fetches it SSRF-safely, extracts the
- * visible text, and asks GLM to draft a business description that pre-fills the
+ * visible text, and asks GLM to draft a redesign brief that pre-fills the
  * builder form. Optional convenience — failures are friendly, never fatal.
  *
  * POST JSON: { url, csrf_token }  ->  { success, business_name, description }
@@ -105,7 +105,7 @@ function iz_page_text($html) {
 }
 
 /** Pull real contact details (phone + address) from a page: tel: links, JSON-LD, <address>. */
-function iz_contact_details($html) {
+function iz_contact_details($html, &$firstAddress = null) {
     $html = (string) $html;
     $phones = []; $addresses = []; $emails = [];
     // tel: links — most reliable phone source
@@ -157,11 +157,12 @@ function iz_contact_details($html) {
     if ($phones)    { $lines[] = 'Phone: ' . implode(', ', $phones); }
     if ($emails)    { $lines[] = 'Email: ' . implode(', ', $emails); }
     if ($addresses) { $lines[] = 'Address: ' . implode(' | ', $addresses); }
+    $firstAddress = $addresses[0] ?? '';
     return $lines ? "\nCONTACT DETAILS FOUND ON SITE:\n" . implode("\n", $lines) : '';
 }
 
-/** Same-host internal links from a page, ranked toward services/about pages. Returns up to $max absolute URLs. */
-function iz_internal_links($html, $baseUrl, $max = 3) {
+/** Same-host internal links from a page, ranked toward services/pricing/menu/about pages. Returns up to $max absolute URLs. */
+function iz_internal_links($html, $baseUrl, $max = 8) {
     $pb = parse_url($baseUrl);
     $bhost = strtolower($pb['host'] ?? '');
     $scheme = $pb['scheme'] ?? 'https';
@@ -183,10 +184,13 @@ function iz_internal_links($html, $baseUrl, $max = 3) {
             $norm = $scheme . '://' . $bhost . $path;
             $hay = $path . ' ' . strtolower(trim(strip_tags($mm[2][$i])));
             $score = 0;
-            foreach (['service','what-we','offer','program','treatment','solution','care','menu','pricing','plans','specialt','about','our-','product'] as $kw) {
-                if (strpos($hay, $kw) !== false) { $score += 2; }
+            foreach (['service','services','pricing','price','rates','menu','package','packages','treatment','treatments','what-we','offer','program','solution','care','specialt','product'] as $kw) {
+                if (strpos($hay, $kw) !== false) { $score += 4; }
             }
-            if (preg_match('~(contact|privacy|terms|login|signin|cart|account|career|faq|blog|news)~', $path)) { $score -= 1; }
+            foreach (['about','our-','team','location','contact'] as $kw) {
+                if (strpos($hay, $kw) !== false) { $score += 1; }
+            }
+            if (preg_match('~(privacy|terms|login|signin|cart|account|career|job|faq|blog|news|gift|store|shop)~', $path)) { $score -= 2; }
             if (!isset($scored[$norm]) || $score > $scored[$norm]) { $scored[$norm] = $score; }
         }
     }
@@ -207,11 +211,11 @@ $metaDesc = ''; if (preg_match('~<meta[^>]+name=["\']description["\'][^>]*conten
 $ogSite = ''; if (preg_match('~<meta[^>]+property=["\']og:site_name["\'][^>]*content=["\']([^"\']*)~i', $html, $m)) { $ogSite = trim(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')); }
 $ogDesc = ''; if (preg_match('~<meta[^>]+property=["\']og:description["\'][^>]*content=["\']([^"\']*)~i', $html, $m)) { $ogDesc = trim(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')); }
 
-// Home page text, then crawl a few key inner pages (services/about/...) on the SAME host so
-// the AI sees the actual offerings, not just the marketing home page.
+// Home page text, then crawl key inner pages (services/pricing/menu/about/...) on the SAME host
+// so the AI sees the actual offerings, not just the marketing home page.
 $blocks = [$title . "\n" . $metaDesc . "\n" . $ogDesc . "\n" . iz_page_text($html)];
 $crawled = [$url];
-foreach (iz_internal_links($html, $url, 3) as $link) {
+foreach (iz_internal_links($html, $url, 8) as $link) {
     if (in_array($link, $crawled, true)) { continue; }
     $sub = iz_safe_fetch($link);
     if ($sub !== null && strlen($sub) > 80) {
@@ -221,8 +225,9 @@ foreach (iz_internal_links($html, $url, 3) as $link) {
 }
 $textBlob = trim(implode("\n", $blocks));
 $textBlob = preg_replace('~\n{3,}~', "\n\n", $textBlob);
-if (mb_strlen($textBlob) > 11000) { $textBlob = mb_substr($textBlob, 0, 11000); }
-$textBlob .= iz_contact_details($html); // real phone/address from the home page (footer/JSON-LD/tel:)
+if (mb_strlen($textBlob) > 32000) { $textBlob = mb_substr($textBlob, 0, 32000); }
+$foundAddress = '';
+$textBlob .= iz_contact_details($html, $foundAddress); // real phone/address from the home page (footer/JSON-LD/tel:)
 if (mb_strlen(trim($textBlob)) < 40) {
     echo json_encode(['success' => false, 'message' => "That site didn't have enough readable text. Tell us about your business below."]); exit;
 }
@@ -237,9 +242,9 @@ if (mb_strlen($bizName) > 80) { $bizName = ''; }
 $glmKey = trim((string) getEnv('GLM_API_KEY', ''));
 if ($glmKey === '') { echo json_encode(['success' => false, 'message' => 'Analyzer is unavailable right now — please type your description.']); exit; }
 
-$sys = "You read text gathered from a small business's CURRENT website (home page plus a few inner pages such as services/about) and write a clear description to brief building them a brand-new site. Write 3-6 sentences as the business owner. You MUST include: what the business does; a concrete list of their main services or products by name (pull the actual service names found in the text — e.g. \"We offer X, Y, and Z\"); who they serve; their city/service area if stated; and the overall tone. If the text shows the business's real phone number, email address, or street address (e.g. a 'CONTACT DETAILS FOUND' section, footer, or contact page), include them accurately so the new site can reuse the real contact info. Use ONLY facts present in the text — never invent services, prices, addresses, phone numbers, awards, or statistics; omit anything not present. Refer to the business by its plain name without legal suffixes like LLC, Inc., or Corp. Plain text only, no preamble, no markdown, no bullet characters.";
+$sys = "You read text gathered from a small business's CURRENT website (home page plus key inner pages such as services/pricing/menu/about) and write a redesign brief that will be pasted into a website generator. Preserve important existing-site content instead of over-summarizing it. Keep the full response under 6500 characters. Use this exact plain-text structure:\nBusiness summary: 2-4 sentences as the business owner, including what the business does, who they serve, city/service area if stated, tone, and real contact details if found.\nServices and pricing to preserve: grouped by category. Include the real service/product/package names found in the text. Include durations and prices ONLY when present. For service-heavy sites, include all major categories and representative high-value items, not just a few generic categories.\nNotes for redesign: any factual constraints such as phone-only booking, safety notices, eco/clean-green positioning, gift cards, or appointment requirements.\nRules: Use ONLY facts present in the text. Never invent services, prices, addresses, phone numbers, awards, or statistics. If pricing is not shown, omit pricing rather than writing 'call for pricing'. Refer to the business by its plain name without legal suffixes like LLC, Inc., or Corp. Plain text only, no markdown bullets that require special formatting.";
 $usr = "Website: " . $url . "\n" . ($bizName !== '' ? "Business name: $bizName\n" : '') . "\nPAGE TEXT (multiple pages, separated by '--- url ---'):\n" . $textBlob;
-$payload = json_encode(['model' => 'glm-5', 'max_tokens' => 900, 'messages' => [
+$payload = json_encode(['model' => (trim((string) getEnv('GLM_MODEL', 'glm-5')) ?: 'glm-5'), 'max_tokens' => 3600, 'messages' => [
     ['role' => 'system', 'content' => $sys], ['role' => 'user', 'content' => $usr],
 ]]);
 
@@ -262,4 +267,4 @@ if (mb_strlen($desc) < 40) {
     echo json_encode(['success' => false, 'message' => "We couldn't summarize that site — please type your description."]); exit;
 }
 
-echo json_encode(['success' => true, 'business_name' => $bizName, 'description' => $desc]);
+echo json_encode(['success' => true, 'business_name' => $bizName, 'description' => $desc, 'business_address' => $foundAddress, 'pages_crawled' => count($crawled)]);

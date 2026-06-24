@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Website Builder — Preview Generator (cPanel cron)
+ * Site Drafter — Preview Generator (cPanel cron)
  *
  * Polls Supabase for pending site_builder_leads, generates a single-file site
  * with GLM-5 (streaming), writes it to the previews dir, marks the lead
@@ -62,6 +62,10 @@ if (!$isCli) {
 
 // ---- Single-instance lock ----------------------------------------------------
 $lockFile = sys_get_temp_dir() . '/site-builder-generate.lock';
+if (is_file($lockFile) && (time() - (int) @filemtime($lockFile)) > 3600) {
+    @unlink($lockFile);
+    cronLog('Removed stale generator lock');
+}
 $lock = fopen($lockFile, 'c');
 if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
     cronLog('Another instance is running — exiting');
@@ -74,10 +78,11 @@ if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
 $supabaseUrl = rtrim((string) envOr('SUPABASE_URL', ''), '/');
 $supabaseKey = trim((string) envOr('SUPABASE_SERVICE_ROLE_KEY', ''));
 $glmKey      = trim((string) envOr('GLM_API_KEY', ''));
+$glmModel    = trim((string) envOr('GLM_MODEL', 'glm-5')) ?: 'glm-5'; // glm-5.2 returned empty/truncated HTML at 20k tokens (all gens failed) — reverted to glm-5; set GLM_MODEL=glm-5.2 only after raising max_tokens + testing a full generation
 $deployRoot  = rtrim((string) envOr('PREVIEW_DEPLOY_DIR', dirname(__DIR__) . '/previews'), '/');
 $baseUrl     = rtrim((string) envOr('PREVIEW_BASE_URL', 'https://izendestudioweb.com/previews'), '/');
 
-if ($supabaseUrl === '' || $supabaseKey === '' || $glmKey === '') {
+if ($supabaseUrl === '' || $supabaseKey === '' || (!defined('IZ_GEN_LIB') && $glmKey === '')) {
     cronLog('Missing config', ['supabase' => $supabaseUrl !== '', 'sb_key' => $supabaseKey !== '', 'glm_key' => $glmKey !== '']);
     if (!$isCli) { echo "misconfigured\n"; }
     exit(1);
@@ -107,7 +112,7 @@ function supabaseRequest($method, $path, $body = null) {
     return [$code, $resp === false ? null : json_decode($resp, true)];
 }
 
-function buildPrompts($lead, $heroUrl = '', $logoUrl = '') {
+function buildPrompts($lead, $heroUrl = '', $logoUrl = '', $supportUrls = []) {
     $system = <<<'PROMPT'
 You are a senior web designer at a professional web studio. You build a complete,
 production-ready, single-page marketing website for a small business from a short
@@ -116,13 +121,26 @@ brief.
 Output rules (CRITICAL):
 - Return ONE complete HTML document and NOTHING else. Start at <!DOCTYPE html> and
   end at </html>. No markdown code fences, no explanation, no preamble.
+- Keep the document compact and complete. Target 12k-22k characters. Do not overbuild
+  huge decorative SVGs, app mockups, long animations, or excessive sections that risk
+  truncation. A polished complete page is better than an ambitious broken page.
 - Everything inline in that one file: a single <style> block in <head>. No external
   build step, no JS frameworks. A small amount of vanilla JS is fine (mobile menu,
   smooth scroll) but the site must look and work with JS disabled.
 - You MAY use Google Fonts via <link>. For photography, use ONLY image URLs that are
   explicitly provided in this brief. NEVER invent, guess, or use stock/Unsplash/picsum
   placeholder image URLs — they break and look unprofessional. If no image URL is
-  provided for a spot, use tasteful CSS gradients/backgrounds and inline SVG instead.
+  provided for a spot, use tasteful CSS gradients/backgrounds and inline SVG instead — but keep those
+  fillers SMALL and clearly decorative (subtle section backgrounds, small icons inside content). NEVER
+  render a large photo-sized rectangle whose only content is a centered icon on a gradient: that reads as
+  a broken/missing image. If a section or card has no real photo, choose a layout that looks complete
+  without one (icon-and-text cards with a small icon badge, bold type, columns) rather than an empty
+  image placeholder.
+- Do NOT add a film-grain or noise texture overlay over the page. Never place a fixed or
+  absolutely-positioned full-screen layer of SVG feTurbulence/fractalNoise (or any repeating
+  noise image) on top of the site — it makes the whole page look grainy and ruins legibility over
+  photos and text. If you want subtle texture, confine it to a single section's own background and
+  keep it nearly invisible (opacity <= 0.04); never layer noise above hero photos or body copy.
 - Mobile-first and fully responsive. Must look great at 375px and 1280px.
 - Accessible: semantic landmarks, alt text, sufficient color contrast, focus states.
 
@@ -136,8 +154,17 @@ arrangement):
   simple inline-SVG monogram of the initials. NEVER render text/letters inside a
   raster image, and never attempt a photorealistic logo — keep it crisp and
   brand-appropriate using the theme colors.
+  If the header has a call-to-action BUTTON, it must look like a real button with
+  comfortable padding (around .7rem vertical / 1.5-1.8rem horizontal). CRITICAL: make
+  sure a generic nav-link rule (e.g. `.nav-links a { padding: ... }`) does NOT override
+  the button's padding — either keep the CTA out of the plain-link list, or give the CTA
+  rule enough specificity (e.g. `.nav-links a.nav-cta`) so its padding always wins. A
+  header CTA must never collapse to tight plain-link padding.
 - A striking hero (headline + one-line subhead + primary CTA) built per the Hero
-  style named in the Design Direction.
+  style named in the Design Direction. The first viewport must never feel empty:
+  include visible headline copy, supporting copy, and a CTA above the fold on both
+  desktop and mobile. Do not leave a blank 40-60% column beside an image. Avoid
+  clipped diagonal photo panels unless the headline is visibly overlaid on the image.
 - An about/story section in the business's voice (2-3 short paragraphs).
 - The services/offerings, presented in the layout named in the Design Direction.
   Include prices ONLY if the brief implies them; otherwise describe without inventing.
@@ -146,8 +173,9 @@ arrangement):
 - A contact or booking section (see ONLINE BOOKING below) with a click-to-call tel:
   link and a mailto: link.
 - A footer with copyright + the business name.
-You MAY add extra sections that fit (gallery, a "how it works"/process strip, an FAQ,
-a stats band). Use distinctive section dividers/shapes — not plain stacked grey blocks.
+You MAY add one extra section that fits (gallery, a "how it works"/process strip, an
+FAQ, a stats band). Use distinctive section dividers/shapes — not plain stacked grey
+blocks.
 
 Theming contract (REQUIRED):
 - Define ALL colors and fonts as CSS custom properties on :root, using EXACTLY
@@ -161,7 +189,7 @@ Design rules (MAKE IT DISTINCT — do not produce a cookie-cutter template):
   type scale, spacing rhythm, and section shapes. Two different businesses must yield
   visibly different LAYOUTS — not the same template recolored.
 - Match the requested STYLE/VIBE in palette, type, and imagery mood.
-- Avoid generic "AI slop": no Inter/Roboto/Arial-only stacks, no purple-on-white
+- Avoid generic generated-site cliches: no Inter/Roboto/Arial-only stacks, no purple-on-white
   gradient cliché, no identical three-equal-cards-and-done. Use a confident type scale,
   strong visual hierarchy, asymmetry where it fits, and generous, intentional spacing.
 - Real, specific copy derived from the brief — never lorem ipsum.
@@ -187,6 +215,14 @@ Accuracy & editability (CRITICAL — this is a preview the owner will personaliz
 - Use ONLY facts the owner actually provided. NEVER invent specific business hours,
   prices, street addresses, years in business, staff names, license numbers, or
   statistics. Inventing a wrong fact is worse than omitting it.
+- If the owner's description includes a structured "Services and pricing to preserve"
+  section from an existing-site scan, treat it as authoritative source content:
+  carry over the real service categories, named services/packages, durations, and
+  prices that fit the page. Do not reduce a service-heavy business to three generic
+  cards when real menu/pricing details were provided.
+- For dense scanned content, preserve context by grouping details into concise sections
+  such as Services, Plans, Shop/Categories, Offers, App/Tools, FAQs, and Disclosures.
+  Summarize long category lists, but do not drop whole business-critical groups.
 - When a section would normally show such a detail but it wasn't provided, use a
   clearly-editable placeholder the owner will obviously swap — e.g. "Hours: add your
   hours here", "[Your address]", "Call for pricing" — never a fabricated specific.
@@ -196,8 +232,13 @@ Accuracy & editability (CRITICAL — this is a preview the owner will personaliz
 - Never render legal suffixes (LLC, Inc., Corp., Ltd., Co.) in the brand name shown on the site — use the plain business name.
 PROMPT;
 
+    $description = (string) ($lead['business_description'] ?? '');
+    if (strlen($description) > 8000) {
+        $description = substr($description, 0, 8000) . "\n\n[Input trimmed for draft speed. Preserve the main services, plans, offers, and disclosure notes above.]";
+    }
+
     $user = 'Business name: ' . $lead['business_name'] . "\n"
-        . 'What the business does: ' . $lead['business_description'] . "\n"
+        . 'What the business does: ' . $description . "\n"
         . 'Style / vibe: ' . (!empty($lead['style_vibe']) ? $lead['style_vibe'] : 'choose the most fitting style for this business') . "\n"
         . 'Contact email (for the mailto link): ' . $lead['contact_email'] . "\n"
         . (!empty($lead['contact_phone']) ? 'Contact phone (for the tel link): ' . $lead['contact_phone'] . "\n" : '');
@@ -210,9 +251,8 @@ PROMPT;
     // (and even re-rolls) diverge into genuinely different layouts, not one template.
     $heroArch = [
         'a full-bleed hero with the image behind a rich dark gradient and a large overlaid headline',
-        'a split hero: bold headline + CTA on one side, an image or richly-styled panel on the other',
-        'a centered editorial hero with oversized display type, a thin rule, and lots of whitespace',
-        'an asymmetric hero with an offset headline, floating accent shapes, and a layered/angled image',
+        'a compact editorial hero with oversized display type, a thin rule, and a visible CTA',
+        'an asymmetric hero with an offset headline, floating accent shapes, and a clearly visible CTA',
         'a minimalist statement hero: one huge typographic line, a short subhead, a single CTA',
     ];
     $svcLayout = [
@@ -240,12 +280,52 @@ PROMPT;
         . "- Pick a section order and composition that suits THIS direction — not a generic top-to-bottom stack.\n";
 
     if (!empty($heroUrl)) {
-        $user .= "\nHERO IMAGE AVAILABLE (a real, on-brand photo was generated for this business): " . $heroUrl . "\n"
-            . "Use it as the hero ONLY if a photographic hero genuinely suits this business and the requested vibe. If a clean typographic / CSS / illustrative hero would look more premium for this brand (e.g. minimal, luxury, or text-forward concepts), prefer that and you may omit the photo entirely. When you DO use it, make it a full-bleed background with a dark gradient overlay so the headline stays legible, and give it a descriptive alt/aria-label. Do not use any OTHER photographic image; for other visuals use CSS gradients/backgrounds and inline SVG.\n";
+        $user .= "\nHERO IMAGE AVAILABLE (a real, on-brand photo was generated specifically for this business): " . $heroUrl . "\n"
+            . "Use this photo as the hero by DEFAULT — a strong photographic hero makes the page far more compelling, and a bare CSS/gradient hero on a service or local business looks empty and unfinished. Make it a FULL-BLEED background with a dark gradient overlay so the headline stays legible, and give it a descriptive alt/aria-label. Only fall back to a clean typographic / CSS hero (omitting the photo) when a photo would genuinely look LESS premium for THIS specific brand — i.e. a strictly minimalist luxury or text-forward concept; that is the rare exception, not the default. Do NOT place this photo as a split-screen side panel, clipped diagonal panel, or oversized cropped rectangle beside empty space.\n";
+    }
+
+    if (!empty($supportUrls)) {
+        $list = '';
+        foreach (array_values($supportUrls) as $i => $u) { $list .= '  ' . ($i + 1) . '. ' . $u . "\n"; }
+        $user .= "\nSUPPORTING PHOTOS AVAILABLE (real, on-brand photographs generated for THIS business — use them to make the page feel alive and credible instead of empty gradient panels):\n" . $list
+            . "Place these REAL photos in the content sections where a photo genuinely helps a visitor understand the business — e.g. About, Services, a feature/'why us' band, or a small gallery — with descriptive alt text. Style them responsively (width:100%, object-fit:cover, a sensible aspect-ratio, border-radius) so they crop cleanly on any screen. Use each one where it adds meaning; do NOT force all of them in if the design is stronger without one, and never stretch, distort, or tile them.\n"
+            . "CRITICAL — design the layout around EXACTLY the images you have (the hero plus the " . count($supportUrls) . " supporting photo(s) above), and no more. Do NOT build a section that needs one photo per item (e.g. a services or features list with a large image beside every row/card) and then leave the slots you can't fill as a big gradient box containing a single centered icon — that looks like a broken/missing image. For any item WITHOUT a real photo, use a compact icon-and-text card (a small icon badge next to the heading and copy) or a clean typographic/columned layout that looks complete WITHOUT imagery. Large photo-sized blocks are allowed ONLY where you place one of the real photos above.\n";
+    }
+
+    // Other-visuals policy: only the real URLs above are allowed; everything else must be CSS/SVG so nothing breaks.
+    if (!empty($heroUrl) || !empty($supportUrls)) {
+        $user .= "\nOTHER VISUALS: Besides the real image URL(s) provided above (hero / logo / supporting photos), do NOT use, invent, or hotlink ANY other photographic image URLs — they break and look unprofessional. For every other visual (backgrounds, accents, icons, decorative panels) use CSS gradients/backgrounds and small inline SVG only.\n";
     }
 
     if (!empty($logoUrl)) {
-        $user .= "\nLOGO MARK (a custom icon was generated for this business — use THIS EXACT URL as the small logo icon in the header, paired with the business name as a text wordmark beside it; the image is icon-only, do NOT overlay any letters on it). The icon sits on a solid WHITE background, so seat it inside a small rounded-corner tile/badge (about 40-44px, border-radius, object-fit:contain, optional subtle shadow or thin border) so it reads as an intentional logo on any header color: " . $logoUrl . "\n";
+        if (strpos($logoUrl, '/genmedia/uploads/') !== false) {
+            // Customer's OWN logo — feature it prominently, and size it defensively so any shape/resolution fits.
+            $user .= "\nCUSTOMER LOGO (this is the customer's REAL brand logo — feature it prominently). Use THIS EXACT URL in the header as the primary logo, and also echo it in the footer. Display it FREE-STANDING (do NOT box it in a small tile, do NOT crop, stretch, or overlay text). Apply this exact CSS so any shape/resolution fits without breaking the layout: height auto, max-height:clamp(36px,5vw,52px), width:auto, object-fit:contain (a wide wordmark renders wide-but-short; a square icon stays square). Give the header enough padding that the logo has breathing room. URL: " . $logoUrl . "\n";
+        } else {
+            $user .= "\nLOGO MARK (a custom icon was generated for this business — use THIS EXACT URL as the small logo icon in the header, paired with the business name as a text wordmark beside it; the image is icon-only, do NOT overlay any letters on it). The icon sits on a solid WHITE background, so seat it inside a small rounded-corner tile/badge (about 40-44px, border-radius, object-fit:contain, optional subtle shadow or thin border) so it reads as an intentional logo on any header color: " . $logoUrl . "\n";
+        }
+    }
+
+    $socialLinks = [];
+    if (!empty($lead['social_links'])) {
+        $decoded = json_decode((string) $lead['social_links'], true);
+        if (is_array($decoded)) { $socialLinks = array_filter($decoded, 'is_string'); }
+    }
+    if ($socialLinks) {
+        $user .= "\nSOCIAL LINKS: This business provided verified social/profile URLs. In the footer next to the copyright, place the exact placeholder comment <!--IZ_SOCIAL--> on its own line where social icons should appear. Do NOT draw social icons yourself and do NOT write the URLs into the HTML; we inject the correct linked icons server-side.\n";
+    }
+
+    // Brand colors from the customer's uploaded logo — only steer the palette when they choose automatic style direction.
+    $autoVibe = empty($lead['style_vibe']);
+    $bc = [];
+    if (!empty($lead['brand_colors'])) { $decoded = json_decode((string) $lead['brand_colors'], true); if (is_array($decoded)) { $bc = $decoded; } }
+    if ($autoVibe && $bc) {
+        $user .= "\nBRAND COLORS (pulled from the customer's logo — build the palette around these; set --c-accent and --c-accent-2 from them and choose harmonious supporting colors so the whole site feels on-brand): " . implode(', ', $bc) . "\n";
+    }
+
+    // Embedded map placeholder — only when a Maps key is configured AND we have an address (location business).
+    if (trim((string) envOr('GOOGLE_MAPS_EMBED_KEY', '')) !== '' && !empty($lead['business_address'])) {
+        $user .= "\nMAP: This business has a physical address. In the contact section, place the exact placeholder comment <!--IZ_MAP--> on its own line where an embedded map should appear (we insert the real map there). Put it after the address text.\n";
     }
 
     $user .= "\nONLINE BOOKING: If this business takes appointments or reservations (salon, spa, massage, clinic, dentist, barber, trades/home-services, tutor, coach, consultant, photographer, restaurant, etc.), make the Contact section an 'Online Booking' section with id=\"book\" and point the hero's primary call-to-action button at #book. Inside it, build a styled form with EXACTLY this contract (match the site's theme): <form id=\"izBookingForm\"> containing inputs with these exact name attributes — name, email, phone, service (a <select> listing this business's actual services), preferred_date (input type=\"date\"), preferred_time (input type=\"time\"), message (textarea) — plus a visually-hidden honeypot <input name=\"website\"> (off-screen, tabindex=-1, autocomplete=off) and a submit button. Do NOT set a form action or method and do NOT write any submit JavaScript — leave the form as-is; it is wired up automatically. If this is NOT an appointment business, use a normal contact form instead (no izBookingForm id).\n";
@@ -261,14 +341,14 @@ PROMPT;
  * failure we silently fall back to the raw description.
  */
 function enrichBrief($lead) {
-    global $glmKey;
+    global $glmKey, $glmModel;
     $sys = "You are a brand strategist briefing a web designer. From a short business description, write a tight, concrete creative brief. Infer and include: core services/offerings (short list), the ideal customer, the brand tone/personality in a few adjectives, 2-3 realistic selling points or differentiators, and obvious trust signals (e.g. licensed, family-owned, years in business, local) ONLY if implied. Be specific and believable. Do NOT invent prices, street addresses, phone numbers, awards, or statistics. Keep it under 170 words, plain text.";
     $usr = "Business name: " . $lead['business_name'] . "\n"
          . "Their words: \"" . $lead['business_description'] . "\"\n"
          . "Desired vibe: " . (!empty($lead['style_vibe']) ? $lead['style_vibe'] : 'designer\'s choice');
 
     $payload = json_encode([
-        'model' => 'glm-5',
+        'model' => $glmModel,
         'max_tokens' => 3000, // GLM-5 spends budget on reasoning first; leave room or content comes back empty
         'messages' => [
             ['role' => 'system', 'content' => $sys],
@@ -292,69 +372,93 @@ function enrichBrief($lead) {
     return ($text !== '' && strlen($text) > 40) ? $text : null;
 }
 
-function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '') {
-    global $glmKey;
+function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '', $supportUrls = []) {
+    global $glmKey, $glmModel;
     // Zeno expands a thin description into a real brief first (best-effort).
-    $brief = enrichBrief($lead);
+    $rawDescription = trim((string) ($lead['business_description'] ?? ''));
+    $brief = strlen($rawDescription) > 900 ? null : enrichBrief($lead);
     if ($brief !== null) {
         $lead['_brief'] = $brief;
         cronLog('Brief enriched', ['id' => $lead['id'] ?? '', 'chars' => strlen($brief)]);
     }
-    list($system, $user) = buildPrompts($lead, $heroUrl, $logoUrl);
-    $payload = [
-        'model' => 'glm-5',
-        'max_tokens' => 24000, // bolder layouts + motion = larger output; avoid truncation
-        'stream' => true,
-        'messages' => [
-            ['role' => 'system', 'content' => $system],
-            ['role' => 'user', 'content' => $user],
-        ],
-    ];
+    list($system, $user) = buildPrompts($lead, $heroUrl, $logoUrl, $supportUrls);
+    // One streaming GLM call → validated HTML, as a single retryable unit.
+    $callOnce = function () use ($system, $user, $glmModel, $glmKey, $isCli) {
+        $payload = [
+            'model' => $glmModel,
+            'max_tokens' => 20000, // enough for rich scanned context, while still discouraging giant broken pages
+            'stream' => true,
+            'messages' => [
+                ['role' => 'system', 'content' => $system],
+                ['role' => 'user', 'content' => $user],
+            ],
+        ];
 
-    $sse = '';
-    $ch = curl_init('https://api.z.ai/api/paas/v4/chat/completions');
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Authorization: Bearer ' . $glmKey,
-        'Content-Type: application/json',
-        'Accept: text/event-stream',
-    ]);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 900);
-    curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$sse, $isCli) {
-        $sse .= $chunk;
-        if (!$isCli) { echo '.'; flush(); } // keepalive bytes for web invocations
-        return strlen($chunk);
-    });
-    $ok = curl_exec($ch);
-    $err = curl_error($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+        $sse = '';
+        $ch = curl_init('https://api.z.ai/api/paas/v4/chat/completions');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $glmKey,
+            'Content-Type: application/json',
+            'Accept: text/event-stream',
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 900);
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$sse, $isCli) {
+            $sse .= $chunk;
+            if (!$isCli) { echo '.'; flush(); } // keepalive bytes for web invocations
+            return strlen($chunk);
+        });
+        $ok = curl_exec($ch);
+        $err = curl_error($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-    if ($ok === false || $code !== 200) {
-        return [null, "curl failed (http=$code): $err — first bytes: " . substr($sse, 0, 200)];
-    }
-
-    $html = '';
-    foreach (explode("\n", $sse) as $line) {
-        $line = trim($line);
-        if (strpos($line, 'data: ') !== 0) { continue; }
-        $data = substr($line, 6);
-        if ($data === '[DONE]') { continue; }
-        $j = json_decode($data, true);
-        if (isset($j['choices'][0]['delta']['content'])) {
-            $html .= $j['choices'][0]['delta']['content'];
+        if ($ok === false || $code !== 200) {
+            return [null, "curl failed (http=$code): $err — first bytes: " . substr($sse, 0, 200)];
         }
-    }
-    $html = preg_replace('/^\s*```[a-zA-Z]*\s*\n/', '', $html);
-    $html = preg_replace('/\n```\s*$/', '', $html);
-    $html = trim($html);
 
-    if (strlen($html) < 1000 || stripos($html, '<html') === false || stripos(ltrim($html), '<!doctype html') !== 0) {
-        return [null, 'output did not look like a complete HTML document (len=' . strlen($html) . ')'];
+        $html = '';
+        foreach (explode("\n", $sse) as $line) {
+            $line = trim($line);
+            if (strpos($line, 'data: ') !== 0) { continue; }
+            $data = substr($line, 6);
+            if ($data === '[DONE]') { continue; }
+            $j = json_decode($data, true);
+            if (isset($j['choices'][0]['delta']['content'])) {
+                $html .= $j['choices'][0]['delta']['content'];
+            }
+        }
+        $html = preg_replace('/^\s*```[a-zA-Z]*\s*\n/', '', $html);
+        $html = preg_replace('/\n```\s*$/', '', $html);
+        $html = trim($html);
+        if (preg_match('/<\/html\s*>/i', $html, $m, PREG_OFFSET_CAPTURE)) {
+            $html = substr($html, 0, $m[0][1] + strlen($m[0][0]));
+        }
+
+        if (strlen($html) < 1000 || stripos($html, '<html') === false || stripos(ltrim($html), '<!doctype html') !== 0) {
+            return [null, 'output did not look like a complete HTML document (len=' . strlen($html) . ')'];
+        }
+        if (stripos($html, '</body>') === false || stripos($html, '</html>') === false) {
+            return [null, 'output was truncated before closing body/html (len=' . strlen($html) . ')'];
+        }
+        if (preg_match('/<script\b/i', $html) && stripos($html, '</script>') === false) {
+            return [null, 'output contained an unclosed script tag'];
+        }
+        return [$html, null];
+    };
+
+    // glm-5.2 (a reasoning model) occasionally returns empty/truncated output. One retry rescues those.
+    $lastErr = null;
+    for ($attempt = 1; $attempt <= 2; $attempt++) {
+        list($html, $err) = $callOnce();
+        if ($html !== null) { return [$html, null]; }
+        $lastErr = $err;
+        cronLog('GLM attempt failed', ['id' => $lead['id'] ?? '', 'attempt' => $attempt, 'err' => $err]);
+        if (!$isCli) { echo " [glm attempt $attempt failed: $err] "; flush(); }
     }
-    return [$html, null];
+    return [null, $lastErr];
 }
 
 /**
@@ -432,16 +536,93 @@ function generateHeroImage($lead, $slug, $isCli) {
         . ($vibe ? ' Visual mood and style: ' . $vibe . '.' : '')
         . ' Landscape 16:9 composition designed to work as a FULL-BLEED website background behind overlaid white text:'
         . ' keep it visually calm with reasonably even tones, avoid a single hard-edged focal point dead-center,'
-        . ' and do NOT leave a large flat empty panel on one side (the layout adds its own dark gradient scrim for legibility).'
+        . ' and do NOT leave a large flat empty panel or blank wall on one side (the layout adds its own dark gradient scrim for legibility).'
         . ' Natural, flattering light; authentic, editorial, professional quality.'
+        . ' Depict authentic, respectful people consistent with the clientele and community this business describes serving —'
+        . ' reflect any cues in the description about the people served (e.g. ethnicity, age group, families, profession).'
+        . ' If the description gives no such cues, show people naturally relevant to the service. Real and candid, never stocky.'
         . ' Absolutely NO text, NO words, NO logos, NO watermarks, and NO user-interface elements in the image.';
     $url = geminiImageToFile($prompt, $slug, 'hero');
     if ($url !== '' && !$isCli) { echo " [hero image ok] "; flush(); }
     return $url;
 }
 
+/** Two real, on-brand supporting photos (people/service + space/detail) for the content
+ *  sections, so non-hero spots show a real image instead of an empty gradient+icon panel.
+ *  Best-effort; any '' simply isn't offered to GLM (it falls back to CSS/SVG for that spot). */
+function generateSupportImages($lead, $slug, $isCli) {
+    $name = (string) $lead['business_name'];
+    $desc = trim((string) ($lead['business_description'] ?? ''));
+    $vibe = trim((string) ($lead['style_vibe'] ?? ''));
+    $common = ($vibe ? ' Visual mood and style: ' . $vibe . '.' : '')
+        . ' Natural, flattering light; authentic, candid, editorial and professional quality — real, never stocky.'
+        . ' Depict authentic, respectful people consistent with the clientele and community this business describes serving —'
+        . ' reflect any cues in the description about the people served (e.g. ethnicity, age group, families, profession);'
+        . ' if the description gives no such cues, show people naturally relevant to the service.'
+        . ' Photorealistic, versatile 4:3 composition that still reads well when cropped into a card or column.'
+        . ' Absolutely NO text, NO words, NO logos, NO watermarks, and NO user-interface elements in the image.';
+    // Content-aware count: a service-heavy business needs more real photos than a simple one.
+    // Estimate distinct offerings from the description, map to [2..IZ_SUPPORT_MAX]. The layout
+    // rule ("design around the photos you have") is the safety net for any leftover slots.
+    $supportMax = (int) envOr('IZ_SUPPORT_MAX', 7);
+    if ($supportMax < 2) { $supportMax = 2; }
+    if ($supportMax > 7) { $supportMax = 7; }
+    $chunks = preg_split('/[,;\n\x{2022}]+|\band\b/iu', $desc) ?: [];
+    $items  = 0;
+    foreach ($chunks as $c) { if (strlen(trim((string) $c)) >= 3) { $items++; } }
+    $photoCount = (int) max(2, min($supportMax, (int) ceil($items / 2)));
+
+    $uploaded = [];
+    if (!empty($lead['uploaded_photos'])) {
+        $decoded = json_decode((string) $lead['uploaded_photos'], true);
+        if (is_array($decoded)) {
+            foreach ($decoded as $url) {
+                if (is_string($url) && preg_match('~^https://izendestudioweb\.com/genmedia/uploads/photo-[\w-]+\.(?:png|jpe?g|webp|gif)$~i', $url)) {
+                    $uploaded[] = $url;
+                }
+            }
+        }
+    }
+    $uploaded = array_slice(array_values(array_unique($uploaded)), 0, 7);
+
+    // Pool of distinct shot concepts (varied so multiple photos never look repetitive); take the first N.
+    $concepts = [
+        'Show this business\'s work actually happening — the service being delivered or a customer/client being helped — so a visitor instantly understands what they get.',
+        'Focus on the space or environment (interior, setting, or welcoming entrance), conveying quality, cleanliness and care; people optional and secondary.',
+        'Show the team / staff at work — warm, competent professionals engaged in their craft.',
+        'A close, editorial detail of a signature service, product, tool, or result that conveys expertise and attention to detail.',
+        'A genuine, happy customer / client enjoying the outcome or result of this business\'s work — candid and natural, not posed.',
+        'A second distinct service or offering this business provides, depicted authentically in context.',
+        'A lifestyle / context shot that captures the feeling and value of choosing this business — calm, trustworthy, aspirational.',
+    ];
+    $model    = trim((string) envOr('GEMINI_LOGO_MODEL', 'nano-banana-pro-preview'));      // higher-fidelity model
+    $fallback = trim((string) envOr('GEMINI_IMAGE_MODEL', 'gemini-3.1-flash-image'));
+    $urls = array_slice($uploaded, 0, $photoCount);
+    $toGenerate = max(0, $photoCount - count($urls));
+    for ($i = 0; $i < $toGenerate; $i++) {
+        $base   = 'support-' . ($i + 1);
+        $prompt = 'Create a warm, authentic, editorial photograph for the website of "' . $name . '". The business: ' . $desc . '. '
+            . $concepts[$i] . $common;
+        $u = geminiImageToFile($prompt, $slug, $base, $model);
+        if ($u === '') { $u = geminiImageToFile($prompt, $slug, $base, $fallback); }
+        if ($u !== '') { $urls[] = $u; }
+    }
+    if (!empty($urls) && !$isCli) {
+        echo ' [' . count($urls) . ' support image' . (count($urls) === 1 ? '' : 's') . " of $photoCount"
+            . (count($uploaded) ? ', ' . min(count($uploaded), $photoCount) . ' uploaded' : '') . '] ';
+        flush();
+    }
+    return $urls;
+}
+
 /** Premium icon-only logo mark (no text — letters in raster logos misrender). */
 function generateLogoMark($lead, $slug, $isCli) {
+    // Customer uploaded their own logo? Use it as-is.
+    $uploaded = trim((string) ($lead['logo_url'] ?? ''));
+    if ($uploaded !== '' && preg_match('~^https://izendestudioweb\.com/genmedia/uploads/[\w-]+\.(?:png|jpe?g|webp|gif)$~i', $uploaded)) {
+        if (!$isCli) { echo " [using uploaded logo] "; flush(); }
+        return $uploaded;
+    }
     $desc = trim((string) ($lead['business_description'] ?? ''));
     $vibe = trim((string) ($lead['style_vibe'] ?? ''));
     $prompt = 'Design a polished, PREMIUM logo ICON (emblem/symbol only) for "'
@@ -488,7 +669,7 @@ function slugForLead($lead) {
  * the customer's real provisioned site never carries it.
  */
 /**
- * Wire any booking form (#izBookingForm) the AI built to the tenant booking
+ * Wire any booking form (#izBookingForm) in the generated draft to the tenant booking
  * endpoint. Baked into generated_html so it persists onto the live static/WP
  * site. No-op if the site has no booking form. The per-site token is public by
  * design (the endpoint is honeypot + rate-limit + enable-gated).
@@ -521,13 +702,99 @@ JS;
     return $html . $js;
 }
 
-function injectClaimBar($html, $slug = '') {
+/**
+ * Belt-and-suspenders: GLM sometimes adds a heavy full-screen film-grain overlay (an SVG
+ * feTurbulence/fractalNoise texture used as a CSS background) that makes the whole page look
+ * grainy and hurts legibility over photos and text. Neutralize any such noise data-URI
+ * background so it can never ship, regardless of what the model generated. Quoted data URIs
+ * only (GLM always quotes them; matching to the quote is safe because the encoded SVG itself
+ * contains literal ")" characters that would break a naive [^)] match).
+ */
+function stripGrainOverlay($html) {
+    if ($html === '' || stripos($html, 'feTurbulence') === false) { return $html; }
+    $html = preg_replace('~url\(\s*"data:image/svg\+xml,[^"]*(?:feTurbulence|fractalNoise)[^"]*"\s*\)~i', 'none', $html);
+    $html = preg_replace("~url\(\s*'data:image/svg\\+xml,[^']*(?:feTurbulence|fractalNoise)[^']*'\s*\)~i", 'none', $html);
+    return $html;
+}
+
+function injectMap($html, $lead) {
+    $placeholder = '<!--IZ_MAP-->';
+    $key = trim((string) envOr('GOOGLE_MAPS_EMBED_KEY', ''));
+    $address = trim((string) ($lead['business_address'] ?? ''));
+    if ($key === '' || $address === '') {
+        return str_replace($placeholder, '', $html);
+    }
+
+    $src = 'https://www.google.com/maps/embed/v1/place?key=' . rawurlencode($key) . '&q=' . rawurlencode($address);
+    $map = '<div class="iz-map-embed" style="position:relative;aspect-ratio:16/7;max-width:100%;overflow:hidden;border-radius:16px;background:#e2e8f0">'
+        . '<iframe src="' . htmlspecialchars($src, ENT_QUOTES) . '" loading="lazy" title="Map" referrerpolicy="no-referrer-when-downgrade" '
+        . 'style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>';
+    return str_replace($placeholder, $map, $html);
+}
+
+function injectSocial($html, $lead) {
+    $placeholder = '<!--IZ_SOCIAL-->';
+    $decoded = [];
+    if (!empty($lead['social_links'])) {
+        $j = json_decode((string) $lead['social_links'], true);
+        if (is_array($j)) { $decoded = $j; }
+    }
+    $icons = [
+        'facebook' => ['Facebook', '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3.5l.5-4h-4V7a1 1 0 0 1 1-1h3z"/>'],
+        'instagram' => ['Instagram', '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/>'],
+        'x' => ['X', '<path d="M4 4l16 16M20 4L4 20"/>'],
+        'linkedin' => ['LinkedIn', '<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>'],
+        'tiktok' => ['TikTok', '<path d="M14 3v11.5a4.5 4.5 0 1 1-4.5-4.5"/><path d="M14 3a6 6 0 0 0 6 6"/>'],
+        'youtube' => ['YouTube', '<path d="M22 12s0-4-1-5c-1-1-9-1-9-1s-8 0-9 1c-1 1-1 5-1 5s0 4 1 5c1 1 9 1 9 1s8 0 9-1c1-1 1-5 1-5z"/><path d="M10 9l5 3-5 3z"/>'],
+        'google' => ['Google Business', '<path d="M21 11.5h-8v3h4.6a5.5 5.5 0 1 1-1.4-5.5l2.2-2.2A8.5 8.5 0 1 0 21 13z"/>'],
+    ];
+    $links = '';
+    foreach ($icons as $key => $meta) {
+        $url = trim((string)($decoded[$key] ?? ''));
+        if ($url === '' || !filter_var($url, FILTER_VALIDATE_URL)) { continue; }
+        $parts = parse_url($url);
+        if (!is_array($parts) || strtolower((string)($parts['scheme'] ?? '')) !== 'https') { continue; }
+        $label = htmlspecialchars($meta[0], ENT_QUOTES);
+        $href = htmlspecialchars($url, ENT_QUOTES);
+        $links .= '<a class="iz-social-link" href="' . $href . '" target="_blank" rel="noopener noreferrer" aria-label="' . $label . '" title="' . $label . '">'
+            . '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' . $meta[1] . '</svg></a>';
+    }
+    if ($links === '') { return str_replace($placeholder, '', $html); }
+    $social = '<span class="iz-social-links">' . $links . '</span>'
+        . '<style>.iz-social-links{display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap;margin-left:12px;vertical-align:middle}'
+        . '.iz-social-link{width:34px;height:34px;border-radius:999px;display:inline-grid;place-items:center;color:var(--c-accent,#2563eb);border:1px solid currentColor;text-decoration:none;transition:transform .18s ease,background .18s ease,color .18s ease}'
+        . '.iz-social-link:hover{transform:translateY(-2px);background:var(--c-accent,#2563eb);color:var(--c-accent-contrast,#fff)}'
+        . '.iz-social-link svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}'
+        . '@media(max-width:620px){.iz-social-links{margin:10px 0 0;display:flex;justify-content:center}}'
+        . '@media(prefers-reduced-motion:reduce){.iz-social-link{transition:none}.iz-social-link:hover{transform:none}}</style>';
+    return str_replace($placeholder, $social, $html);
+}
+
+function injectPreviewRobotsMeta($html) {
+    $meta = '<meta name="robots" content="noindex,nofollow">';
+    if (stripos($html, 'name="robots"') !== false || stripos($html, "name='robots'") !== false) {
+        return $html;
+    }
+    if (preg_match('/<head\b[^>]*>/i', $html, $m, PREG_OFFSET_CAPTURE)) {
+        $pos = $m[0][1] + strlen($m[0][0]);
+        return substr($html, 0, $pos) . "\n  " . $meta . substr($html, $pos);
+    }
+    return $meta . "\n" . $html;
+}
+
+function injectClaimBar($html, $slug = '', $createdAt = '') {
+    $createdTs = $createdAt !== '' ? strtotime((string) $createdAt) : false;
+    if (!$createdTs) { $createdTs = time(); }
+    $expiryMs = (int) (($createdTs + 7 * 86400) * 1000);
     $bar = '<div id="izende-claim-bar" style="position:fixed;top:0;left:0;right:0;z-index:2147483647;'
         . 'background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:space-between;'
         . 'gap:10px;flex-wrap:wrap;padding:9px 16px;font-family:system-ui,-apple-system,\'Segoe UI\',sans-serif;'
         . 'font-size:14px;line-height:1.3;box-shadow:0 2px 14px rgba(0,0,0,.28)">'
         . '<span style="display:flex;align-items:center;gap:8px">✨ <strong>Built for you by Izende Studio Web</strong>'
         . '<span style="opacity:.8"> — love it? Make it yours.</span></span>'
+        . '<span id="izende-preview-status" style="margin-left:auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;opacity:.92;font-weight:700;white-space:nowrap">'
+        . '<span id="izende-claim-countdown">Reserved for you — 7 days left</span>'
+        . '<span id="izende-draft-count" style="opacity:.86">Checking drafts left…</span></span>'
         . '<a href="https://izendestudioweb.com/claim-site.php?slug=' . rawurlencode($slug) . '" class="izende-claim-btn" '
         . 'style="background:#2563eb;color:#fff;text-decoration:none;font-weight:700;padding:9px 22px;'
         . 'border-radius:999px;white-space:nowrap">Claim this site →</a></div>'
@@ -537,7 +804,12 @@ function injectClaimBar($html, $slug = '') {
         . '.izende-claim-btn:hover{background:#1d4ed8!important;transform:scale(1.04)}'
         . '@keyframes izClaimPulse{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.7),0 0 12px rgba(56,189,248,.5)}'
         . '50%{box-shadow:0 0 0 10px rgba(37,99,235,0),0 0 26px rgba(56,189,248,.95)}}'
-        . '@media(prefers-reduced-motion:reduce){.izende-claim-btn{animation:none}}</style>';
+        . '@media(max-width:680px){#izende-preview-status{margin-left:0;font-size:13px;flex-basis:100%}}'
+        . '@media(prefers-reduced-motion:reduce){.izende-claim-btn{animation:none}}</style>'
+        . '<script>(function(){var el=document.getElementById("izende-claim-countdown");if(!el)return;var exp=' . $expiryMs . ';'
+        . 'function tick(){var left=Math.max(0,exp-Date.now());var days=Math.max(0,Math.ceil(left/86400000));'
+        . 'el.textContent="Reserved for you — "+days+" day"+(days===1?"":"s")+" left";}tick();'
+        . 'var dc=document.getElementById("izende-draft-count");if(dc&&window.fetch){fetch("/api/generation-count.php",{cache:"no-store",credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){if(j&&j.success){var rem=Math.max(0,parseInt(j.remaining,10)||0);var limit=Math.max(1,parseInt(j.limit,10)||3);dc.textContent=rem>0?rem+" of "+limit+" free drafts left — add more detail for better results":"All "+limit+" free drafts used — claim this site to keep editing";}}).catch(function(){dc.textContent="Draft count available after preview";});}})();</script>';
     if (stripos($html, '</body>') !== false) {
         return preg_replace('/<\/body>/i', $bar . '</body>', $html, 1);
     }
@@ -546,9 +818,9 @@ function injectClaimBar($html, $slug = '') {
 
 /**
  * Stage 4 editor (presets) — a "Customize" widget injected into the PREVIEW only.
- * Instantly re-themes the live page by overriding the CSS-variable contract on
- * :root (accent colour + font pairing). Zero AI, zero backend, free + instant —
- * the "make it yours" hook. Choices persist in localStorage per slug.
+ * Re-themes the visible page instantly, then saves the selected CSS-variable
+ * preset back to generated_html so a later claim/provision uses the same look.
+ * Browser localStorage keeps the preview responsive while the server save finishes.
  */
 function injectEditorWidget($html, $slug, $leadId = '') {
     $token = ($leadId !== '') ? substr(hash_hmac('sha256', 'site:' . $leadId, (string) envOr('SITE_BOOKING_SECRET', '')), 0, 40) : '';
@@ -556,9 +828,13 @@ function injectEditorWidget($html, $slug, $leadId = '') {
 <style>#izEditPanel{font-size:14px;line-height:1.45;color:#1e293b}
 #izEditPanel .iz-h{font-weight:700;color:#0f172a;margin-bottom:6px}
 #izEditPanel .iz-sub{color:#475569}
+#izEditPanel #izAsk{background:#fff !important;color:#0f172a !important;-webkit-text-fill-color:#0f172a !important;caret-color:#0f172a;border:1px solid #cbd5e1 !important;opacity:1 !important;filter:none !important}
+#izEditPanel #izAsk::placeholder{color:#94a3b8 !important;-webkit-text-fill-color:#94a3b8 !important;opacity:1}
 .izspin{display:inline-block;width:14px;height:14px;border:2px solid #c7d2fe;border-top-color:#2563eb;border-radius:50%;animation:izspin .7s linear infinite;vertical-align:-2px;margin-right:7px}
+.izwaitbar{height:7px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin:9px 0 7px}
+.izwaitbar span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#2563eb,#38bdf8);transition:width 1s linear}
 @keyframes izspin{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){.izspin{animation:none}}</style>
+@media(prefers-reduced-motion:reduce){.izspin{animation:none}.izwaitbar span{transition:none}}</style>
 <div id="izEdit" style="position:fixed;right:16px;bottom:16px;z-index:2147483646;font-family:system-ui,-apple-system,'Segoe UI',sans-serif">
 <button id="izEditBtn" aria-label="Customize this site" style="display:flex;align-items:center;gap:7px;background:#0f172a;color:#fff;border:0;border-radius:999px;padding:11px 18px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.28)">🎨 Customize</button>
 <div id="izEditPanel" style="display:none;position:absolute;right:0;bottom:54px;width:290px;max-height:80vh;overflow:auto;background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.25);padding:18px">
@@ -570,10 +846,10 @@ function injectEditorWidget($html, $slug, $leadId = '') {
 <div id="izFonts" style="display:flex;flex-direction:column;gap:7px;margin:6px 0 16px"></div>
 <button id="izReset" style="width:100%;background:#f1f5f9;border:0;border-radius:8px;padding:10px;font-weight:600;font-size:14px;color:#334155;cursor:pointer;margin-bottom:16px">Reset look</button>
 <div id="izAskWrap" style="border-top:1px solid #e2e8f0;padding-top:14px">
-<div class="iz-h">Ask AI to change anything</div>
+	<div class="iz-h">Ask Site Drafter to change anything</div>
 <div class="iz-sub" style="margin-bottom:9px">e.g. "shorten the hero", "use a warmer tone", "add an FAQ"</div>
 <textarea id="izAsk" rows="4" placeholder="Describe a change…" style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:8px;padding:10px;font-family:inherit;font-size:14px;line-height:1.45;color:#0f172a;min-height:88px;resize:vertical"></textarea>
-<button id="izSend" style="width:100%;background:#2563eb;color:#fff;border:0;border-radius:8px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;margin-top:9px">Send to AI</button>
+	<button id="izSend" style="width:100%;background:#2563eb;color:#fff;border:0;border-radius:8px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;margin-top:9px">Send to Site Drafter</button>
 <div id="izMsg" style="margin-top:12px;font-size:13.5px;line-height:1.5;color:#334155"></div>
 </div>
 <div style="text-align:center;margin-top:14px;color:#475569;font-size:12.5px">Like it? <strong>Claim your site</strong> to keep editing.</div>
@@ -588,19 +864,32 @@ function applyColor(c){R.style.setProperty('--c-accent',c);R.style.setProperty('
 function applyFont(f){gf(f.h);gf(f.b);R.style.setProperty('--font-heading',"'"+f.h+"',serif");R.style.setProperty('--font-body',"'"+f.b+"',sans-serif");}
 function save(s){try{localStorage.setItem(K,JSON.stringify(s))}catch(e){}}
 function load(){try{return JSON.parse(localStorage.getItem(K)||'{}')}catch(e){return{}}}
+var send=document.getElementById('izSend'),ask=document.getElementById('izAsk'),msg=document.getElementById('izMsg'),lbl='Send to Site Drafter',waitTimer=null,waitEnd=0,themeTimer=null,themeDirty=false,themeResetPending=false;
+function setMsg(t,c){if(!msg)return;msg.style.color=c||'#334155';msg.innerHTML=t;}
+function persistTheme(reset,done){
+ if(!LEAD){if(done)done(true);return;}
+ var ok=false;
+ fetch(EP,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lead_id:LEAD,token:TOKEN,action:'theme',theme:reset?{reset:true}:{color:st.color||'',font:st.font||''}})})
+  .then(function(r){return r.json();})
+  .then(function(j){ok=!!(j&&j.success);if(ok){themeDirty=false;themeResetPending=false;if(send&&!send.disabled)setMsg('✓ Look saved for claim.','#15803d');}else if(send&&!send.disabled){setMsg((j&&j.message)||'Look changed here, but could not save yet.','#b45309');}})
+  .catch(function(){if(send&&!send.disabled)setMsg('Look changed here, but could not save yet.','#b45309');})
+  .finally(function(){if(done)done(ok);});
+}
+function queueTheme(reset){themeDirty=true;themeResetPending=!!reset;clearTimeout(themeTimer);themeTimer=setTimeout(function(){persistTheme(themeResetPending);},350);}
 var st=load();if(st.color)applyColor(st.color);if(st.font){var ff=FONTS.filter(function(x){return x.n==st.font})[0];if(ff)applyFont(ff);}
-var cw=document.getElementById('izColors');COLORS.forEach(function(c){var b=document.createElement('button');b.style.cssText='width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #cbd5e1;cursor:pointer;background:'+c;b.onclick=function(){applyColor(c);st.color=c;save(st);};cw.appendChild(b);});
-var fw=document.getElementById('izFonts');FONTS.forEach(function(f){var b=document.createElement('button');b.textContent=f.n;b.style.cssText='text-align:left;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:9px 11px;cursor:pointer;font-weight:600;font-size:14px;color:#334155';b.onclick=function(){applyFont(f);st.font=f.n;save(st);};fw.appendChild(b);});
+var cw=document.getElementById('izColors');COLORS.forEach(function(c){var b=document.createElement('button');b.style.cssText='width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #cbd5e1;cursor:pointer;background:'+c;b.onclick=function(){applyColor(c);st.color=c;save(st);queueTheme(false);};cw.appendChild(b);});
+var fw=document.getElementById('izFonts');FONTS.forEach(function(f){var b=document.createElement('button');b.textContent=f.n;b.style.cssText='text-align:left;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:9px 11px;cursor:pointer;font-weight:600;font-size:14px;color:#334155';b.onclick=function(){applyFont(f);st.font=f.n;save(st);queueTheme(false);};fw.appendChild(b);});
 document.getElementById('izEditBtn').onclick=function(){var p=document.getElementById('izEditPanel');p.style.display=p.style.display=='none'?'block':'none';};
-document.getElementById('izReset').onclick=function(){['--c-accent','--c-accent-2','--c-accent-contrast','--font-heading','--font-body'].forEach(function(v){R.style.removeProperty(v)});try{localStorage.removeItem(K)}catch(e){}st={};};
-var send=document.getElementById('izSend'),ask=document.getElementById('izAsk'),msg=document.getElementById('izMsg'),lbl='Send to AI';
+document.getElementById('izReset').onclick=function(){['--c-accent','--c-accent-2','--c-accent-contrast','--font-heading','--font-body'].forEach(function(v){R.style.removeProperty(v)});try{localStorage.removeItem(K)}catch(e){}st={};queueTheme(true);};
+Array.prototype.forEach.call(document.querySelectorAll('.izende-claim-btn'),function(a){a.addEventListener('click',function(e){if(!LEAD||!themeDirty)return;e.preventDefault();var href=a.href;clearTimeout(themeTimer);setMsg('<span class="izspin"></span>Saving your look before claim…','#334155');persistTheme(themeResetPending,function(ok){if(ok){location.href=href;}else{setMsg('Could not save your look yet. Try Claim again in a moment.','#b91c1c');}});});});
 if(!LEAD){document.getElementById('izAskWrap').style.display='none';}
-function setMsg(t,c){msg.style.color=c||'#334155';msg.innerHTML=t;}
-function reset(){send.disabled=false;send.textContent=lbl;}
+function stopWait(){if(waitTimer){clearInterval(waitTimer);waitTimer=null;}}
+function reset(){stopWait();send.disabled=false;send.textContent=lbl;}
+function startWait(freeLeft){stopWait();waitEnd=Date.now()+120000;function draw(){var left=Math.max(0,Math.ceil((waitEnd-Date.now())/1000));var pct=Math.max(0,Math.min(100,(left/120)*100));var mm=Math.floor(left/60),ss=String(left%60).padStart(2,'0');var label=left>0?('Estimated update in <strong style="color:#2563eb">'+mm+':'+ss+'</strong>'):('<strong style="color:#2563eb">Finalizing your change…</strong>');setMsg('<span class="izspin"></span>'+label+(freeLeft!=null?' <span style="color:#64748b">('+freeLeft+' free left)</span>':'')+'<div class="izwaitbar" aria-hidden="true"><span style="width:'+pct+'%"></span></div><div style="color:#64748b">Keep this panel open — we will refresh the preview when it is done.</div>','#334155');}draw();waitTimer=setInterval(draw,1000);}
 function poll(eid,tries){
  if(tries<=0){setMsg('Still working — refresh the page in a moment to see your change.','#475569');reset();return;}
  fetch(EP+'?eid='+encodeURIComponent(eid)+'&lead_id='+encodeURIComponent(LEAD)+'&token='+encodeURIComponent(TOKEN)).then(function(r){return r.json();}).then(function(s){
-  if(s&&s.status==='applied'){setMsg('✓ Done! Refreshing your preview…','#15803d');setTimeout(function(){location.reload();},900);}
+  if(s&&s.status==='applied'){stopWait();setMsg('✓ Done! Refreshing your preview…','#15803d');setTimeout(function(){location.reload();},900);}
   else if(s&&s.status==='failed'){setMsg('That one didn’t take — try rewording the change.','#b91c1c');reset();}
   else{setTimeout(function(){poll(eid,tries-1);},7000);}
  }).catch(function(){setTimeout(function(){poll(eid,tries-1);},7000);});
@@ -608,7 +897,7 @@ function poll(eid,tries){
 send&&(send.onclick=function(){var q=(ask.value||'').trim();if(q.length<3){setMsg('Tell us the change in a sentence.','#b91c1c');return;}
 send.disabled=true;send.textContent='Sending…';setMsg('<span class="izspin"></span>Sending your request…','#334155');
 fetch(EP,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lead_id:LEAD,token:TOKEN,request_text:q})}).then(function(r){return r.json();}).then(function(j){
-if(j.success&&j.edit_id){ask.value='';setMsg('<span class="izspin"></span>Applying your change… this takes about a minute.'+(j.free_left!=null?' <span style="color:#64748b">('+j.free_left+' free left)</span>':''),'#334155');poll(j.edit_id,24);}
+if(j.success&&j.edit_id){ask.value='';startWait(j.free_left);poll(j.edit_id,24);}
 else if(j.success){ask.value='';setMsg('✓ Queued — refresh in about a minute.','#15803d');reset();}
 else if(j.gated){setMsg((j.message||'')+' <a href="'+(j.claim_url||'#')+'" style="color:#2563eb;font-weight:700">Claim now &rarr;</a>','#1d4ed8');reset();}
 else{setMsg(j.message||'Could not queue that.','#b91c1c');reset();}
@@ -622,7 +911,7 @@ JS;
     return $html . $js;
 }
 
-function writePreview($slug, $html, $leadId = '') {
+function writePreview($slug, $html, $leadId = '', $createdAt = '') {
     global $deployRoot, $baseUrl;
     if (!preg_match('/^[a-z0-9][a-z0-9-]{1,70}$/', $slug)) {
         return [null, 'invalid slug'];
@@ -631,8 +920,9 @@ function writePreview($slug, $html, $leadId = '') {
     if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
         return [null, 'mkdir failed: ' . $dir];
     }
-    $fileHtml = injectClaimBar($html, $slug);                    // preview gets the claim bar; stored generated_html stays clean
-    $fileHtml = injectEditorWidget($fileHtml, $slug, $leadId);   // + the "Customize" widget (presets + AI chat), preview only
+    $fileHtml = injectPreviewRobotsMeta($html);                  // preview only; stored generated_html stays indexable
+    $fileHtml = injectClaimBar($fileHtml, $slug, $createdAt);    // preview gets the claim bar; stored generated_html stays clean
+    $fileHtml = injectEditorWidget($fileHtml, $slug, $leadId);   // + the "Customize" widget (presets + text change requests), preview only
     $tmp = $dir . '/.index.' . bin2hex(random_bytes(4)) . '.tmp';
     if (@file_put_contents($tmp, $fileHtml, LOCK_EX) === false || !@rename($tmp, $dir . '/index.html')) {
         @unlink($tmp);
@@ -667,7 +957,7 @@ function sendPreviewEmail($lead, $previewUrl) {
 </body></html>
 HTML;
 
-    $text = "Your AI-built website preview for {$lead['business_name']} is ready!\n\n"
+    $text = "Your website draft for {$lead['business_name']} is ready!\n\n"
         . "View it here: $previewUrl\n\n"
         . "Like what you see? Reply to this email or call (314) 312-6441 and Izende Studio Web will put it live on your own domain with managed hosting.\n\n"
         . "— Izende Studio Web\n";
@@ -694,7 +984,7 @@ HTML;
 
 function expireOldPreviews($isCli) {
     global $deployRoot;
-    $maxAge = 14 * 86400;
+    $maxAge = 7 * 86400;
     $now = time();
     foreach (@scandir($deployRoot) ?: [] as $entry) {
         if ($entry === '.' || $entry === '..') { continue; }
@@ -729,6 +1019,10 @@ function expireOldPreviews($isCli) {
 // ---- Main --------------------------------------------------------------------
 if (!defined('IZ_GEN_LIB')) {
 expireOldPreviews($isCli);
+// Recover stale locks: a run that died mid-generation leaves the lead stuck in 'generating'.
+// Anything still 'generating' after 20 min is presumed dead — return it to the pending queue.
+$staleCutoff = gmdate('c', time() - 1200);
+supabaseRequest('PATCH', '/rest/v1/site_builder_leads?status=eq.generating&updated_at=lt.' . rawurlencode($staleCutoff), ['status' => 'pending']);
 list($code, $leads) = supabaseRequest('GET', '/rest/v1/site_builder_leads?select=*&status=eq.pending&order=created_at.asc&limit=3');
 if ($code !== 200 || !is_array($leads)) {
     cronLog('Poll failed', ['http' => $code]);
@@ -742,14 +1036,24 @@ if (count($leads) === 0) {
 
 foreach ($leads as $lead) {
     $id = $lead['id'];
+    // Atomic claim: flip pending -> generating ONLY if it's still pending. With Prefer:
+    // return=representation, a matched row comes back; an empty array means another cron run
+    // (this generation can exceed the 5-min cron interval) already claimed it — skip to avoid
+    // duplicate image generation, races, and one run clobbering the other's result.
+    list($claimCode, $claimed) = supabaseRequest('PATCH', '/rest/v1/site_builder_leads?id=eq.' . rawurlencode($id) . '&status=eq.pending', ['status' => 'generating', 'updated_at' => gmdate('c')]);
+    if ($claimCode !== 200 || !is_array($claimed) || count($claimed) === 0) {
+        cronLog('Skip — lead already claimed by another run', ['id' => $id, 'http' => $claimCode]);
+        continue;
+    }
     cronLog('Processing lead', ['id' => $id, 'business' => $lead['business_name']]);
     if (!$isCli) { echo "\nlead $id ({$lead['business_name']}) generating"; flush(); }
 
     $slug = slugForLead($lead);
     $heroUrl = generateHeroImage($lead, $slug, $isCli); // best-effort; '' falls back to CSS/SVG
     $logoUrl = generateLogoMark($lead, $slug, $isCli);  // best-effort; '' falls back to SVG monogram
+    $supportUrls = generateSupportImages($lead, $slug, $isCli); // best-effort real content photos; missing spots fall back to CSS/SVG
 
-    list($html, $err) = generateWithGlm($lead, $isCli, $heroUrl, $logoUrl);
+    list($html, $err) = generateWithGlm($lead, $isCli, $heroUrl, $logoUrl, $supportUrls);
     if ($html === null) {
         cronLog('Generation FAILED', ['id' => $id, 'err' => $err]);
         supabaseRequest('PATCH', '/rest/v1/site_builder_leads?id=eq.' . $id, ['status' => 'failed']);
@@ -757,9 +1061,12 @@ foreach ($leads as $lead) {
         continue;
     }
 
+    $html = stripGrainOverlay($html); // kill any heavy full-screen film-grain/noise overlay GLM may add
+    $html = injectMap($html, $lead); // replace the placeholder server-side so the Maps key never goes to GLM
+    $html = injectSocial($html, $lead); // replace the footer social placeholder with correct linked icons
     $html = injectBookingScript($html, $id); // wire any booking form to the endpoint (persisted into generated_html)
 
-    list($previewUrl, $werr) = writePreview($slug, $html, $id);
+    list($previewUrl, $werr) = writePreview($slug, $html, $id, $lead['created_at'] ?? '');
     if ($previewUrl === null) {
         cronLog('Write FAILED', ['id' => $id, 'err' => $werr]);
         supabaseRequest('PATCH', '/rest/v1/site_builder_leads?id=eq.' . $id, ['status' => 'failed']);
@@ -771,10 +1078,20 @@ foreach ($leads as $lead) {
         'status' => 'preview_live',
         'preview_url' => $previewUrl,
         'preview_slug' => $slug,
+    ]);
+    if ($ucode < 200 || $ucode >= 300) {
+        cronLog('Status PATCH failed after preview write', ['id' => $id, 'url' => $previewUrl, 'patch_http' => $ucode]);
+        if (!$isCli) { echo "\nSTATUS PATCH FAILED: $ucode (preview exists at $previewUrl)\n"; }
+        continue;
+    }
+    list($hcode) = supabaseRequest('PATCH', '/rest/v1/site_builder_leads?id=eq.' . $id, [
         'generated_html' => $html,
     ]);
+    if ($hcode < 200 || $hcode >= 300) {
+        cronLog('generated_html PATCH failed', ['id' => $id, 'patch_http' => $hcode, 'bytes' => strlen($html)]);
+    }
     $emailed = sendPreviewEmail($lead, $previewUrl);
-    cronLog('Lead complete', ['id' => $id, 'url' => $previewUrl, 'bytes' => strlen($html), 'patch_http' => $ucode, 'emailed' => $emailed]);
+    cronLog('Lead complete', ['id' => $id, 'url' => $previewUrl, 'bytes' => strlen($html), 'patch_http' => $ucode, 'html_patch_http' => $hcode, 'emailed' => $emailed]);
     if (!$isCli) { echo "\nDONE: $previewUrl (emailed: " . ($emailed ? 'yes' : 'NO') . ")\n"; flush(); }
 }
 

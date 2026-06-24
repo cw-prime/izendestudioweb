@@ -54,27 +54,27 @@ setSecurityHeaders();
             <p>Fast, secure, and reliable hosting with 99.9% uptime guarantee. Powered by enterprise-grade infrastructure.</p>
             <div class="hero-actions">
               <a href="#pricing" class="btn btn-brand">View Hosting Plans</a>
-              <a href="ai-website-builder.php" class="btn btn-outline-light"><i class="bi bi-magic"></i> Build a Site with AI</a>
+              <a href="website-drafter" class="btn btn-outline-light"><i class="bi bi-magic"></i> Try Website Drafter</a>
             </div>
           </div>
         </div>
       </div>
     </section><!-- End Hero Section -->
 
-    <!-- ======= AI Builder CTA Banner ======= -->
+    <!-- ======= Website Drafter CTA Banner ======= -->
     <section class="ai-builder-cta section-bg" data-aos="fade-up" style="padding: 40px 0;">
       <div class="container">
         <div class="row align-items-center">
           <div class="col-lg-8">
-            <h3 class="mb-1">No website yet? Let our AI build one — free preview in 2 minutes.</h3>
+            <h3 class="mb-1">No website yet? Start with a free website draft in 2 minutes.</h3>
             <p class="mb-0">Describe your business and we'll generate a live preview, then host it for you. No page builders, no Wix.</p>
           </div>
           <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-            <a href="ai-website-builder.php" class="btn btn-brand btn-lg"><i class="bi bi-magic"></i> Build My Free Preview</a>
+            <a href="website-drafter" class="btn btn-brand btn-lg"><i class="bi bi-magic"></i> Start My Free Draft</a>
           </div>
         </div>
       </div>
-    </section><!-- End AI Builder CTA Banner -->
+    </section><!-- End Website Drafter CTA Banner -->
 
     <!-- ======= Trust Badges Section ======= -->
     <section class="trust-badges section-bg" style="padding: 60px 0;">

@@ -1,20 +1,28 @@
 # Next Actions (Execution Queue)
-Last updated: 2026-06-14 (AI Website Builder funnel)
+Last updated: 2026-06-22 (Website Drafter funnel)
 
 ## AI Website Builder Funnel — Active Queue (2026-06-14)
 
 ### Owner-gated (cannot complete without owner action)
+- **Free-first-year-domain offer — DONE + verified 2026-06-16.** WHMCS Free Domain on 14/15/16 set to "registration/transfer only (renew as normal)", eligible terms incl. Monthly, TLD .com. Fixed a junk .com price ($177.98/yr) -> register+renew $24.99/yr (2yr 49.98, 3yr 74.97). Live cart confirmed: Website Draft - Get Online + new .com = $0.00 first year, Renewal ~$24.99/yr. Existing-domain path unaffected.
 - **[OWNER] Run one live paid order through WHMCS/PayPal — STATIC (pid14)** to prove the money loop end-to-end (account create → hook → site deploy + mailbox → converted). `todo` — still the only true end-to-end proof.
 - **[OWNER] Run one live paid order — WORDPRESS (pid15)** to prove auto WP install+seed + mailbox on a real domain. `todo`
-- **[OWNER] Enable glm-5.2 access in z.ai**, then A/B vs glm-5. `todo`
+- **glm-5.2 — REVERTED 2026-06-24 (broke generation).** `blocked`. glm-5.2 was set as the default (commit fe9fc18) but it exhausts the 20k max_tokens on reasoning and returns EMPTY/TRUNCATED HTML — every draft failed (real "Summit Roofing" lead failed 4x). Reverted `GLM_MODEL` default back to **glm-5** in all 3 call sites (commits 17687f8 + dee2685); service restored + verified. The earlier "valid" check only confirmed the model ID (HTTP 200), not a full generation. TO RE-ENABLE: raise `max_tokens` well above 20k AND verify a full end-to-end generation, THEN set `GLM_MODEL=glm-5.2`. Do NOT flip blind. `GLM_MODEL` env still overrides the default. Watch z.ai balance during heavy testing.
 - **[OWNER/SECURITY] Rotate ALL chat-exposed keys** (Anthropic/GLM/Gemini/Supabase/**FTP ai-agent@**/WHM/SITE_BOOKING_SECRET). `todo` — FTP password was recovered from a prior transcript this session; rotate.
+
+### P1 — Conversion copy / positioning
+- **Reposition funnel to "Website Drafter" (reduce AI fatigue).** `done` 2026-06-20. Public page/URL is now `website-drafter.php` / `/website-drafter`; legacy `/ai-website-builder` and `/ai-website-builder.php` 301 to it. Tool/nav/breadcrumb = **"Website Drafter"**; output noun stays **"a website draft"**. Internal API/form IDs/endpoints and `gtag('ai_builder_*')` names are intentionally preserved.
+- **[NEW] Website Drafter Landing Page Conversion Tweaks.** `todo` — Apply future conversion tweaks to `website-drafter.php`: push the CTA higher (above fold on mobile), add the text "Free Preview • No Credit Card Required" as a green badge above the H1, and add a small secondary trust note under the "Get My Free Draft" submit button ("No credit card required. Free, fast preview.").
+- **[NEW] Execute Approved Video Reels.** `todo` — Owner approved all 3 reel concepts from `reel_concepts_2026-W24.md`. Generate prompts via Higgsfield and distribute them staggered across platforms (YouTube Shorts, Facebook Reels, LinkedIn).
+- **Social links + customer photo uploads — DONE + VERIFIED 2026-06-24.** Shipped both: Step-2 intake for 7 social platforms (FB/IG/X/LinkedIn/TikTok/YouTube/Google Business) → `social_links` JSON → server-injected footer icons via `injectSocial()`/`<!--IZ_SOCIAL-->`; new `api/upload-photo.php` (CSRF + rate-limit + MIME + 10MB + ≥1000px gate) + Step-2 multi-file picker (cap 7) → `uploaded_photos` JSON → `generateSupportImages()` uses uploads first toward the 2–7 target, generates only the remainder (cost saving); hero always generated. Supabase columns added. Verified end-to-end on glm-5 (Greenline test: 3 uploads + 2 generated = target 5, footer icons rendered, hero generated). Commit dee2685, deployed + live. Plan doc: `plans/social-links-photo-uploads-2026-06-22.md`.
 
 ### P2 — Hardening / polish
 - **Resync / fix local working clone:** `git reset --hard origin/main` is blocked by Permission-denied unlinking FTP-written `previews/` files (owned by another uid). Needs sudo/chown or a fresh clone. Cosmetic — remote+prod authoritative. `todo`
 - Version-control the `previews/samples/*` HTML (currently prod-only, like all samples). `todo`
+- **Post-claim multi-page expansion path.** `todo` — Keep the free Website Drafter preview single-page for speed/conversion, but plan a paid-site expansion step after claim: split the approved draft into real Home / Services / About / Contact / FAQ or Offers pages. For static tier this means writing multiple files and updating nav links; for WordPress tiers this means creating actual WP pages from the draft instead of only the canvas-style single page. Do not change the first-preview generator until the paid-order loop is proven.
 - Async WP provisioning queue — only if synchronous Softaculous install in the hook causes delays (low risk now). `todo`
 - Localize hero/logo images into the provisioned account (currently referenced from izende.com /genmedia). `todo`
-- Persist editor PRESET colour/font choices to the lead so they carry to the provisioned site (currently localStorage-only; AI content edits already carry). `todo`
+- Persist editor PRESET colour/font choices to the lead so they carry to the provisioned site. `done` 2026-06-20 — `api/site-builder-edit.php` now supports `action=theme`, updates the lead's `generated_html`, re-renders the preview, and the preview Customize widget saves pending theme changes before the claim link navigates away. AI/text content edits already carried over through the edit queue.
 - Optional: Gemini logo as transparent PNG (currently white-bg in a rounded tile — works). `todo`
 
 ### Done (funnel) — see HANDOFF_LOG.md for evidence
@@ -27,6 +35,7 @@ Last updated: 2026-06-14 (AI Website Builder funnel)
 - **Business name** legal-suffix strip (client+server+generator); **client emails** → office line (314) 312-6441; checkout font fix.
 - **Professional & Corporate showcase sample** added (all 5 vibes covered).
 - **Funnel checked into git** for the first time — PR #1 + PR #2 merged to `main` (`34d8cc7`).
+- **Generation/customize waiting UX + carryover fixes** — 2:00 countdowns on page generation and Customize edits; builder form no longer shows draft-count/detail coaching UI; completed preview claim bar shows remaining free drafts plus "add more detail for better results"; hidden honeypot no longer renders visibly; Customize colour/font presets persist into `generated_html` before claim.
 
 ---
 

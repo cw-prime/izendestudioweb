@@ -36,11 +36,13 @@ $_footerNonceAttr = $_footerNonce !== '' ? ' nonce="' . htmlspecialchars($_foote
 
       <h3>Follow Us</h3>
       <p>Connect with us on social media!</p>
-      <div class="social-links">
+      <!-- Social links + BBB Accredited Business seal on one centered row -->
+      <div class="social-links" style="flex-wrap:wrap; align-items:center;">
         <a href="https://twitter.com/IzendeWeb" target="_blank" class="twitter"><i class="bx bxl-twitter"></i></a>
         <a href="https://www.facebook.com/Izende-Studio-Web-109880234906868" target="_blank" class="facebook"><i class="bx bxl-facebook"></i></a>
         <!-- <a href="#" class="instagram"><i class="bx bxl-instagram"></i></a> -->
         <a href="https://www.linkedin.com/company/izende-studio-web" target="_blank" class="linkedin"><i class="bx bxl-linkedin"></i></a>
+        <iframe title="Izende Studio Web BBB Accredited Business" border="0" frameborder="0" style="border:0; height:52px; width:250px;" src="https://seal-stlouis.bbb.org/frame/blue-seal-250-52-whitetxt-bbb-1000053774.png?chk=798241D411"></iframe>
       </div>
 
       <!-- Service Area Information -->

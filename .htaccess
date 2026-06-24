@@ -27,6 +27,9 @@ Options -Indexes +FollowSymLinks
     # -------------------------------------------------------------------------
     # Redirect explicit .php requests to extensionless URLs (public site only)
     # -------------------------------------------------------------------------
+    RewriteRule ^ai-website-builder/?$ /website-drafter [R=301,L]
+    RewriteRule ^ai-website-builder\.php$ /website-drafter [R=301,L]
+
     RewriteCond %{THE_REQUEST} \s/+index\.php[\s?] [NC]
     RewriteRule ^index\.php$ / [R=301,L]
 

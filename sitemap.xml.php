@@ -47,6 +47,7 @@ $staticPages = [
     '/' => ['file' => __DIR__ . '/index.php', 'changefreq' => 'weekly', 'priority' => '1.0'],
     '/services/' => ['file' => __DIR__ . '/services/index.php', 'changefreq' => 'monthly', 'priority' => '0.9'],
     '/blog' => ['file' => __DIR__ . '/blog.php', 'changefreq' => 'weekly', 'priority' => '0.8'],
+    '/website-drafter' => ['file' => __DIR__ . '/website-drafter.php', 'changefreq' => 'monthly', 'priority' => '0.8'],
     '/book-consultation' => ['file' => __DIR__ . '/book-consultation.php', 'changefreq' => 'monthly', 'priority' => '0.8'],
     '/quote' => ['file' => __DIR__ . '/quote.php', 'changefreq' => 'monthly', 'priority' => '0.8'],
     '/portfolio-details' => ['file' => __DIR__ . '/portfolio-details.php', 'changefreq' => 'monthly', 'priority' => '0.7'],

@@ -17,9 +17,11 @@ class SpamProtection {
         // Store field name in session for validation
         $_SESSION['honeypot_field_' . $formId] = $fieldName;
 
-        // Return hidden field with CSS to make it invisible
+        // Return a honeypot that submits normally but is not visible/focusable for people.
+        // `hidden` is intentional here: simple spam bots still tend to fill every input,
+        // while browsers keep it out of the visible layout even under strict CSP.
         return '
-        <div class="form-field-hp" style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true" tabindex="-1">
+        <div class="form-field-hp" hidden aria-hidden="true">
             <label for="' . $fieldName . '">Website URL (leave blank)</label>
             <input type="text" name="' . $fieldName . '" id="' . $fieldName . '" value="" autocomplete="off" tabindex="-1">
         </div>';
@@ -150,7 +152,18 @@ class SpamProtection {
      * @return array ['is_spam' => bool, 'reason' => string]
      */
     public static function detectSpamPatterns($data) {
-        $content = implode(' ', array_values($data));
+        // Scan ONLY human-entered text. Skip CSRF / reCAPTCHA / timestamp / honeypot
+        // tokens — they're opaque random strings that can contain spam substrings
+        // (e.g. "xxx") by chance and would false-flag legitimate submissions.
+        $skip = ['csrf_token', 'form_timestamp', 'g-recaptcha-response', 'h-captcha-response'];
+        $parts = [];
+        foreach ($data as $k => $v) {
+            if (!is_string($v)) { continue; }                  // arrays (e.g. brand_colors), nested, etc.
+            if (in_array($k, $skip, true)) { continue; }
+            if (strpos((string) $k, 'website_url_') === 0) { continue; } // session-named honeypot
+            $parts[] = $v;
+        }
+        $content = implode(' ', $parts);
 
         // Common spam keywords
         $spamKeywords = [
@@ -161,7 +174,8 @@ class SpamProtection {
         ];
 
         foreach ($spamKeywords as $keyword) {
-            if (stripos($content, $keyword) !== false) {
+            // Whole-word match so "xxx" inside a token or "porn" inside "popcorn" don't false-trigger.
+            if (preg_match('/\b' . preg_quote($keyword, '/') . '\b/i', $content)) {
                 return ['is_spam' => true, 'reason' => 'Spam keyword detected: ' . $keyword];
             }
         }

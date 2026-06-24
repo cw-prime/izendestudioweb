@@ -18,6 +18,7 @@ $staticLinks = [
     ['label' => 'Home', 'href' => $base],
     ['label' => 'Services', 'href' => $base . 'services/'],
     ['label' => 'Blog', 'href' => $base . 'blog'],
+    ['label' => 'Website Drafter', 'href' => $base . 'website-drafter'],
     ['label' => 'Book Appointment', 'href' => $base . 'book-consultation'],
     ['label' => 'Free Quote', 'href' => $base . 'quote'],
     ['label' => 'Portfolio (Case Studies)', 'href' => $base . 'portfolio-details'],
@@ -119,4 +120,3 @@ if (is_dir($servicesDir)) {
   <?php include './assets/includes/footer.php'; ?>
 </body>
 </html>
-
