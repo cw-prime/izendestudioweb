@@ -1,12 +1,12 @@
 <?php
 /**
- * Izende AI Website — post-provision hook.
+ * Izende Site Drafter — post-provision hook.
  *
  * When WHMCS finishes creating the cPanel account, this fires and finishes the
  * site for the customer based on which product they bought:
- *   - pid 14 (AI Website, static):  write the lead's generated_html into
+ *   - pid 14 (Site Drafter, static):  write the lead's generated_html into
  *     public_html/index.html.
- *   - pid 15/16 (AI Website WordPress / Managed): install WordPress via
+ *   - pid 15/16 (Site Drafter WordPress / Managed): install WordPress via
  *     Softaculous and seed it from the same generated_html so the live site
  *     MATCHES the claimed preview 1:1 and is editable in wp-admin
  *     (see scripts/lib/wp-provision.php — proven by the dry-run harness).
@@ -160,7 +160,7 @@ if (!function_exists('zeno_has_booking_addon')) {
 add_hook('AfterModuleCreate', 1, function ($vars) {
     try {
         $pid = (int)($vars['pid'] ?? 0);
-        if (!in_array($pid, [14, 15, 16], true)) { return; } // AI Website products only
+        if (!in_array($pid, [14, 15, 16], true)) { return; } // Site Drafter products only
         $cfg = zeno_env();
         $domain   = (string)($vars['domain'] ?? '');
         $username = (string)($vars['username'] ?? '');

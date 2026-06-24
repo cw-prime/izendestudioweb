@@ -68,3 +68,18 @@ build/
 analytics-dashboard-*.json
 *.pem
 *.key
+
+# --- Website Drafter runtime artifacts (cron + FTP write these; not version-controlled) ---
+/previews/*
+!/previews/.htaccess
+/genmedia/*
+!/genmedia/.htaccess
+!/genmedia/uploads/
+/genmedia/uploads/*
+!/genmedia/uploads/.htaccess
+
+# --- Large media + scratch prototypes (kept on disk, out of git) ---
+/marketing-videos/
+/izende-reels/
+/glc-prototype/
+/retailers_prototype.html
