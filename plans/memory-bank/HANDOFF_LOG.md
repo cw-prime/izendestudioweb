@@ -994,3 +994,21 @@ ROOT-CAUSED BUG (1-line fix) in api/preview-deploy.php:
 - Risks: none yet (no code). When built: keep hero generated; server-inject social icons; enforce upload min-size + whitelist; watch z.ai balance during generation testing.
 - Re-entry packet: N/A (new feature, ARCHITECT-approved plan in `plans/social-links-photo-uploads-2026-06-22.md`).
 - Updated memory files: HANDOFF_LOG.md, NEXT_ACTIONS.md
+
+---
+- Date: 2026-06-24
+- Agent: Claude (Opus 4.8) / DEBUG + CODE
+- Scope worked: (1) P0 OUTAGE fix — reverted glm-5.2. (2) Finished + verified the social-links + photo-uploads feature.
+- Business KPI targeted: Draft generation reliability (P0) + intake personalization / image-gen cost reduction.
+- P0 OUTAGE (glm-5.2): After the earlier switch of the GLM default to glm-5.2, EVERY draft generation failed — glm-5.2 burns the 20k max_tokens on reasoning and returns empty (`len=0`) or truncated HTML. Log showed a real lead ("Summit Roofing") failing 4x plus the Greenline test failing both retry attempts. The earlier "glm-5.2 is valid" check only confirmed the model ID was accepted (HTTP 200), NOT a full generation — that was the gap.
+  - FIX: reverted `GLM_MODEL` default glm-5.2 → glm-5 in all 3 call sites (`scripts/generate-pending-previews.php`, `scripts/apply-pending-edits.php`, `api/analyze-site.php`). Deployed. Regenerated the Greenline test → `preview_live` on glm-5 (service restored). Commit 17687f8 (+ generator default in dee2685).
+  - glm-5.2 re-enable LATER requires: raise max_tokens well above 20k AND verify a full end-to-end generation before flipping `GLM_MODEL=glm-5.2`. Do NOT flip blind.
+- SOCIAL + PHOTO FEATURE (now shipped + verified): Built mostly by a prior/night-shift agent (was uncommitted in the working tree); I reviewed, lint-cleaned, deployed, tested, committed.
+  - Files: `website-drafter.php` (Step-2 social inputs + multi-file photo picker w/ thumbnails+remove, cap 7; payload carries social_links + uploaded_photos), `api/site-builder-leads.php` (validate 7 social URLs https+host, photo whitelist cap 7; store JSON), `api/upload-photo.php` NEW (CSRF + rate-limit 15/600 + MIME + 10MB + >=1000px gate), `scripts/generate-pending-previews.php` (`<!--IZ_SOCIAL-->` footer placeholder + `injectSocial()` inline brand-SVG icons; `generateSupportImages()` uses uploads first toward the 2-7 target, generates only the remainder — cost saving; hero stays generated).
+  - Supabase columns `social_links`, `uploaded_photos` added earlier (migration applied 2026-06-22).
+  - VERIFIED end-to-end on glm-5 (throwaway "Greenline Lawn & Landscape"): 3 uploads + 2 generated = target 5; hero generated (not an upload); footer renders the 3 social icons; `<!--IZ_SOCIAL-->` replaced. Commit dee2685.
+- Tests/lint: `php -l` clean on all touched files; FTPS deploy (226) each; live verification via curl. 
+- Result: SUCCESS. Outage resolved (glm-5 restored); social/photo feature live + verified. All commits pushed to origin/funnel-preview-protections-logo-map (synced).
+- Risks: glm-5.2 must NOT be re-enabled without max_tokens increase + full-gen test. Social icons rely on GLM placing the `<!--IZ_SOCIAL-->` placeholder (same soft-failure mode as IZ_MAP — no icons if omitted).
+- Follow-up: clean up the Greenline throwaway lead + media + the 3 photo-test uploads (next). glm-5.2 tuning is a separate, properly-tested task.
+- Updated memory files: HANDOFF_LOG.md, NEXT_ACTIONS.md
