@@ -78,7 +78,7 @@ if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
 $supabaseUrl = rtrim((string) envOr('SUPABASE_URL', ''), '/');
 $supabaseKey = trim((string) envOr('SUPABASE_SERVICE_ROLE_KEY', ''));
 $glmKey      = trim((string) envOr('GLM_API_KEY', ''));
-$glmModel    = trim((string) envOr('GLM_MODEL', 'glm-5.2')) ?: 'glm-5.2'; // override via GLM_MODEL env (e.g. glm-5 to roll back)
+$glmModel    = trim((string) envOr('GLM_MODEL', 'glm-5')) ?: 'glm-5'; // glm-5.2 returned empty/truncated HTML at 20k tokens (all gens failed) — reverted to glm-5; set GLM_MODEL=glm-5.2 only after raising max_tokens + testing a full generation
 $deployRoot  = rtrim((string) envOr('PREVIEW_DEPLOY_DIR', dirname(__DIR__) . '/previews'), '/');
 $baseUrl     = rtrim((string) envOr('PREVIEW_BASE_URL', 'https://izendestudioweb.com/previews'), '/');
 
@@ -304,6 +304,15 @@ PROMPT;
         } else {
             $user .= "\nLOGO MARK (a custom icon was generated for this business — use THIS EXACT URL as the small logo icon in the header, paired with the business name as a text wordmark beside it; the image is icon-only, do NOT overlay any letters on it). The icon sits on a solid WHITE background, so seat it inside a small rounded-corner tile/badge (about 40-44px, border-radius, object-fit:contain, optional subtle shadow or thin border) so it reads as an intentional logo on any header color: " . $logoUrl . "\n";
         }
+    }
+
+    $socialLinks = [];
+    if (!empty($lead['social_links'])) {
+        $decoded = json_decode((string) $lead['social_links'], true);
+        if (is_array($decoded)) { $socialLinks = array_filter($decoded, 'is_string'); }
+    }
+    if ($socialLinks) {
+        $user .= "\nSOCIAL LINKS: This business provided verified social/profile URLs. In the footer next to the copyright, place the exact placeholder comment <!--IZ_SOCIAL--> on its own line where social icons should appear. Do NOT draw social icons yourself and do NOT write the URLs into the HTML; we inject the correct linked icons server-side.\n";
     }
 
     // Brand colors from the customer's uploaded logo — only steer the palette when they choose automatic style direction.
@@ -563,6 +572,19 @@ function generateSupportImages($lead, $slug, $isCli) {
     foreach ($chunks as $c) { if (strlen(trim((string) $c)) >= 3) { $items++; } }
     $photoCount = (int) max(2, min($supportMax, (int) ceil($items / 2)));
 
+    $uploaded = [];
+    if (!empty($lead['uploaded_photos'])) {
+        $decoded = json_decode((string) $lead['uploaded_photos'], true);
+        if (is_array($decoded)) {
+            foreach ($decoded as $url) {
+                if (is_string($url) && preg_match('~^https://izendestudioweb\.com/genmedia/uploads/photo-[\w-]+\.(?:png|jpe?g|webp|gif)$~i', $url)) {
+                    $uploaded[] = $url;
+                }
+            }
+        }
+    }
+    $uploaded = array_slice(array_values(array_unique($uploaded)), 0, 7);
+
     // Pool of distinct shot concepts (varied so multiple photos never look repetitive); take the first N.
     $concepts = [
         'Show this business\'s work actually happening — the service being delivered or a customer/client being helped — so a visitor instantly understands what they get.',
@@ -575,8 +597,9 @@ function generateSupportImages($lead, $slug, $isCli) {
     ];
     $model    = trim((string) envOr('GEMINI_LOGO_MODEL', 'nano-banana-pro-preview'));      // higher-fidelity model
     $fallback = trim((string) envOr('GEMINI_IMAGE_MODEL', 'gemini-3.1-flash-image'));
-    $urls = [];
-    for ($i = 0; $i < $photoCount; $i++) {
+    $urls = array_slice($uploaded, 0, $photoCount);
+    $toGenerate = max(0, $photoCount - count($urls));
+    for ($i = 0; $i < $toGenerate; $i++) {
         $base   = 'support-' . ($i + 1);
         $prompt = 'Create a warm, authentic, editorial photograph for the website of "' . $name . '". The business: ' . $desc . '. '
             . $concepts[$i] . $common;
@@ -584,7 +607,11 @@ function generateSupportImages($lead, $slug, $isCli) {
         if ($u === '') { $u = geminiImageToFile($prompt, $slug, $base, $fallback); }
         if ($u !== '') { $urls[] = $u; }
     }
-    if (!empty($urls) && !$isCli) { echo ' [' . count($urls) . ' support image' . (count($urls) === 1 ? '' : 's') . " of $photoCount] "; flush(); }
+    if (!empty($urls) && !$isCli) {
+        echo ' [' . count($urls) . ' support image' . (count($urls) === 1 ? '' : 's') . " of $photoCount"
+            . (count($uploaded) ? ', ' . min(count($uploaded), $photoCount) . ' uploaded' : '') . '] ';
+        flush();
+    }
     return $urls;
 }
 
@@ -703,6 +730,44 @@ function injectMap($html, $lead) {
         . '<iframe src="' . htmlspecialchars($src, ENT_QUOTES) . '" loading="lazy" title="Map" referrerpolicy="no-referrer-when-downgrade" '
         . 'style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>';
     return str_replace($placeholder, $map, $html);
+}
+
+function injectSocial($html, $lead) {
+    $placeholder = '<!--IZ_SOCIAL-->';
+    $decoded = [];
+    if (!empty($lead['social_links'])) {
+        $j = json_decode((string) $lead['social_links'], true);
+        if (is_array($j)) { $decoded = $j; }
+    }
+    $icons = [
+        'facebook' => ['Facebook', '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3.5l.5-4h-4V7a1 1 0 0 1 1-1h3z"/>'],
+        'instagram' => ['Instagram', '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/>'],
+        'x' => ['X', '<path d="M4 4l16 16M20 4L4 20"/>'],
+        'linkedin' => ['LinkedIn', '<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>'],
+        'tiktok' => ['TikTok', '<path d="M14 3v11.5a4.5 4.5 0 1 1-4.5-4.5"/><path d="M14 3a6 6 0 0 0 6 6"/>'],
+        'youtube' => ['YouTube', '<path d="M22 12s0-4-1-5c-1-1-9-1-9-1s-8 0-9 1c-1 1-1 5-1 5s0 4 1 5c1 1 9 1 9 1s8 0 9-1c1-1 1-5 1-5z"/><path d="M10 9l5 3-5 3z"/>'],
+        'google' => ['Google Business', '<path d="M21 11.5h-8v3h4.6a5.5 5.5 0 1 1-1.4-5.5l2.2-2.2A8.5 8.5 0 1 0 21 13z"/>'],
+    ];
+    $links = '';
+    foreach ($icons as $key => $meta) {
+        $url = trim((string)($decoded[$key] ?? ''));
+        if ($url === '' || !filter_var($url, FILTER_VALIDATE_URL)) { continue; }
+        $parts = parse_url($url);
+        if (!is_array($parts) || strtolower((string)($parts['scheme'] ?? '')) !== 'https') { continue; }
+        $label = htmlspecialchars($meta[0], ENT_QUOTES);
+        $href = htmlspecialchars($url, ENT_QUOTES);
+        $links .= '<a class="iz-social-link" href="' . $href . '" target="_blank" rel="noopener noreferrer" aria-label="' . $label . '" title="' . $label . '">'
+            . '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' . $meta[1] . '</svg></a>';
+    }
+    if ($links === '') { return str_replace($placeholder, '', $html); }
+    $social = '<span class="iz-social-links">' . $links . '</span>'
+        . '<style>.iz-social-links{display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap;margin-left:12px;vertical-align:middle}'
+        . '.iz-social-link{width:34px;height:34px;border-radius:999px;display:inline-grid;place-items:center;color:var(--c-accent,#2563eb);border:1px solid currentColor;text-decoration:none;transition:transform .18s ease,background .18s ease,color .18s ease}'
+        . '.iz-social-link:hover{transform:translateY(-2px);background:var(--c-accent,#2563eb);color:var(--c-accent-contrast,#fff)}'
+        . '.iz-social-link svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}'
+        . '@media(max-width:620px){.iz-social-links{margin:10px 0 0;display:flex;justify-content:center}}'
+        . '@media(prefers-reduced-motion:reduce){.iz-social-link{transition:none}.iz-social-link:hover{transform:none}}</style>';
+    return str_replace($placeholder, $social, $html);
 }
 
 function injectPreviewRobotsMeta($html) {
@@ -998,6 +1063,7 @@ foreach ($leads as $lead) {
 
     $html = stripGrainOverlay($html); // kill any heavy full-screen film-grain/noise overlay GLM may add
     $html = injectMap($html, $lead); // replace the placeholder server-side so the Maps key never goes to GLM
+    $html = injectSocial($html, $lead); // replace the footer social placeholder with correct linked icons
     $html = injectBookingScript($html, $id); // wire any booking form to the endpoint (persisted into generated_html)
 
     list($previewUrl, $werr) = writePreview($slug, $html, $id, $lead['created_at'] ?? '');

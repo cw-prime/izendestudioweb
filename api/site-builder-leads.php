@@ -44,8 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Rate limiting: 3 attempts per 10 minutes per IP
-$identifier = ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . '_site_builder';
-if (function_exists('checkRateLimit') && !checkRateLimit($identifier, 3, 600)) {
+// Dev/admin bypass: requests from localhost or the server's own IP skip rate limiting.
+$_devBypassIps = ['127.0.0.1', '::1', '192.168.1.253'];
+$_remoteIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$_isDevBypass = in_array($_remoteIp, $_devBypassIps, true);
+
+$identifier = $_remoteIp . '_site_builder';
+if (!$_isDevBypass && function_exists('checkRateLimit') && !checkRateLimit($identifier, 3, 600)) {
     http_response_code(429);
     echo json_encode(['success' => false, 'message' => 'Too many requests. Please try again in a few minutes.']);
     exit;
@@ -120,6 +125,33 @@ if (!empty($data['brand_colors']) && is_array($data['brand_colors'])) {
     }
     if ($clean) { $brandColors = json_encode(array_slice(array_values(array_unique($clean)), 0, 4)); }
 }
+$socialLinks = null;
+if (!empty($data['social_links']) && is_array($data['social_links'])) {
+    $allowedSocial = ['facebook', 'instagram', 'x', 'linkedin', 'tiktok', 'youtube', 'google'];
+    $cleanSocial = [];
+    foreach ($allowedSocial as $platform) {
+        $url = trim((string)($data['social_links'][$platform] ?? ''));
+        if ($url === '') { continue; }
+        if (mb_strlen($url) > 300 || !filter_var($url, FILTER_VALIDATE_URL)) { continue; }
+        $parts = parse_url($url);
+        if (!is_array($parts) || strtolower((string)($parts['scheme'] ?? '')) !== 'https' || empty($parts['host'])) { continue; }
+        $cleanSocial[$platform] = $url;
+    }
+    if ($cleanSocial) { $socialLinks = json_encode($cleanSocial); }
+}
+$uploadedPhotos = null;
+if (!empty($data['uploaded_photos']) && is_array($data['uploaded_photos'])) {
+    $cleanPhotos = [];
+    foreach ($data['uploaded_photos'] as $url) {
+        if (!is_string($url)) { continue; }
+        $url = trim($url);
+        if (preg_match('~^https://izendestudioweb\.com/genmedia/uploads/photo-[\w-]+\.(?:png|jpe?g|webp|gif)$~i', $url)) {
+            $cleanPhotos[] = $url;
+        }
+    }
+    $cleanPhotos = array_slice(array_values(array_unique($cleanPhotos)), 0, 7);
+    if ($cleanPhotos) { $uploadedPhotos = json_encode($cleanPhotos); }
+}
 $businessAddress = trim((string)($data['business_address'] ?? ''));
 $businessAddress = preg_replace('/[\x00-\x1f]+/', ' ', $businessAddress);
 if (mb_strlen($businessAddress) > 200) { $businessAddress = ''; }
@@ -183,7 +215,7 @@ if ($supabaseUrl === '' || $supabaseKey === '') {
 
 // Anti-abuse backstop: cap leads per IP per 24h (catches cookie-clearers at scale).
 $ipAddr = $_SERVER['REMOTE_ADDR'] ?? '';
-if ($ipAddr !== '') {
+if (!$_isDevBypass && $ipAddr !== '') {
     $since = gmdate('Y-m-d\TH:i:s\Z', time() - 86400);
     $cch = curl_init($supabaseUrl . '/rest/v1/site_builder_leads?select=id&ip_address=eq.' . rawurlencode($ipAddr) . '&created_at=gte.' . rawurlencode($since));
     curl_setopt($cch, CURLOPT_HTTPHEADER, ['apikey: ' . $supabaseKey, 'Authorization: Bearer ' . $supabaseKey, 'Prefer: count=exact', 'Range: 0-0']);
@@ -215,6 +247,8 @@ $lead = [
     'brand_colors'         => $brandColors,
     'business_address'     => $businessAddress !== '' ? $businessAddress : null,
 ];
+if ($socialLinks !== null) { $lead['social_links'] = $socialLinks; }
+if ($uploadedPhotos !== null) { $lead['uploaded_photos'] = $uploadedPhotos; }
 
 $ch = curl_init($supabaseUrl . '/rest/v1/site_builder_leads');
 curl_setopt($ch, CURLOPT_POST, true);

@@ -528,6 +528,27 @@ SEOHelper::outputMetaTags('website-drafter', [
                     <small class="text-muted d-block mt-1" id="izLogoNote">We'll feature your logo on the site — and if you let Site Drafter choose the style, we'll match your brand colors.</small>
                   </div>
 
+                  <details class="mb-3">
+                    <summary class="form-label mb-2" style="cursor:pointer">Add your social links <span class="text-muted fw-normal">(optional)</span></summary>
+                    <div class="row g-2">
+                      <div class="col-md-6"><input type="url" class="form-control form-control-sm" name="social_facebook" placeholder="Facebook URL"></div>
+                      <div class="col-md-6"><input type="url" class="form-control form-control-sm" name="social_instagram" placeholder="Instagram URL"></div>
+                      <div class="col-md-6"><input type="url" class="form-control form-control-sm" name="social_x" placeholder="X / Twitter URL"></div>
+                      <div class="col-md-6"><input type="url" class="form-control form-control-sm" name="social_linkedin" placeholder="LinkedIn URL"></div>
+                      <div class="col-md-6"><input type="url" class="form-control form-control-sm" name="social_tiktok" placeholder="TikTok URL"></div>
+                      <div class="col-md-6"><input type="url" class="form-control form-control-sm" name="social_youtube" placeholder="YouTube URL"></div>
+                      <div class="col-md-6"><input type="url" class="form-control form-control-sm" name="social_google" placeholder="Google Business Profile URL"></div>
+                    </div>
+                    <small class="text-muted d-block mt-1">We'll add clickable social icons to your draft footer.</small>
+                  </details>
+
+                  <div class="mb-3">
+                    <label class="form-label">Have your own photos? Upload them <span class="text-muted fw-normal">(optional)</span></label>
+                    <input type="file" class="form-control" id="izPhotoFiles" accept="image/png,image/jpeg,image/webp,image/gif" multiple style="max-width:420px">
+                    <div id="izPhotoThumbs" class="d-flex gap-2 flex-wrap mt-2"></div>
+                    <small class="text-muted d-block mt-1" id="izPhotoNote">Add up to 7 large photos. Each photo should be at least 1000px on its longest side.</small>
+                  </div>
+
                     <div class="wiz-nav">
                       <button type="button" class="btn btn-outline-secondary btn-lg wiz-back" data-target="1"><i class="bi bi-arrow-left"></i> Back</button>
                       <button type="button" class="btn btn-primary btn-lg wiz-next" data-target="3">Next <i class="bi bi-arrow-right"></i></button>
@@ -824,6 +845,66 @@ SEOHelper::outputMetaTags('website-drafter', [
       });
   })();
 
+  /* ---- Customer photo uploads -> use real content photos before generated ones ---- */
+  (function(){
+      var fileEl = document.getElementById('izPhotoFiles');
+      var note   = document.getElementById('izPhotoNote');
+      var thumbs = document.getElementById('izPhotoThumbs');
+      var form   = document.getElementById('aiBuilderForm');
+      if (!fileEl || !form) { return; }
+      var csrfEl = form.querySelector('[name="csrf_token"]');
+      window.izUploadedPhotos = window.izUploadedPhotos || [];
+
+      function renderPhotos(){
+          if (!thumbs) { return; }
+          thumbs.innerHTML = '';
+          window.izUploadedPhotos.forEach(function(url, i){
+              var wrap = document.createElement('span');
+              wrap.style.cssText = 'position:relative;display:inline-block;width:74px;height:58px;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;background:#f8fafc';
+              var img = document.createElement('img');
+              img.src = url; img.alt = ''; img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+              var btn = document.createElement('button');
+              btn.type = 'button'; btn.setAttribute('aria-label', 'Remove photo');
+              btn.textContent = '×';
+              btn.style.cssText = 'position:absolute;top:2px;right:2px;width:20px;height:20px;border:0;border-radius:50%;background:rgba(15,23,42,.85);color:#fff;line-height:18px;font-weight:700;cursor:pointer';
+              btn.addEventListener('click', function(){
+                  window.izUploadedPhotos.splice(i, 1);
+                  renderPhotos();
+                  if (note) { note.textContent = window.izUploadedPhotos.length ? (window.izUploadedPhotos.length + ' photo' + (window.izUploadedPhotos.length === 1 ? '' : 's') + ' added.') : 'Add up to 7 large photos. Each photo should be at least 1000px on its longest side.'; }
+              });
+              wrap.appendChild(img); wrap.appendChild(btn); thumbs.appendChild(wrap);
+          });
+      }
+
+      fileEl.addEventListener('change', function(){
+          var files = Array.prototype.slice.call(fileEl.files || []);
+          if (!files.length) { return; }
+          var remaining = Math.max(0, 7 - window.izUploadedPhotos.length);
+          if (remaining <= 0) { if (note) { note.textContent = 'You can upload up to 7 photos.'; note.className = 'text-danger d-block mt-1'; } fileEl.value = ''; return; }
+          files = files.slice(0, remaining);
+          if (note) { note.innerHTML = '<span class="iz-spin"></span>Uploading photos…'; note.className = 'text-muted d-block mt-1'; }
+          var chain = Promise.resolve();
+          files.forEach(function(file){
+              chain = chain.then(function(){
+                  if (file.size > 10 * 1024 * 1024) { throw new Error(file.name + ' is over 10 MB.'); }
+                  var fd = new FormData();
+                  fd.append('photo', file);
+                  fd.append('csrf_token', csrfEl ? csrfEl.value : '');
+                  return fetch('api/upload-photo.php', { method: 'POST', body: fd })
+                    .then(function(r){ return r.json().then(function(j){ if (!r.ok || !j.success) { throw new Error((j && j.message) || 'Could not upload ' + file.name + '.'); } return j; }); })
+                    .then(function(j){ if (j.url && window.izUploadedPhotos.indexOf(j.url) === -1) { window.izUploadedPhotos.push(j.url); } renderPhotos(); });
+              });
+          });
+          chain.then(function(){
+              if (note) { note.textContent = window.izUploadedPhotos.length + ' photo' + (window.izUploadedPhotos.length === 1 ? '' : 's') + ' added.'; note.className = 'text-muted d-block mt-1'; }
+              fileEl.value = '';
+          }).catch(function(err){
+              if (note) { note.textContent = err.message || 'Photo upload failed.'; note.className = 'text-danger d-block mt-1'; }
+              fileEl.value = '';
+          });
+      });
+  })();
+
   const _aiForm = document.getElementById('aiBuilderForm');
   if (_aiForm) _aiForm.addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -846,6 +927,16 @@ SEOHelper::outputMetaTags('website-drafter', [
           'g-recaptcha-response': formData.get('g-recaptcha-response'),
           logo_url: window.izLogoUrl || '',
           brand_colors: window.izBrandColors || [],
+          uploaded_photos: window.izUploadedPhotos || [],
+          social_links: {
+              facebook: formData.get('social_facebook'),
+              instagram: formData.get('social_instagram'),
+              x: formData.get('social_x'),
+              linkedin: formData.get('social_linkedin'),
+              tiktok: formData.get('social_tiktok'),
+              youtube: formData.get('social_youtube'),
+              google: formData.get('social_google')
+          },
           business_address: window.izBusinessAddress || ''
       };
 
