@@ -77,3 +77,9 @@ analytics-dashboard-*.json
 !/genmedia/uploads/
 /genmedia/uploads/*
 !/genmedia/uploads/.htaccess
+
+# --- Large media + scratch prototypes (kept on disk, out of git) ---
+/marketing-videos/
+/izende-reels/
+/glc-prototype/
+/retailers_prototype.html
