@@ -78,7 +78,8 @@ if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
 $supabaseUrl = rtrim((string) envOr('SUPABASE_URL', ''), '/');
 $supabaseKey = trim((string) envOr('SUPABASE_SERVICE_ROLE_KEY', ''));
 $glmKey      = trim((string) envOr('GLM_API_KEY', ''));
-$glmModel    = trim((string) envOr('GLM_MODEL', 'glm-5')) ?: 'glm-5'; // glm-5.2 returned empty/truncated HTML at 20k tokens (all gens failed) — reverted to glm-5; set GLM_MODEL=glm-5.2 only after raising max_tokens + testing a full generation
+$glmModel    = trim((string) envOr('GLM_MODEL', 'glm-5')) ?: 'glm-5'; // glm-5.2 returned empty/truncated HTML at 20k tokens (all gens failed) — reverted to glm-5; set GLM_MODEL=glm-5.2 only after raising GLM_MAX_TOKENS + testing a full generation
+$glmMaxTokens = (int) envOr('GLM_MAX_TOKENS', 20000); if ($glmMaxTokens < 4000) { $glmMaxTokens = 20000; } // reasoning models (glm-5.2) need a much higher ceiling
 $deployRoot  = rtrim((string) envOr('PREVIEW_DEPLOY_DIR', dirname(__DIR__) . '/previews'), '/');
 $baseUrl     = rtrim((string) envOr('PREVIEW_BASE_URL', 'https://izendestudioweb.com/previews'), '/');
 
@@ -373,7 +374,7 @@ function enrichBrief($lead) {
 }
 
 function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '', $supportUrls = []) {
-    global $glmKey, $glmModel;
+    global $glmKey, $glmModel, $glmMaxTokens;
     // Zeno expands a thin description into a real brief first (best-effort).
     $rawDescription = trim((string) ($lead['business_description'] ?? ''));
     $brief = strlen($rawDescription) > 900 ? null : enrichBrief($lead);
@@ -383,10 +384,10 @@ function generateWithGlm($lead, $isCli, $heroUrl = '', $logoUrl = '', $supportUr
     }
     list($system, $user) = buildPrompts($lead, $heroUrl, $logoUrl, $supportUrls);
     // One streaming GLM call → validated HTML, as a single retryable unit.
-    $callOnce = function () use ($system, $user, $glmModel, $glmKey, $isCli) {
+    $callOnce = function () use ($system, $user, $glmModel, $glmKey, $isCli, $glmMaxTokens) {
         $payload = [
             'model' => $glmModel,
-            'max_tokens' => 20000, // enough for rich scanned context, while still discouraging giant broken pages
+            'max_tokens' => $glmMaxTokens, // configurable via GLM_MAX_TOKENS (glm-5.2 reasoning needs a high ceiling)
             'stream' => true,
             'messages' => [
                 ['role' => 'system', 'content' => $system],
