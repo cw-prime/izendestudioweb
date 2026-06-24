@@ -66,6 +66,8 @@ server-side. Public URL is `/website-drafter`; legacy `/ai-website-builder` and 
 
 **Product:** Prospect describes their business → the Website Drafter (GLM-5) prepares a live single-page website draft (with a real Gemini hero photo + logo) → "Claim this site" → pays in WHMCS/PayPal → site auto-provisions onto Izende cPanel hosting. Draft = hook; recurring cPanel hosting = the product. Hard requirement: fully automated, no babysitting. Pilot: a massage therapist who owns a domain.
 
+**Future multi-page direction (approved for planning, not current build):** keep the first free preview single-page for speed and conversion. Add a later paid-site expansion path after claim that splits the approved draft into real Home / Services / About / Contact / FAQ or Offers pages. WordPress should benefit from this if done as real WP pages; it should not hurt WP as long as the current canvas single-page seed remains the fallback until the multi-page seeding path is built and tested.
+
 ### Pipeline (as-built, NOT n8n)
 - Intake: `website-drafter.php` (`/website-drafter`) → `api/site-builder-leads.php` → Supabase `site_builder_leads` (status=pending).
 - Generation: **cPanel cron** `scripts/generate-pending-previews.php` (GLM-5 streaming). Per lead: enrichBrief → Gemini hero image (`gemini-3.1-flash-image`, best-effort, un-forced) + Gemini logo icon → GLM builds site (CSS-var contract, no-fabrication) → injectBookingScript (wires any booking form) → writePreview (+ injectClaimBar + Customize widget) → email prospect. Images hosted at `/genmedia/<slug>/`. Previews at `/previews/<slug>/`. 14-day expiry (skips samples + claimed/converted; also clears genmedia).
