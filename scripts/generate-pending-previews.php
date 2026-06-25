@@ -78,8 +78,8 @@ if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
 $supabaseUrl = rtrim((string) envOr('SUPABASE_URL', ''), '/');
 $supabaseKey = trim((string) envOr('SUPABASE_SERVICE_ROLE_KEY', ''));
 $glmKey      = trim((string) envOr('GLM_API_KEY', ''));
-$glmModel    = trim((string) envOr('GLM_MODEL', 'glm-5')) ?: 'glm-5'; // glm-5.2 returned empty/truncated HTML at 20k tokens (all gens failed) — reverted to glm-5; set GLM_MODEL=glm-5.2 only after raising GLM_MAX_TOKENS + testing a full generation
-$glmMaxTokens = (int) envOr('GLM_MAX_TOKENS', 20000); if ($glmMaxTokens < 4000) { $glmMaxTokens = 20000; } // reasoning models (glm-5.2) need a much higher ceiling
+$glmModel    = trim((string) envOr('GLM_MODEL', 'glm-5.2')) ?: 'glm-5.2'; // glm-5.2 ONLY works paired with the high GLM_MAX_TOKENS below (verified: complete 40k HTML at 64k). Roll back instantly with GLM_MODEL=glm-5.
+$glmMaxTokens = (int) envOr('GLM_MAX_TOKENS', 64000); if ($glmMaxTokens < 4000) { $glmMaxTokens = 64000; } // glm-5.2 reasoning exhausts a low ceiling and returns empty/truncated — needs ~64k
 $deployRoot  = rtrim((string) envOr('PREVIEW_DEPLOY_DIR', dirname(__DIR__) . '/previews'), '/');
 $baseUrl     = rtrim((string) envOr('PREVIEW_BASE_URL', 'https://izendestudioweb.com/previews'), '/');
 
@@ -349,7 +349,7 @@ function enrichBrief($lead) {
          . "Desired vibe: " . (!empty($lead['style_vibe']) ? $lead['style_vibe'] : 'designer\'s choice');
 
     $payload = json_encode([
-        'model' => $glmModel,
+        'model' => (trim((string) envOr('GLM_BRIEF_MODEL', 'glm-5')) ?: 'glm-5'), // brief is a quick aux call — keep on fast glm-5 even when the main model is glm-5.2
         'max_tokens' => 3000, // GLM-5 spends budget on reasoning first; leave room or content comes back empty
         'messages' => [
             ['role' => 'system', 'content' => $sys],
